@@ -54,34 +54,6 @@
         }
         #minimap-title { background:#1565c0; color:white; font-size:10px; padding:3px 8px; text-align:center; font-weight:bold; }
         #minimap { width:100%; height:calc(100% - 22px); }
-        #upload-box {
-            position:absolute; bottom:15px; left:250px; z-index:800;
-            width:220px; background:white; border-radius:10px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.25); overflow:hidden;
-            border:2px solid #1565c0; font-size:11px;
-        }
-        #upload-title {
-            background:#1565c0; color:white; font-size:10px;
-            padding:3px 8px; text-align:center; font-weight:bold;
-        }
-        #upload-body { padding:10px; }
-        #upload-body p { color:#555; margin-bottom:8px; line-height:1.4; }
-        #upload-body input[type=file] { font-size:10px; width:100%; }
-        #upload-status { margin-top:8px; font-size:10px; color:#1565c0; display:none; }
-        #upload-kml {
-            position:absolute; bottom:15px; left:485px; z-index:800;
-            width:220px; background:white; border-radius:10px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.25); overflow:hidden;
-            border:2px solid #388e3c; font-size:11px;
-        }
-        #upload-kml-title {
-            background:#388e3c; color:white; font-size:10px;
-            padding:3px 8px; text-align:center; font-weight:bold;
-        }
-        #upload-kml-body { padding:10px; }
-        #upload-kml-body p { color:#555; margin-bottom:8px; line-height:1.4; }
-        #upload-kml-body input[type=file] { font-size:10px; width:100%; }
-        #upload-kml-status { margin-top:8px; font-size:10px; color:#388e3c; display:none; }
     
         /* REPORTE PANEL */
         #btn-reporte {
@@ -204,10 +176,6 @@
         body.mobile-mode #minimap-container {
             width:150px; height:140px; bottom:auto; top:60px; left:5px;
         }
-        body.mobile-mode #upload-box,
-        body.mobile-mode #upload-kml {
-            display:none;
-        }
         body.mobile-mode #btn-reporte {
             top:auto; bottom:45vh; left:10px; font-size:12px; padding:8px 14px;
         }
@@ -279,23 +247,8 @@
         <span class="close-btn" onclick="document.getElementById('infoPanel').style.display='none'">✕</span>
         <div id="infoContent"></div>
     </div>
-    <div id="upload-box">
-        <div id="upload-title">📂 Cargar datos Excel</div>
-        <div id="upload-body">
-            <p>Sube el Excel con puntos. Se asigna barrio automáticamente por ubicación</p>
-            <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="cargarExcel(this)">
-            <div id="upload-status"></div>
-        </div>
-    </div>
-
-    <div id="upload-kml">
-        <div id="upload-kml-title">🗺️ Cargar límites KML</div>
-        <div id="upload-kml-body">
-            <p>Sube KML/KMZ de barrios. Cargar antes del Excel</p>
-            <input type="file" id="kmlFile" accept=".kml,.kmz" onchange="cargarKML(this)">
-            <div id="upload-kml-status"></div>
-        </div>
-    </div>
+    <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="cargarExcel(this)" style="display:none">
+    <input type="file" id="kmlFile" accept=".kml,.kmz" onchange="cargarKML(this)" style="display:none">
 
     
     <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
