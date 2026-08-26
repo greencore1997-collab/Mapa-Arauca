@@ -349,9 +349,9 @@
             border-radius:9px;
         }
         body.mobile-mode #header-logo { display:none; }
-        body.mobile-mode .geo-titulo  { font-size:13px; letter-spacing:4px; }
-        body.mobile-mode .geo-empresa { font-size:6px;  letter-spacing:1.5px; margin-top:2px; }
-        body.mobile-mode .geo-esp     { font-size:5.5px; letter-spacing:1px;  margin-top:1px; }
+        body.mobile-mode .geo-titulo  { font-size:17px; letter-spacing:5px; }
+        body.mobile-mode .geo-empresa { font-size:8px;  letter-spacing:2px;   margin-top:3px; }
+        body.mobile-mode .geo-esp     { font-size:7px;   letter-spacing:1.5px; margin-top:2px; }
 
         #footer-credito {
             position:fixed; bottom:6px; left:50%; transform:translateX(-50%);
@@ -389,7 +389,7 @@
 
         /* ── Botón mi ubicación ── */
         #btn-mi-ubicacion {
-            position:fixed; bottom:65px; right:12px; z-index:801;
+            position:fixed; bottom:65px; right:2px; z-index:801;
             width:44px; height:44px;
             background:rgba(0,12,35,0.85);
             border:2px solid #00c8ff;
@@ -407,10 +407,39 @@
             box-shadow:0 0 32px rgba(0,200,255,0.6);
         }
         #btn-mi-ubicacion.cargando { opacity:0.5; cursor:wait; }
-        body.mobile-mode #btn-mi-ubicacion { width:42px; height:42px; font-size:18px; bottom:28px; right:10px; }
+        body.mobile-mode #btn-mi-ubicacion { width:42px; height:42px; font-size:18px; bottom:28px; right:2px; }
 
         .minimap-poly { cursor:pointer; }
         #minimap-title { cursor:pointer; }
+
+        /* ── Pestaña de atributos ── */
+        #btn-atributo-desktop {
+            display:block;
+            position:absolute; top:248px; right:10px; z-index:399;
+            background:rgba(0,12,35,0.78); color:#00c8ff;
+            border:1px solid rgba(0,200,255,0.5); border-radius:8px;
+            padding:7px 14px; font-size:10px; font-weight:bold;
+            cursor:pointer; width:185px; text-align:left;
+            font-family:'Orbitron', monospace; letter-spacing:1.5px;
+            box-shadow:0 0 10px rgba(0,180,255,0.15);
+            transition:background 0.2s; white-space:nowrap; box-sizing:border-box;
+        }
+        #btn-atributo-desktop:hover { background:rgba(0,30,70,0.9); }
+        #btn-atributo-desktop.abierto { border-radius:8px 8px 0 0; border-bottom-color:transparent; }
+        #panel-atributo {
+            position:absolute; top:286px; right:10px; z-index:398;
+            background:white; border-radius:0 0 8px 8px;
+            box-shadow:0 6px 15px rgba(0,0,0,0.25);
+            max-height:0; overflow:hidden; width:185px;
+            transition:max-height 0.35s ease, padding 0.35s ease;
+            padding:0 12px; box-sizing:border-box;
+        }
+        #panel-atributo.panel-open { max-height:250px; padding:10px 12px; overflow-y:auto; }
+        #panel-atributo label { display:flex; align-items:center; gap:6px; padding:4px 0; cursor:pointer; font-size:11px; color:#333; border-bottom:1px solid #f0f0f0; }
+        #panel-atributo label:last-child { border-bottom:none; }
+        #panel-atributo .attr-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        #panel-atributo .attr-title { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
+        body.mobile-mode #btn-atributo-desktop, body.mobile-mode #panel-atributo { display:none; }
 </style>
 </head>
 <body>
@@ -418,6 +447,11 @@
 
     <div id="map"></div>
     <button id="btn-barrios-desktop" onclick="toggleLegendDesktop()">🏘️ BARRIOS <span id="flecha-barrios">▼</span></button>
+    <button id="btn-atributo-desktop" onclick="toggleAtributo()">🎨 ATRIBUTO <span id="flecha-atributo">▼</span></button>
+    <div id="panel-atributo">
+      <div class="attr-title">Colorear mapa por:</div>
+      <div id="attr-opciones"></div>
+    </div>
     <div id="header-marca">
       <div id="header-texto">
         <div class="geo-titulo">GEOVISOR</div>
@@ -580,7 +614,7 @@
                 radius:6, fillColor:colores[p.barrio], color:'#333',
                 weight:1, opacity:0.8, fillOpacity:0.85
             }).addTo(map);
-            marker._barrio=p.barrio;
+            marker._barrio=p.barrio; marker._punto=p;
             allMarkers.push(marker);
 
             marker.on('click',function(){
@@ -1518,6 +1552,53 @@
             { timeout:12000, enableHighAccuracy:true }
         );
     }
+
+    
+    // ── Pestaña de atributos ──
+    var PALETA_ATTR = ['#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4',
+        '#42d4f4','#f032e6','#bfef45','#469990','#9A6324','#800000','#aaffc3','#ffd8b1',
+        '#000075','#a9a9a9','#ffffff','#e05c1a'];
+
+    var attrActual = 'barrio';
+
+    function buildAttrPanel() {
+        var attrs = ['barrio','concepto','funcionario'];
+        var div = document.getElementById('attr-opciones');
+        var html = '';
+        attrs.forEach(function(attr) {
+            var label = attr.charAt(0).toUpperCase() + attr.slice(1);
+            var checked = attr === 'barrio' ? ' checked' : '';
+            html += '<label><input type="radio" name="attr-radio" value="'+attr+'"'+checked+
+                ' onchange="colorearPor(''+attr+'')">'+ label +'</label>';
+        });
+        div.innerHTML = html;
+    }
+
+    function colorearPor(atributo) {
+        attrActual = atributo;
+        var valores = {};
+        var idx = 0;
+        allMarkers.forEach(function(m) {
+            var val = (m._punto && m._punto[atributo]) || 'Sin dato';
+            if (!valores[val]) { valores[val] = PALETA_ATTR[idx % PALETA_ATTR.length]; idx++; }
+        });
+        allMarkers.forEach(function(m) {
+            var val = (m._punto && m._punto[atributo]) || 'Sin dato';
+            m.setStyle({ fillColor: valores[val], color: '#333', weight: 1 });
+        });
+    }
+
+    function toggleAtributo() {
+        var panel = document.getElementById('panel-atributo');
+        var btn   = document.getElementById('btn-atributo-desktop');
+        var flecha = document.getElementById('flecha-atributo');
+        var isOpen = panel.classList.contains('panel-open');
+        panel.classList.toggle('panel-open', !isOpen);
+        btn.classList.toggle('abierto', !isOpen);
+        flecha.textContent = isOpen ? '▼' : '▲';
+    }
+
+    buildAttrPanel();
 
     </script>
 </body>
