@@ -721,9 +721,9 @@
                             var vals=mAux.map(function(r){return String(r[i]||'').trim().replace(',','.');}).filter(function(v){return v&&!isNaN(parseFloat(v));});
                             if(!vals.length) continue;
                             var esLatDec=vals.every(function(v){var n=parseFloat(v);return n>0&&n<15;});
-                            var esLatEnt=vals.every(function(v){return /^[1-9]\d{4,}$/.test(v.replace(/\.0+$/,''));});
+                            var esLatEnt=vals.every(function(v){return /^[1-9]\d{3,}$/.test(v.replace(/\.0+$/,''));});
                             var esLonDec=vals.every(function(v){var n=parseFloat(v);return n<-50&&n>-100;});
-                            var esLonEnt=vals.every(function(v){return /^-[5-9]\d{4,}$/.test(v.replace(/\.0+$/,''));});
+                            var esLonEnt=vals.every(function(v){return /^-[5-9]\d{3,}$/.test(v.replace(/\.0+$/,''));});
                             if(iLat<0&&(esLatDec||esLatEnt)) iLat=i;
                             else if(iLon<0&&(esLonDec||esLonEnt)) iLon=i;
                         }
@@ -747,12 +747,16 @@
                     statusLog('📍 Ej: lat='+sLat+' lon='+sLon,'info');
 
                     // ── Detectar coordenadas enteras ──
-                    var muestra=rows.slice(1,Math.min(6,rows.length)).filter(function(r){return r[iLat]!==undefined&&r[iLat]!=='';});
                     function strCoord(v){var s=String(v===0?'0':(v||'')).trim().replace(',','.').replace(/\.0+$/,''); return s;}
-                    // Lat: cualquier entero de 5+ dígitos que empiece con 1-9 (cubre lat 1-9° para Colombia)
-                    var latEnt=muestra.length>0&&muestra.every(function(r){return /^[1-9]\d{4,}$/.test(strCoord(r[iLat]));});
-                    // Lon: entero negativo de 6+ dígitos (cubre lon -50° a -99° para Latinoamérica)
-                    var lonEnt=muestra.length>0&&muestra.every(function(r){return /^-[5-9]\d{4,}$/.test(strCoord(r[iLon]));});
+                    // Filtrar filas con valor numérico válido en lat
+                    var muestra=rows.slice(1,Math.min(10,rows.length)).filter(function(r){
+                        var s=strCoord(r[iLat]);
+                        return s!==''&&!isNaN(parseFloat(s))&&isFinite(parseFloat(s));
+                    });
+                    // Lat: entero de 4+ dígitos que empiece con 1-9 (cubre lat 1°-9° Colombia)
+                    var latEnt=muestra.length>0&&muestra.every(function(r){return /^[1-9]\d{3,}$/.test(strCoord(r[iLat]));});
+                    // Lon: entero negativo de 4+ dígitos (cubre lon -50° a -99° Latinoamérica)
+                    var lonEnt=muestra.length>0&&muestra.every(function(r){return /^-[5-9]\d{3,}$/.test(strCoord(r[iLon]));});
 
                     // ── DIAGNÓSTICO: mostrar valores crudos de muestra ──
                     if(muestra.length>0){
@@ -800,11 +804,11 @@
             function cvt(val,esLat){
                 var s=String(val===0?'0':(val||'')).trim().replace(',','.');
                 if(!convertir) return parseFloat(s);
-                if(esLat&&latEnt&&/^[1-9]\d{4,}$/.test(s)){
+                if(esLat&&latEnt&&/^[1-9]\d{3,}$/.test(s)){
                     // Insertar decimal después del 1er dígito: 7076543 → 7.076543
                     return parseFloat(s.charAt(0)+'.'+s.slice(1));
                 }
-                if(!esLat&&lonEnt&&/^-[5-9]\d{4,}$/.test(s)){
+                if(!esLat&&lonEnt&&/^-[5-9]\d{3,}$/.test(s)){
                     // Insertar decimal después de los 2 primeros dígitos del valor absoluto: -7012345 → -70.12345
                     var neg=s.startsWith('-'); var abs=s.replace(/^-/,'');
                     return parseFloat((neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2));
