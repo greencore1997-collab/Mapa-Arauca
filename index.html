@@ -46,6 +46,15 @@
         .search-box { width:100%; padding:6px 10px; border:1px solid #ccc; border-radius:6px; font-size:11px; margin-bottom:8px; box-sizing:border-box; }
         .search-box:focus { outline:none; border-color:#1565c0; box-shadow:0 0 3px rgba(21,101,192,0.3); }
         .foto-hint { font-size:10px; color:#888; margin-top:3px; }
+        #geovisor-status {
+            position:absolute; bottom:218px; left:15px; z-index:800;
+            width:220px; background:rgba(255,255,255,0.93); border-radius:7px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.13); padding:5px 9px 5px 9px;
+            font-size:10px; line-height:1.45; pointer-events:none;
+            border:1px solid #e0e0e0; display:none;
+        }
+        #geovisor-status .st-line { margin:1px 0; }
+        body.mobile-mode #geovisor-status { bottom:auto; top:205px; left:5px; width:175px; font-size:9px; }
         #minimap-container {
             position:absolute; bottom:15px; left:15px; z-index:800;
             width:220px; height:200px; background:white;
@@ -283,6 +292,7 @@
         </div>
     </div>
 
+<div id="geovisor-status"></div>
 <div id="minimap-container">
         <div id="minimap-title">Delimitación barrios</div>
         <div id="minimap"></div>
@@ -351,6 +361,7 @@
                 document.getElementById('conteoBarrio').style.display='none';
                 destacarMinimap(null);
                 map.setView([7.08,-70.76],11);
+                statusLog('✅ Mostrando todos los barrios ('+allMarkers.length+' puntos)','ok');
             } else {
                 barrioActivo=barrio;
                 allMarkers.forEach(function(m){
@@ -364,6 +375,7 @@
                 var pts=allMarkers.filter(function(m){return m._barrio===barrio;});
                 document.getElementById('conteoBarrio').style.display='block';
                 document.getElementById('conteoBarrio').textContent='📍 '+pts.length+' puntos en '+barrio;
+                statusLog('✅ Filtro activo: '+barrio+' ('+pts.length+' puntos)','ok');
                 destacarMinimap(barrio);
                 if(pts.length>0){
                     var lats=pts.map(function(m){return m.getLatLng().lat;});
@@ -410,6 +422,18 @@
         }
     }
     function cerrarOpciones(){ document.getElementById('opciones-menu').classList.remove('visible'); }
+    function statusLog(msg, tipo){
+        var panel=document.getElementById('geovisor-status');
+        panel.style.display='block';
+        var color = tipo==='ok' ? '#2e7d32' : tipo==='error' ? '#c62828' : '#222';
+        var div=document.createElement('div');
+        div.className='st-line';
+        div.style.color=color;
+        div.textContent=msg;
+        // Mantener máximo 5 líneas
+        while(panel.children.length>=5){ panel.removeChild(panel.firstChild); }
+        panel.appendChild(div);
+    }
     function mostrarToast(msg){
         var t=document.getElementById('opc-toast');
         t.textContent=msg; t.style.display='block'; t.style.opacity='1';
@@ -608,10 +632,7 @@
         function cargarExcel(input){
             var file=input.files[0];
             if(!file) return;
-            var status=document.getElementById('upload-status');
-            status.style.display='block';
-            status.textContent='⏳ Cargando y asignando barrios...';
-            status.style.color='#1565c0';
+            statusLog('⏳ Cargando Excel y asignando barrios...','info');
 
             var reader=new FileReader();
             reader.onload=function(e){
@@ -635,8 +656,8 @@
                     }
 
                     if(iLat<0||iLon<0){
-                        status.textContent='❌ No se encontraron columnas LATITUD/LONGITUD';
-                        status.style.color='#e53935';
+                        statusLog('❌ No se encontraron columnas LATITUD/LONGITUD','error');
+                        statusLog('💡 Verifica que el Excel tenga cabeceras LATITUD y LONGITUD','info');
                         return;
                     }
 
@@ -718,11 +739,11 @@
 
                     var sinBarrio=nuevos.filter(function(p){return p.barrio==='SIN BARRIO';}).length;
                     var conBarrio=nuevos.length-sinBarrio;
-                    status.textContent='✅ '+nuevos.length+' puntos ('+conBarrio+' con barrio asignado)';
-                    status.style.color='#2e7d32';
+                    statusLog('✅ Excel cargado: '+nuevos.length+' puntos ('+conBarrio+' con barrio)','ok');
+                    if(sinBarrio>0) statusLog('⚠️ '+sinBarrio+' puntos sin barrio asignado','error');
                 } catch(err) {
-                    status.textContent='❌ Error: '+err.message;
-                    status.style.color='#e53935';
+                    statusLog('❌ Error al leer Excel: '+err.message,'error');
+                    statusLog('💡 Intenta refrescar la página y cargar de nuevo','info');
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -736,10 +757,7 @@
         function cargarKML(input){
             var file=input.files[0];
             if(!file) return;
-            var status=document.getElementById('upload-kml-status');
-            status.style.display='block';
-            status.textContent='⏳ Cargando...';
-            status.style.color='#388e3c';
+            statusLog('⏳ Cargando KML/KMZ...','info');
 
             var reader=new FileReader();
             reader.onload=function(e){
@@ -780,8 +798,8 @@
                     });
 
                     if(count>0){
-                        status.textContent='✅ '+count+' polígonos cargados';
-                        status.style.color='#2e7d32';
+                        statusLog('✅ KML cargado: '+count+' polígonos','ok');
+                        statusLog('💡 Ahora carga el Excel para asignar barrios','info');
                         // Ajustar vista del minimap
                         var allBounds=[];
                         Object.values(miniLayers).forEach(function(l){allBounds.push(l.getBounds());});
@@ -791,8 +809,7 @@
                             minimap.fitBounds(bounds,{padding:[10,10]});
                         }
                     } else {
-                        status.textContent='❌ No se encontraron polígonos';
-                        status.style.color='#e53935';
+                        statusLog('❌ No se encontraron polígonos en el KML','error');
                     }
                 }
 
@@ -800,8 +817,7 @@
                     JSZip.loadAsync(data).then(function(zip){
                         var kmlName=Object.keys(zip.files).find(function(f){return f.endsWith('.kml');});
                         if(!kmlName){
-                            status.textContent='❌ No se encontró KML dentro del KMZ';
-                            status.style.color='#e53935';
+                            statusLog('❌ No se encontró KML dentro del KMZ','error');
                             return;
                         }
                         zip.files[kmlName].async('string').then(function(kmlText){
