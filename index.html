@@ -140,6 +140,17 @@
         .rep-table tr:hover { background:#e3f2fd; }
         .rep-pie-container { display:flex; justify-content:center; margin:15px 0; }
 
+    
+        /* BASEMAP TOGGLE */
+        #btn-basemap {
+            position:absolute; top:100px; left:10px; z-index:900;
+            background:white; border:2px solid #ccc; padding:6px 10px;
+            border-radius:8px; font-size:11px; cursor:pointer;
+            box-shadow:0 2px 8px rgba(0,0,0,0.2); transition:all 0.2s;
+            display:flex; align-items:center; gap:6px; font-weight:bold; color:#333;
+        }
+        #btn-basemap:hover { border-color:#1565c0; color:#1565c0; }
+
     </style>
 </head>
 <body>
@@ -170,6 +181,7 @@
 
     
     <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
+    <button id="btn-basemap" onclick="toggleBasemap()" title="Cambiar mapa base">🗺️ OSM</button>
     <div id="reporte-backdrop" onclick="toggleReporte()"></div>
     <div id="reporte-overlay">
         <div class="rep-header">
@@ -678,6 +690,47 @@
         body.innerHTML = html;
     }
     
+    
+    var _currentBasemap = 'osm';
+    var _osmLayer = map.eachLayer(function(l){ if(l._url && l._url.includes('openstreetmap')) return l; });
+    
+    // Store reference to OSM layer
+    var _osmTileLayer = null;
+    var _satTileLayer = null;
+    map.eachLayer(function(l) {
+        if (l instanceof L.TileLayer) _osmTileLayer = l;
+    });
+
+    function toggleBasemap() {
+        var btn = document.getElementById('btn-basemap');
+        if (_currentBasemap === 'osm') {
+            // Switch to satellite
+            if (_osmTileLayer) map.removeLayer(_osmTileLayer);
+            _satTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri', maxZoom: 19
+            }).addTo(map);
+            // Make sure satellite is behind markers
+            _satTileLayer.bringToBack();
+            _currentBasemap = 'satellite';
+            btn.innerHTML = '🛰️ SAT';
+            btn.style.background = '#222';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#555';
+        } else {
+            // Switch back to OSM
+            if (_satTileLayer) map.removeLayer(_satTileLayer);
+            _osmTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors', maxZoom: 19
+            }).addTo(map);
+            _osmTileLayer.bringToBack();
+            _currentBasemap = 'osm';
+            btn.innerHTML = '🗺️ OSM';
+            btn.style.background = 'white';
+            btn.style.color = '#333';
+            btn.style.borderColor = '#ccc';
+        }
+    }
+
     </script>
 </body>
 </html>
