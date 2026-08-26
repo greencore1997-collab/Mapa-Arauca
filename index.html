@@ -713,11 +713,13 @@
                     var iLat=-1,iLon=-1,iFoto=-1,iFoto2=-1,iConc=-1,iBarrio=-1;
                     var latPat=['LATITUD','LATITUDE','LAT','COORDY','CORDY','YWGS','NORTE','YCOORD','Y'];
                     var lonPat=['LONGITUD','LONGITUDE','LON','LONG','COORDX','CORDX','XWGS','ESTE','XCOORD','X'];
+                    // El patrón debe aparecer al INICIO del encabezado (indexOf===0)
+                    // para evitar falsos positivos como "6_LONGITUD_m" que contiene "LONGITUD"
                     for(var j=0;j<latPat.length&&iLat<0;j++){
-                        for(var i=0;i<header.length;i++){ if(header[i].indexOf(latPat[j])>=0){iLat=i;break;} }
+                        for(var i=0;i<header.length;i++){ if(header[i].indexOf(latPat[j])===0){iLat=i;break;} }
                     }
                     for(var j=0;j<lonPat.length&&iLon<0;j++){
-                        for(var i=0;i<header.length;i++){ if(i!==iLat&&header[i].indexOf(lonPat[j])>=0){iLon=i;break;} }
+                        for(var i=0;i<header.length;i++){ if(i!==iLat&&header[i].indexOf(lonPat[j])===0){iLon=i;break;} }
                     }
                     // Fallback numérico: detectar por composición de valores en muestra
                     if(iLat<0||iLon<0){
