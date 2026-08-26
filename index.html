@@ -54,6 +54,12 @@
             border:1px solid #e0e0e0; display:none;
         }
         #geovisor-status .st-line { margin:1px 0; }
+        #geovisor-status .st-close {
+            position:absolute; top:3px; right:5px;
+            cursor:pointer; color:#aaa; font-size:11px; line-height:1;
+            font-weight:bold; padding:1px 3px; border-radius:3px;
+        }
+        #geovisor-status .st-close:hover { color:#333; background:#eee; }
         body.mobile-mode #geovisor-status { bottom:auto; top:205px; left:5px; width:175px; font-size:9px; }
         #minimap-container {
             position:absolute; bottom:15px; left:15px; z-index:800;
@@ -425,14 +431,25 @@
     function statusLog(msg, tipo){
         var panel=document.getElementById('geovisor-status');
         panel.style.display='block';
+        // Insertar X de cierre si aún no existe
+        if(!panel.querySelector('.st-close')){
+            var x=document.createElement('span');
+            x.className='st-close'; x.textContent='✕';
+            x.title='Cerrar';
+            x.onclick=function(){ panel.style.display='none'; panel.innerHTML=''; };
+            panel.appendChild(x);
+        }
         var color = tipo==='ok' ? '#2e7d32' : tipo==='error' ? '#c62828' : '#222';
         var div=document.createElement('div');
         div.className='st-line';
         div.style.color=color;
         div.textContent=msg;
-        // Mantener máximo 5 líneas
-        while(panel.children.length>=5){ panel.removeChild(panel.firstChild); }
-        panel.appendChild(div);
+        // Mantener máximo 5 líneas (sin contar la X)
+        var lines=panel.querySelectorAll('.st-line');
+        if(lines.length>=5){ panel.removeChild(lines[0]); }
+        // Insertar antes de la X
+        var closeBtn=panel.querySelector('.st-close');
+        panel.insertBefore(div, closeBtn);
     }
     function mostrarToast(msg){
         var t=document.getElementById('opc-toast');
