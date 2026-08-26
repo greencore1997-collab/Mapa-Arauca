@@ -341,7 +341,17 @@
             font-family:'Orbitron', monospace; font-weight:700;
             font-size:10px; letter-spacing:2.5px; color:#80cfff; margin-top:3px;
         }
-        body.mobile-mode #header-marca { display:none; }
+        body.mobile-mode #header-marca {
+            display:flex;
+            top:6px; right:6px;
+            padding:5px 10px 5px 12px;
+            gap:0;
+            border-radius:9px;
+        }
+        body.mobile-mode #header-logo { display:none; }
+        body.mobile-mode .geo-titulo  { font-size:13px; letter-spacing:4px; }
+        body.mobile-mode .geo-empresa { font-size:6px;  letter-spacing:1.5px; margin-top:2px; }
+        body.mobile-mode .geo-esp     { font-size:5.5px; letter-spacing:1px;  margin-top:1px; }
 
         #footer-credito {
             position:fixed; bottom:6px; left:50%; transform:translateX(-50%);
@@ -379,7 +389,7 @@
 
         /* ── Botón mi ubicación ── */
         #btn-mi-ubicacion {
-            position:absolute; bottom:60px; right:10px; z-index:801;
+            position:fixed; bottom:65px; right:12px; z-index:801;
             width:44px; height:44px;
             background:rgba(0,12,35,0.85);
             border:2px solid #00c8ff;
@@ -397,7 +407,7 @@
             box-shadow:0 0 32px rgba(0,200,255,0.6);
         }
         #btn-mi-ubicacion.cargando { opacity:0.5; cursor:wait; }
-        body.mobile-mode #btn-mi-ubicacion { width:40px; height:40px; font-size:18px; bottom:50px; right:8px; }
+        body.mobile-mode #btn-mi-ubicacion { width:42px; height:42px; font-size:18px; bottom:28px; right:10px; }
 
         .minimap-poly { cursor:pointer; }
         #minimap-title { cursor:pointer; }
