@@ -107,12 +107,19 @@
         /* REPORTE PANEL */
         #btn-reporte {
             position:absolute; top:55px; left:10px; z-index:900;
-            background:#1565c0; color:white; border:none; padding:10px 20px;
-            border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer;
-            box-shadow:0 4px 15px rgba(0,0,0,0.25); transition:all 0.3s;
-            display:flex; align-items:center; gap:8px;
+            background:rgba(0,12,35,0.82); color:#00c8ff;
+            border:none; border-left:3px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            padding:9px 18px; border-radius:8px;
+            font-weight:bold; font-size:11px; cursor:pointer;
+            font-family:'Orbitron',monospace; letter-spacing:1.5px;
+            box-shadow:0 0 18px rgba(0,180,255,0.3); transition:all 0.2s;
+            display:flex; align-items:center; gap:6px;
+            backdrop-filter:blur(6px);
         }
-        #btn-reporte:hover { background:#0d47a1; transform:scale(1.05); }
+        #btn-reporte:hover { background:rgba(0,40,90,0.95); box-shadow:0 0 28px rgba(0,200,255,0.5); }
         #reporte-overlay {
             position:fixed; top:0; right:-100%; width:55%; height:100vh;
             background:rgba(255,255,255,0.98); z-index:2000;
@@ -165,22 +172,36 @@
         /* BASEMAP TOGGLE */
         #btn-basemap {
             position:absolute; top:100px; left:10px; z-index:900;
-            background:white; border:2px solid #ccc; padding:6px 10px;
-            border-radius:8px; font-size:11px; cursor:pointer;
-            box-shadow:0 2px 8px rgba(0,0,0,0.2); transition:all 0.2s;
-            display:flex; align-items:center; gap:6px; font-weight:bold; color:#333;
+            background:rgba(0,12,35,0.82); color:#00c8ff;
+            border:none; border-left:3px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            padding:6px 14px; border-radius:8px; font-size:10px; cursor:pointer;
+            font-family:'Orbitron',monospace; letter-spacing:1px; font-weight:bold;
+            box-shadow:0 0 14px rgba(0,180,255,0.25); transition:all 0.2s;
+            display:flex; align-items:center; gap:6px;
+            backdrop-filter:blur(6px);
         }
+        #btn-basemap:hover { background:rgba(0,40,90,0.95); }
         #btn-basemap:hover { border-color:#1565c0; color:#1565c0; }
 
     
         /* MOBILE TOGGLE BUTTON */
         #btn-mobile {
             position:absolute; top:133px; left:10px; z-index:900;
-            background:white; border:2px solid #ccc; padding:6px 10px;
-            border-radius:8px; font-size:11px; cursor:pointer;
-            box-shadow:0 2px 8px rgba(0,0,0,0.2); transition:all 0.2s;
-            display:flex; align-items:center; gap:6px; font-weight:bold; color:#333;
+            background:rgba(0,12,35,0.82); color:#00c8ff;
+            border:none; border-left:3px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            padding:6px 14px; border-radius:8px; font-size:10px; cursor:pointer;
+            font-family:'Orbitron',monospace; letter-spacing:1px; font-weight:bold;
+            box-shadow:0 0 14px rgba(0,180,255,0.25); transition:all 0.2s;
+            display:flex; align-items:center; gap:6px;
+            backdrop-filter:blur(6px);
         }
+        #btn-mobile:hover { background:rgba(0,40,90,0.95); }
         #btn-mobile:hover { border-color:#1565c0; color:#1565c0; }
         #btn-mobile.active { background:#1565c0; color:white; border-color:#1565c0; }
 
@@ -273,10 +294,15 @@
 
         /* OPCIONES BUTTON & MENU */
         #btn-opciones {
-            position:absolute; top:168px; left:10px; z-index:900;
-            background:white; border:2px solid #ccc; padding:6px 11px;
-            border-radius:8px; font-size:16px; cursor:pointer;
-            box-shadow:0 2px 6px rgba(0,0,0,0.15); line-height:1;
+            position:absolute; top:170px; left:10px; z-index:900;
+            background:rgba(0,12,35,0.82); color:#00c8ff;
+            border:none; border-left:3px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            padding:6px 14px; border-radius:8px; font-size:14px; cursor:pointer;
+            box-shadow:0 0 14px rgba(0,180,255,0.25); transition:all 0.2s;
+            backdrop-filter:blur(6px);
         }
         #btn-opciones:hover { background:#f5f5f5; border-color:#1565c0; }
         #opciones-menu {
@@ -301,7 +327,15 @@
         .opc-icon { font-size:14px; min-width:18px; text-align:center; }
         .opc-divider { height:6px; background:#f5f5f5; border-top:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0; }
         body.mobile-mode #btn-opciones {
-            top:auto; bottom:calc(45vh + 148px); left:10px; font-size:15px; padding:8px 10px;
+            position:absolute; top:170px; left:10px; z-index:900;
+            background:rgba(0,12,35,0.82); color:#00c8ff;
+            border:none; border-left:3px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            padding:6px 14px; border-radius:8px; font-size:14px; cursor:pointer;
+            box-shadow:0 0 14px rgba(0,180,255,0.25); transition:all 0.2s;
+            backdrop-filter:blur(6px);
         }
         body.mobile-mode #opciones-menu {
             top:auto; bottom:calc(45vh + 192px); left:52px;
@@ -493,23 +527,7 @@
         /* ── Coordenadas panel ── */
         #panel-puntos-barrio { top:330px; }
         #panel-puntos-barrio .pbl-coord { color:#a0dfff; font-size:9px; font-family:monospace; }
-        /* ── Botones de acción duplicados (derecha) ── */
-        #barra-acciones-der {
-            position:absolute; top:120px; right:10px; z-index:404;
-            display:flex; flex-direction:row; gap:4px;
-        }
-        #barra-acciones-der button {
-            background:rgba(0,12,35,0.78); color:#00c8ff;
-            border:1px solid rgba(0,200,255,0.5); border-radius:7px;
-            padding:6px 9px; font-size:9px; font-weight:bold;
-            cursor:pointer; font-family:'Orbitron',monospace; letter-spacing:1px;
-            box-shadow:0 0 10px rgba(0,180,255,0.15); transition:background 0.2s;
-            white-space:nowrap;
-        }
-        #barra-acciones-der button:hover { background:rgba(0,40,100,0.9); }
-        body.mobile-mode #btn-restricciones-desktop,
-        body.mobile-mode #panel-restricciones,
-        body.mobile-mode #barra-acciones-der { display:none; }
+        
 </style>
 </head>
 <body>
@@ -521,10 +539,6 @@
     <div id="panel-atributo">
       <div class="attr-title">Colorear mapa por:</div>
       <div id="attr-opciones"></div>
-    </div>
-    <div id="barra-acciones-der">
-      <button onclick="toggleReporte()">📊 REPORTE</button>
-      <button onclick="toggleBasemap()">🗺️ MAPA</button>
     </div>
     <button id="btn-restricciones-desktop" onclick="toggleRestricciones()">🚫 RESTRICCIONES <span id="flecha-restricciones">▼</span></button>
     <div id="panel-restricciones">
