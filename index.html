@@ -54,6 +54,18 @@
             border:1px solid #e0e0e0; display:none;
         }
         #geovisor-status .st-line { margin:1px 0; }
+        #modal-conversion {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;
+        }
+        .modal-box { background:white; border-radius:12px; padding:22px 24px; max-width:360px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+        .modal-box h3 { font-size:14px; color:#1565c0; margin-bottom:10px; }
+        .modal-box p { font-size:12px; color:#555; margin:5px 0; line-height:1.5; }
+        .modal-ejemplo { background:#f5f5f5; border-radius:6px; padding:8px 12px; font-size:11px; font-family:monospace; color:#333; margin:10px 0; line-height:1.8; }
+        .modal-btns { display:flex; gap:10px; margin-top:14px; }
+        .modal-btns button { flex:1; padding:9px; border:none; border-radius:7px; cursor:pointer; font-size:13px; font-weight:bold; }
+        #modal-si { background:#1565c0; color:white; } #modal-si:hover { background:#0d47a1; }
+        #modal-no { background:#f5f5f5; color:#333; border:1px solid #ddd; } #modal-no:hover { background:#e0e0e0; }
         #geovisor-status .st-close {
             position:absolute; top:3px; right:5px;
             cursor:pointer; color:#aaa; font-size:11px; line-height:1;
@@ -286,6 +298,21 @@
         <div class="opc-item" onclick="actualizarKML()"><span class="opc-icon">&#128506;</span>Cargar KML</div>
     </div>
     <div id="opc-toast"></div>
+    <div id="modal-conversion">
+        <div class="modal-box">
+            <h3>⚠️ Coordenadas enteras detectadas</h3>
+            <p>Las coordenadas no tienen decimales. ¿Desea convertirlas automáticamente?</p>
+            <div class="modal-ejemplo">
+                <div id="modal-ej-lat"></div>
+                <div id="modal-ej-lon"></div>
+            </div>
+            <p style="color:#888;font-size:11px;">Se inserta el decimal después del "7" en latitud y después de "-70" en longitud.</p>
+            <div class="modal-btns">
+                <button id="modal-si">✅ Sí, convertir</button>
+                <button id="modal-no">❌ No, usar tal cual</button>
+            </div>
+        </div>
+    </div>
     <button id="btn-legend-tab" onclick="toggleLegendTab()">🏘️ Barrios ▲</button>
     <div id="reporte-backdrop" onclick="toggleReporte()"></div>
     <div id="reporte-overlay">
@@ -650,121 +677,167 @@
         function cargarExcel(input){
             var file=input.files[0];
             if(!file) return;
-            statusLog('⏳ Cargando Excel y asignando barrios...','info');
+            var esCSV=/\.csv$/i.test(file.name);
+            statusLog('⏳ Cargando '+(esCSV?'CSV':'Excel')+' y detectando columnas...','info');
 
             var reader=new FileReader();
             reader.onload=function(e){
                 try {
-                    var data=new Uint8Array(e.target.result);
-                    var wb=XLSX.read(data,{type:'array'});
+                    var wb;
+                    if(esCSV){
+                        wb=XLSX.read(e.target.result,{type:'string'});
+                    } else {
+                        wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+                    }
                     var ws=wb.Sheets[wb.SheetNames[0]];
-                    var rows=XLSX.utils.sheet_to_json(ws,{header:1});
+                    var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
 
-                    // Buscar columnas por header
-                    var header=rows[0].map(function(h){return String(h).toUpperCase();});
+                    if(!rows||rows.length<2){
+                        statusLog('❌ El archivo está vacío o sin datos','error'); return;
+                    }
+
+                    // ── Detección de columnas por nombre (fuzzy, por prioridad) ──
+                    var header=rows[0].map(function(h){return String(h||'').toUpperCase().trim().replace(/[_\s]+/g,'');});
                     var iLat=-1,iLon=-1,iFoto=-1,iFoto2=-1,iConc=-1,iBarrio=-1;
+                    var latPat=['LATITUD','LATITUDE','LAT','COORDY','CORDY','YWGS','NORTE','YCOORD','Y'];
+                    var lonPat=['LONGITUD','LONGITUDE','LON','LONG','COORDX','CORDX','XWGS','ESTE','XCOORD','X'];
+                    for(var j=0;j<latPat.length&&iLat<0;j++){
+                        for(var i=0;i<header.length;i++){ if(header[i].indexOf(latPat[j])>=0){iLat=i;break;} }
+                    }
+                    for(var j=0;j<lonPat.length&&iLon<0;j++){
+                        for(var i=0;i<header.length;i++){ if(i!==iLat&&header[i].indexOf(lonPat[j])>=0){iLon=i;break;} }
+                    }
+                    // Fallback numérico: detectar por composición de valores en muestra
+                    if(iLat<0||iLon<0){
+                        var mAux=rows.slice(1,Math.min(8,rows.length));
+                        for(var i=0;i<header.length;i++){
+                            if(i===iLat||i===iLon) continue;
+                            var vals=mAux.map(function(r){return String(r[i]||'').trim().replace(',','.');}).filter(function(v){return v&&!isNaN(parseFloat(v));});
+                            if(!vals.length) continue;
+                            var esLatDec=vals.every(function(v){var n=parseFloat(v);return n>5&&n<9;});
+                            var esLatEnt=vals.every(function(v){return /^7\d{3,}$/.test(v.replace(/\.0+$/,''));});
+                            var esLonDec=vals.every(function(v){var n=parseFloat(v);return n<-68&&n>-76;});
+                            var esLonEnt=vals.every(function(v){return /^-?70\d{2,}$/.test(v.replace(/\.0+$/,''));});
+                            if(iLat<0&&(esLatDec||esLatEnt)) iLat=i;
+                            else if(iLon<0&&(esLonDec||esLonEnt)) iLon=i;
+                        }
+                    }
                     for(var i=0;i<header.length;i++){
                         var h=header[i];
-                        if(h.indexOf('LATITUD')>=0) iLat=i;
-                        if(h.indexOf('LONGITUD')>=0&&iLon<0) iLon=i;
                         if(h.indexOf('FOTO')>=0&&iFoto<0) iFoto=i;
                         else if(h.indexOf('FOTO')>=0) iFoto2=i;
-                        if(h.indexOf('CONCEPTO')>=0) iConc=i;
-                        if(h.indexOf('BARRIO')>=0) iBarrio=i;
+                        if((h.indexOf('CONCEPTO')>=0||h.indexOf('CONCEPT')>=0)&&iConc<0) iConc=i;
+                        if((h.indexOf('BARRIO')>=0||h.indexOf('SECTOR')>=0||h.indexOf('ZONA')>=0)&&iBarrio<0) iBarrio=i;
                     }
 
                     if(iLat<0||iLon<0){
-                        statusLog('❌ No se encontraron columnas LATITUD/LONGITUD','error');
-                        statusLog('💡 Verifica que el Excel tenga cabeceras LATITUD y LONGITUD','info');
-                        return;
+                        statusLog('❌ No se detectaron columnas de coordenadas','error');
+                        statusLog('💡 Encabezados: '+rows[0].slice(0,8).join(', '),'info'); return;
                     }
+                    statusLog('✅ Columnas: "'+rows[0][iLat]+'" (lat) · "'+rows[0][iLon]+'" (lon)','ok');
 
-                    var nuevos=[];
-                    for(var r=1;r<rows.length;r++){
-                        var row=rows[r];
-                        var lat=parseFloat(row[iLat]);
-                        var lon=parseFloat(row[iLon]);
-                        if(isNaN(lat)||isNaN(lon)) continue;
-                        var foto='';
-                        if(iFoto>=0&&row[iFoto]) foto=String(row[iFoto]);
-                        if(!foto&&iFoto2>=0&&row[iFoto2]) foto=String(row[iFoto2]);
-                        var conc='';
-                        if(iConc>=0&&row[iConc]) conc=String(row[iConc]);
-                        var barrio=asignarBarrio(lat,lon);
-                        if(!barrio){
-                            if(iBarrio>=0&&row[iBarrio]) barrio=String(row[iBarrio]);
-                            else barrio='SIN BARRIO';
+                    // ── Detectar coordenadas enteras ──
+                    var muestra=rows.slice(1,Math.min(6,rows.length)).filter(function(r){return r[iLat]!==undefined&&r[iLat]!=='';});
+                    function strCoord(v){return String(v||'').trim().replace(',','.').replace(/\.0+$/,'');}
+                    var latEnt=muestra.length>0&&muestra.every(function(r){return /^7\d{3,}$/.test(strCoord(r[iLat]));});
+                    var lonEnt=muestra.length>0&&muestra.every(function(r){return /^-?70\d{2,}$/.test(strCoord(r[iLon]));});
+
+                    if(latEnt||lonEnt){
+                        var ejLat=strCoord(muestra[0][iLat]), ejLon=strCoord(muestra[0][iLon]);
+                        var cLat=latEnt?('7.'+ejLat.slice(1)):ejLat;
+                        var cLon=lonEnt?(ejLon.replace(/^(-?)70/,'$1-70.').replace('--','-')):ejLon;
+                        // Corrección más simple: -70XXXX → -70.XXXX
+                        if(lonEnt){
+                            var neg=ejLon.startsWith('-');
+                            var abs=ejLon.replace(/^-/,'');
+                            cLon=(neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2);
                         }
-                        nuevos.push({lat:lat,lon:lon,foto:foto,concepto:conc,barrio:barrio,funcionario:''});
+                        statusLog('⚠️ Coordenadas enteras: lat='+ejLat+', lon='+ejLon,'error');
+                        document.getElementById('modal-ej-lat').textContent='Lat: '+ejLat+' → '+cLat;
+                        document.getElementById('modal-ej-lon').textContent='Lon: '+ejLon+' → '+cLon;
+                        document.getElementById('modal-conversion').style.display='flex';
+                        document.getElementById('modal-si').onclick=function(){
+                            document.getElementById('modal-conversion').style.display='none';
+                            statusLog('✅ Convirtiendo coordenadas...','ok');
+                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,true,latEnt,lonEnt);
+                        };
+                        document.getElementById('modal-no').onclick=function(){
+                            document.getElementById('modal-conversion').style.display='none';
+                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,false,false,false);
+                        };
+                    } else {
+                        _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,false,false,false);
                     }
 
-                    if(nuevos.length===0){
-                        status.textContent='❌ No se encontraron puntos válidos';
-                        status.style.color='#e53935';
-                        return;
-                    }
-
-                    // Limpiar markers anteriores
-                    allMarkers.forEach(function(m){map.removeLayer(m);});
-                    allMarkers=[];
-
-                    // Generar colores para nuevos barrios
-                    var barriosNuevos={};
-                    nuevos.forEach(function(p){barriosNuevos[p.barrio]=true;});
-                    Object.keys(barriosNuevos).forEach(function(b){
-                        if(!colores[b]){
-                            colores[b]='#'+Math.floor(Math.random()*0xAAAAAA+0x555555).toString(16);
-                        }
-                    });
-
-                    // Crear markers
-                    nuevos.forEach(function(p){
-                        var m=L.circleMarker([p.lat,p.lon],{
-                            radius:6,fillColor:colores[p.barrio]||'#888',color:'#333',
-                            weight:1,opacity:0.8,fillOpacity:0.85
-                        }).addTo(map);
-                        m._barrio=p.barrio;
-                        allMarkers.push(m);
-                        m.on('click',function(){
-                            var html='<h3>'+p.barrio+'</h3>';
-                            html+='<p><strong>Lat:</strong> '+p.lat.toFixed(6)+'</p>';
-                            html+='<p><strong>Lon:</strong> '+p.lon.toFixed(6)+'</p>';
-                            if(p.concepto) html+='<p><strong>Concepto:</strong> '+p.concepto+'</p>';
-                            if(p.foto){html+='<a href="'+p.foto+'" target="_blank"><img src="'+p.foto+'" onerror="this.parentElement.style.display=\'none\'"></a><p class="foto-hint">📷 Toca la imagen para verla en grande</p>';}
-                            document.getElementById('infoContent').innerHTML=html;
-                            document.getElementById('infoPanel').style.display='block';
-                        });
-                    });
-
-                    // Actualizar leyenda
-                    puntos=nuevos;
-                    barrioActivo=null;
-                    var legendHtml='<h4 style="margin-bottom:8px;font-size:13px;color:#333;">Barrios ('+Object.keys(barriosNuevos).length+')</h4>';
-                    legendHtml+='<div id="conteoBarrio" style="display:none;background:#e3f2fd;color:#1565c0;font-weight:bold;font-size:11px;padding:6px 10px;border-radius:6px;margin-bottom:8px;text-align:center;border:1px solid #90caf9;"></div>';
-                    legendHtml+='<input type="text" class="search-box" id="searchBarrio" placeholder="🔍 Buscar barrio..." oninput="buscarBarrio(this.value)">';
-                    Object.keys(barriosNuevos).sort().forEach(function(b){
-                        legendHtml+='<div class="legend-item" data-barrio="'+b+'" onclick="filtrarBarrio(this.dataset.barrio)">';
-                        legendHtml+='<div class="legend-color" style="background:'+(colores[b]||'#888')+'"></div>';
-                        legendHtml+='<span>'+b+'</span></div>';
-                    });
-                    legendHtml+='<button class="btn-todos" id="btnTodos" onclick="filtrarBarrio(barrioActivo)">✕ Ver todos los barrios</button>';
-                    document.getElementById('legend').innerHTML=legendHtml;
-
-                    // Zoom a nuevos puntos
-                    var lats=nuevos.map(function(p){return p.lat;});
-                    var lons=nuevos.map(function(p){return p.lon;});
-                    map.fitBounds([[Math.min.apply(null,lats),Math.min.apply(null,lons)],[Math.max.apply(null,lats),Math.max.apply(null,lons)]],{padding:[50,50]});
-
-                    var sinBarrio=nuevos.filter(function(p){return p.barrio==='SIN BARRIO';}).length;
-                    var conBarrio=nuevos.length-sinBarrio;
-                    statusLog('✅ Excel cargado: '+nuevos.length+' puntos ('+conBarrio+' con barrio)','ok');
-                    if(sinBarrio>0) statusLog('⚠️ '+sinBarrio+' puntos sin barrio asignado','error');
-                } catch(err) {
-                    statusLog('❌ Error al leer Excel: '+err.message,'error');
+                } catch(err){
+                    statusLog('❌ Error al leer el archivo: '+err.message,'error');
                     statusLog('💡 Intenta refrescar la página y cargar de nuevo','info');
                 }
             };
-            reader.readAsArrayBuffer(file);
+            if(esCSV) reader.readAsText(file,'UTF-8'); else reader.readAsArrayBuffer(file);
+        }
+
+        function _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,convertir,latEnt,lonEnt){
+            function cvt(val,esLat){
+                var s=String(val||'').trim().replace(',','.');
+                if(!convertir) return parseFloat(s);
+                if(esLat&&latEnt){ return parseFloat('7.'+s.replace(/^-?/,'').slice(1)); }
+                if(!esLat&&lonEnt){
+                    var neg=s.startsWith('-'); var abs=s.replace(/^-?/,'');
+                    return parseFloat((neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2));
+                }
+                return parseFloat(s);
+            }
+            var nuevos=[];
+            for(var r=1;r<rows.length;r++){
+                var row=rows[r];
+                if(!row||row.every(function(c){return c===undefined||c===''||c===null;})) continue;
+                var lat=cvt(row[iLat],true), lon=cvt(row[iLon],false);
+                if(isNaN(lat)||isNaN(lon)) continue;
+                var foto=''; if(iFoto>=0&&row[iFoto]) foto=String(row[iFoto]); if(!foto&&iFoto2>=0&&row[iFoto2]) foto=String(row[iFoto2]);
+                var conc=''; if(iConc>=0&&row[iConc]) conc=String(row[iConc]);
+                var barrio=asignarBarrio(lat,lon);
+                if(!barrio){ barrio=(iBarrio>=0&&row[iBarrio])?String(row[iBarrio]):'SIN BARRIO'; }
+                nuevos.push({lat:lat,lon:lon,foto:foto,concepto:conc,barrio:barrio,funcionario:''});
+            }
+            if(nuevos.length===0){ statusLog('❌ No se encontraron puntos válidos en el archivo','error'); return; }
+
+            allMarkers.forEach(function(m){map.removeLayer(m);}); allMarkers=[];
+            var barriosNuevos={};
+            nuevos.forEach(function(p){barriosNuevos[p.barrio]=true;});
+            Object.keys(barriosNuevos).forEach(function(b){ if(!colores[b]) colores[b]='#'+Math.floor(Math.random()*0xAAAAAA+0x555555).toString(16); });
+
+            nuevos.forEach(function(p){
+                var m=L.circleMarker([p.lat,p.lon],{radius:6,fillColor:colores[p.barrio]||'#888',color:'#333',weight:1,opacity:0.8,fillOpacity:0.85}).addTo(map);
+                m._barrio=p.barrio; allMarkers.push(m);
+                m.on('click',function(){
+                    var html='<h3>'+p.barrio+'</h3>';
+                    html+='<p><strong>Lat:</strong> '+p.lat.toFixed(6)+'</p>';
+                    html+='<p><strong>Lon:</strong> '+p.lon.toFixed(6)+'</p>';
+                    if(p.concepto) html+='<p><strong>Concepto:</strong> '+p.concepto+'</p>';
+                    if(p.foto){html+='<a href="'+p.foto+'" target="_blank"><img src="'+p.foto+'" onerror="this.parentElement.style.display=\'none\'"></a><p class="foto-hint">📷 Toca la imagen para verla en grande</p>';}
+                    document.getElementById('infoContent').innerHTML=html;
+                    document.getElementById('infoPanel').style.display='block';
+                });
+            });
+
+            puntos=nuevos; barrioActivo=null;
+            var legendHtml='<h4 style="margin-bottom:8px;font-size:13px;color:#333;">Barrios ('+Object.keys(barriosNuevos).length+')</h4>';
+            legendHtml+='<div id="conteoBarrio" style="display:none;background:#e3f2fd;color:#1565c0;font-weight:bold;font-size:11px;padding:6px 10px;border-radius:6px;margin-bottom:8px;text-align:center;border:1px solid #90caf9;"></div>';
+            legendHtml+='<input type="text" class="search-box" id="searchBarrio" placeholder="🔍 Buscar barrio..." oninput="buscarBarrio(this.value)">';
+            Object.keys(barriosNuevos).sort().forEach(function(b){
+                legendHtml+='<div class="legend-item" data-barrio="'+b+'" onclick="filtrarBarrio(this.dataset.barrio)">';
+                legendHtml+='<div class="legend-color" style="background:'+(colores[b]||'#888')+'"></div><span>'+b+'</span></div>';
+            });
+            legendHtml+='<button class="btn-todos" id="btnTodos" onclick="filtrarBarrio(barrioActivo)">✕ Ver todos los barrios</button>';
+            document.getElementById('legend').innerHTML=legendHtml;
+
+            var lats=nuevos.map(function(p){return p.lat;}), lons=nuevos.map(function(p){return p.lon;});
+            map.fitBounds([[Math.min.apply(null,lats),Math.min.apply(null,lons)],[Math.max.apply(null,lats),Math.max.apply(null,lons)]],{padding:[50,50]});
+
+            var sinBarrio=nuevos.filter(function(p){return p.barrio==='SIN BARRIO';}).length;
+            statusLog('✅ Cargado: '+nuevos.length+' puntos ('+(nuevos.length-sinBarrio)+' con barrio)','ok');
+            if(sinBarrio>0) statusLog('⚠️ '+sinBarrio+' puntos sin barrio asignado','error');
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
