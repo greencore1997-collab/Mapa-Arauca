@@ -754,6 +754,12 @@
                     // Lon: entero negativo de 6+ dígitos (cubre lon -50° a -99° para Latinoamérica)
                     var lonEnt=muestra.length>0&&muestra.every(function(r){return /^-[5-9]\d{4,}$/.test(strCoord(r[iLon]));});
 
+                    // ── DIAGNÓSTICO: mostrar valores crudos de muestra ──
+                    if(muestra.length>0){
+                        statusLog('🔍 lat crudo="'+strCoord(muestra[0][iLat])+'" lon crudo="'+strCoord(muestra[0][iLon])+'"','info');
+                        statusLog('🔍 latEnt='+latEnt+' lonEnt='+lonEnt,'info');
+                    }
+
                     if(latEnt||lonEnt){
                         var ejLat=strCoord(muestra[0][iLat]), ejLon=strCoord(muestra[0][iLon]);
                         // Lat: insertar decimal después del primer dígito: 7076543 → 7.076543
@@ -765,7 +771,7 @@
                             var abs=ejLon.replace(/^-/,'');
                             cLon=(neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2);
                         }
-                        statusLog('⚠️ Coordenadas enteras: lat='+ejLat+', lon='+ejLon,'error');
+                        statusLog('⚠️ Enteras detectadas → Sí convierte','error');
                         document.getElementById('modal-ej-lat').textContent='Lat: '+ejLat+' → '+cLat;
                         document.getElementById('modal-ej-lon').textContent='Lon: '+ejLon+' → '+cLon;
                         document.getElementById('modal-conversion').style.display='flex';
@@ -806,10 +812,15 @@
                 return parseFloat(s);
             }
             var nuevos=[];
+            var primerPuntoLogueado=false;
             for(var r=1;r<rows.length;r++){
                 var row=rows[r];
                 if(!row||row.every(function(c){return c===undefined||c===''||c===null;})) continue;
                 var lat=cvt(row[iLat],true), lon=cvt(row[iLon],false);
+                if(!primerPuntoLogueado){
+                    statusLog('📌 1er punto: lat='+lat+' lon='+lon,'info');
+                    primerPuntoLogueado=true;
+                }
                 if(isNaN(lat)||isNaN(lon)) continue;
                 var foto=''; if(iFoto>=0&&row[iFoto]) foto=String(row[iFoto]); if(!foto&&iFoto2>=0&&row[iFoto2]) foto=String(row[iFoto2]);
                 var conc=''; if(iConc>=0&&row[iConc]) conc=String(row[iConc]);
