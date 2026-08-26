@@ -721,9 +721,9 @@
                             var vals=mAux.map(function(r){return String(r[i]||'').trim().replace(',','.');}).filter(function(v){return v&&!isNaN(parseFloat(v));});
                             if(!vals.length) continue;
                             var esLatDec=vals.every(function(v){var n=parseFloat(v);return n>0&&n<15;});
-                            var esLatEnt=vals.every(function(v){return /^[1-9]\d{3,}$/.test(v.replace(/\.0+$/,''));});
+                            var esLatEnt=vals.every(function(v){return Math.abs(parseFloat(v))>90;});
                             var esLonDec=vals.every(function(v){var n=parseFloat(v);return n<-50&&n>-100;});
-                            var esLonEnt=vals.every(function(v){return /^-[5-9]\d{3,}$/.test(v.replace(/\.0+$/,''));});
+                            var esLonEnt=vals.every(function(v){return Math.abs(parseFloat(v))>180;});
                             if(iLat<0&&(esLatDec||esLatEnt)) iLat=i;
                             else if(iLon<0&&(esLonDec||esLonEnt)) iLon=i;
                         }
@@ -746,36 +746,39 @@
                     statusLog('✅ Col lat:"'+rows[0][iLat]+'" lon:"'+rows[0][iLon]+'"','ok');
                     statusLog('📍 Ej: lat='+sLat+' lon='+sLon,'info');
 
-                    // ── Detectar coordenadas enteras ──
-                    function strCoord(v){var s=String(v===0?'0':(v||'')).trim().replace(',','.').replace(/\.0+$/,''); return s;}
-                    // Filtrar filas con valor numérico válido en lat
+                    // ── Detectar coordenadas fuera de rango geográfico ──
+                    function strCoord(v){var s=String(v===0?'0':(v||'')).trim().replace(',','.'); return s;}
+                    // Función que convierte automáticamente detectando el factor de escala
+                    function cvtAuto(val, esLat){
+                        var n=parseFloat(String(val===0?'0':(val||'')).replace(',','.'));
+                        if(isNaN(n)) return NaN;
+                        var maximo=esLat?90:180;
+                        if(Math.abs(n)<=maximo) return n; // Ya es decimal válido
+                        var escala=10;
+                        while(Math.abs(n)/escala>maximo&&escala<1000000000) escala*=10;
+                        return n/escala;
+                    }
+                    // Filtrar filas con valores numéricos válidos en ambas columnas
                     var muestra=rows.slice(1,Math.min(10,rows.length)).filter(function(r){
-                        var s=strCoord(r[iLat]);
-                        return s!==''&&!isNaN(parseFloat(s))&&isFinite(parseFloat(s));
+                        var nLat=parseFloat(strCoord(r[iLat])), nLon=parseFloat(strCoord(r[iLon]));
+                        return !isNaN(nLat)&&isFinite(nLat)&&!isNaN(nLon)&&isFinite(nLon);
                     });
-                    // Lat: entero de 4+ dígitos que empiece con 1-9 (cubre lat 1°-9° Colombia)
-                    var latEnt=muestra.length>0&&muestra.every(function(r){return /^[1-9]\d{3,}$/.test(strCoord(r[iLat]));});
-                    // Lon: entero negativo de 4+ dígitos (cubre lon -50° a -99° Latinoamérica)
-                    var lonEnt=muestra.length>0&&muestra.every(function(r){return /^-[5-9]\d{3,}$/.test(strCoord(r[iLon]));});
+                    // Detección: si |valor| > rango válido → necesita conversión
+                    var latEnt=muestra.length>0&&muestra.every(function(r){return Math.abs(parseFloat(strCoord(r[iLat])))>90;});
+                    var lonEnt=muestra.length>0&&muestra.every(function(r){return Math.abs(parseFloat(strCoord(r[iLon])))>180;});
 
-                    // ── DIAGNÓSTICO: mostrar valores crudos de muestra ──
+                    // ── DIAGNÓSTICO ──
                     if(muestra.length>0){
-                        statusLog('🔍 lat crudo="'+strCoord(muestra[0][iLat])+'" lon crudo="'+strCoord(muestra[0][iLon])+'"','info');
+                        var dbgLat=strCoord(muestra[0][iLat]), dbgLon=strCoord(muestra[0][iLon]);
+                        statusLog('🔍 lat="'+dbgLat+'" lon="'+dbgLon+'"','info');
                         statusLog('🔍 latEnt='+latEnt+' lonEnt='+lonEnt,'info');
                     }
 
                     if(latEnt||lonEnt){
                         var ejLat=strCoord(muestra[0][iLat]), ejLon=strCoord(muestra[0][iLon]);
-                        // Lat: insertar decimal después del primer dígito: 7076543 → 7.076543
-                        var cLat=latEnt?(ejLat.charAt(0)+'.'+ejLat.slice(1)):ejLat;
-                        // Lon: insertar decimal después de los primeros 2 dígitos (del valor absoluto): -7012345 → -70.12345
-                        var cLon=ejLon;
-                        if(lonEnt){
-                            var neg=ejLon.startsWith('-');
-                            var abs=ejLon.replace(/^-/,'');
-                            cLon=(neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2);
-                        }
-                        statusLog('⚠️ Enteras detectadas → Sí convierte','error');
+                        var cLat=latEnt?cvtAuto(ejLat,true).toFixed(6):ejLat;
+                        var cLon=lonEnt?cvtAuto(ejLon,false).toFixed(6):ejLon;
+                        statusLog('⚠️ Coords enteras → convertir? lat:'+ejLat+'→'+cLat,'error');
                         document.getElementById('modal-ej-lat').textContent='Lat: '+ejLat+' → '+cLat;
                         document.getElementById('modal-ej-lon').textContent='Lon: '+ejLon+' → '+cLon;
                         document.getElementById('modal-conversion').style.display='flex';
@@ -801,19 +804,18 @@
         }
 
         function _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,convertir,latEnt,lonEnt){
+            // Conversión automática: detecta el factor de escala por rango geográfico
             function cvt(val,esLat){
-                var s=String(val===0?'0':(val||'')).trim().replace(',','.');
-                if(!convertir) return parseFloat(s);
-                if(esLat&&latEnt&&/^[1-9]\d{3,}$/.test(s)){
-                    // Insertar decimal después del 1er dígito: 7076543 → 7.076543
-                    return parseFloat(s.charAt(0)+'.'+s.slice(1));
-                }
-                if(!esLat&&lonEnt&&/^-[5-9]\d{3,}$/.test(s)){
-                    // Insertar decimal después de los 2 primeros dígitos del valor absoluto: -7012345 → -70.12345
-                    var neg=s.startsWith('-'); var abs=s.replace(/^-/,'');
-                    return parseFloat((neg?'-':'')+abs.slice(0,2)+'.'+abs.slice(2));
-                }
-                return parseFloat(s);
+                var n=parseFloat(String(val===0?'0':(val||'')).replace(',','.'));
+                if(isNaN(n)) return NaN;
+                if(!convertir) return n;
+                var maximo=esLat?90:180;
+                if(Math.abs(n)<=maximo) return n; // Ya es decimal válido
+                if(esLat&&!latEnt) return n;
+                if(!esLat&&!lonEnt) return n;
+                var escala=10;
+                while(Math.abs(n)/escala>maximo&&escala<1000000000) escala*=10;
+                return n/escala;
             }
             var nuevos=[];
             var primerPuntoLogueado=false;
