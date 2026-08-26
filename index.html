@@ -151,6 +151,64 @@
         }
         #btn-basemap:hover { border-color:#1565c0; color:#1565c0; }
 
+    
+        /* MOBILE TOGGLE BUTTON */
+        #btn-mobile {
+            position:absolute; top:133px; left:10px; z-index:900;
+            background:white; border:2px solid #ccc; padding:6px 10px;
+            border-radius:8px; font-size:11px; cursor:pointer;
+            box-shadow:0 2px 8px rgba(0,0,0,0.2); transition:all 0.2s;
+            display:flex; align-items:center; gap:6px; font-weight:bold; color:#333;
+        }
+        #btn-mobile:hover { border-color:#1565c0; color:#1565c0; }
+        #btn-mobile.active { background:#1565c0; color:white; border-color:#1565c0; }
+
+        /* MOBILE MODE STYLES */
+        body.mobile-mode .legend {
+            width:100vw; left:0; right:0; top:auto; bottom:0;
+            max-height:42vh; border-radius:16px 16px 0 0;
+            box-shadow:0 -4px 20px rgba(0,0,0,0.2);
+            padding:10px 15px 20px; font-size:13px;
+        }
+        body.mobile-mode .legend-item { padding:8px 10px; font-size:13px; }
+        body.mobile-mode .legend-color { width:16px; height:16px; }
+        body.mobile-mode .search-box { font-size:13px; padding:8px 12px; }
+        body.mobile-mode .btn-todos { font-size:13px; padding:8px; }
+
+        body.mobile-mode .title {
+            top:5px; left:50%; transform:translateX(-50%);
+            font-size:13px; white-space:nowrap; padding:7px 14px;
+            max-width:85vw; overflow:hidden; text-overflow:ellipsis;
+        }
+        body.mobile-mode .info-panel {
+            bottom:auto; top:60px; right:5px; left:5px;
+            max-width:none; width:auto; font-size:13px;
+        }
+        body.mobile-mode #minimap-container {
+            width:150px; height:140px; bottom:auto; top:60px; left:5px;
+        }
+        body.mobile-mode #upload-box,
+        body.mobile-mode #upload-kml {
+            display:none;
+        }
+        body.mobile-mode #btn-reporte {
+            top:auto; bottom:45vh; left:10px; font-size:12px; padding:8px 14px;
+        }
+        body.mobile-mode #btn-basemap {
+            top:auto; bottom:calc(45vh + 50px); left:10px; font-size:12px; padding:8px 12px;
+        }
+        body.mobile-mode #btn-mobile {
+            top:auto; bottom:calc(45vh + 100px); left:10px; font-size:12px; padding:8px 12px;
+        }
+        body.mobile-mode .legend h3 {
+            font-size:14px; margin-bottom:8px;
+        }
+        /* drag handle for mobile panel */
+        body.mobile-mode .legend::before {
+            content:''; display:block; width:40px; height:4px;
+            background:#ccc; border-radius:2px; margin:0 auto 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -182,6 +240,7 @@
     
     <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
     <button id="btn-basemap" onclick="toggleBasemap()" title="Cambiar mapa base">🗺️ OSM</button>
+    <button id="btn-mobile" onclick="toggleMobile()" title="Modo móvil">📱 Móvil</button>
     <div id="reporte-backdrop" onclick="toggleReporte()"></div>
     <div id="reporte-overlay">
         <div class="rep-header">
@@ -728,6 +787,26 @@
             btn.style.background = 'white';
             btn.style.color = '#333';
             btn.style.borderColor = '#ccc';
+        }
+    }
+
+    
+    var _mobileMode = false;
+
+    function toggleMobile() {
+        var btn = document.getElementById('btn-mobile');
+        _mobileMode = !_mobileMode;
+        if (_mobileMode) {
+            document.body.classList.add('mobile-mode');
+            btn.innerHTML = '🖥️ Escritorio';
+            btn.classList.add('active');
+            // Invalidate map size after layout change
+            setTimeout(function(){ map.invalidateSize(); }, 300);
+        } else {
+            document.body.classList.remove('mobile-mode');
+            btn.innerHTML = '📱 Móvil';
+            btn.classList.remove('active');
+            setTimeout(function(){ map.invalidateSize(); }, 300);
         }
     }
 
