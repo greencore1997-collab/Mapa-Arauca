@@ -351,9 +351,36 @@
         }
         body.mobile-mode #logo-araucana { display:none; }
         body.mobile-mode #footer-credito { bottom:3px; font-size:8px; }
-    </style>
+    
+        /* ── Barra climatológica ── */
+        #barra-clima {
+            position:fixed; top:10px; left:50%; transform:translateX(-50%);
+            z-index:401;
+            background:rgba(0,12,35,0.78);
+            border-radius:10px;
+            padding:5px 16px;
+            border:1px solid rgba(0,200,255,0.25);
+            border-left:3px solid #00c8ff;
+            box-shadow:0 0 18px rgba(0,180,255,0.2), inset 0 0 10px rgba(0,100,200,0.08);
+            backdrop-filter:blur(6px);
+            color:#e0f4ff;
+            font-family:'Orbitron', monospace;
+            font-size:9px; letter-spacing:1px;
+            white-space:nowrap; pointer-events:none;
+            display:flex; align-items:center; gap:10px;
+        }
+        #barra-clima .clima-label { color:#80cfff; font-size:8px; margin-right:2px; }
+        #barra-clima .clima-val   { color:#fff; font-weight:bold; }
+        #barra-clima .clima-sep   { color:rgba(0,200,255,0.3); }
+        body.mobile-mode #barra-clima {
+            font-size:8px; padding:4px 10px; gap:7px; top:5px;
+            max-width:95vw; overflow:hidden;
+        }
+</style>
 </head>
 <body>
+<div id="barra-clima"><span style="color:#00c8ff;font-size:8px;letter-spacing:1.5px;">📍 DETECTANDO CLIMA...</span></div>
+
     <div id="map"></div>
     <button id="btn-barrios-desktop" onclick="toggleLegendDesktop()">🏘️ BARRIOS <span id="flecha-barrios">▼</span></button>
     <div id="header-marca">
@@ -1323,6 +1350,64 @@
             tab.innerHTML = '🏘️ Barrios ▼';
         }
     }
+
+    
+    // ── Barra climatológica ──
+    (function() {
+        var bar = document.getElementById('barra-clima');
+        function wmoDesc(code) {
+            if (code === 0) return '☀️ DESPEJADO';
+            if (code <= 2) return '⛅ PARCIAL';
+            if (code <= 3) return '☁️ NUBLADO';
+            if (code <= 49) return '🌫️ NIEBLA';
+            if (code <= 59) return '🌦️ LLOVIZNA';
+            if (code <= 69) return '🌧️ LLUVIA';
+            if (code <= 79) return '🌨️ NIEVE';
+            if (code <= 82) return '🌧️ CHUBASCOS';
+            if (code <= 99) return '⛈️ TORMENTA';
+            return '🌡️';
+        }
+        function showClima(lat, lon, locLabel) {
+            var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+                +'&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code'
+                +'&wind_speed_unit=kmh&timezone=auto';
+            fetch(url)
+              .then(function(r){return r.json();})
+              .then(function(d){
+                var c = d.current;
+                bar.innerHTML =
+                  '<span style="color:#00c8ff;font-size:8px;letter-spacing:1.5px;">📍 '+locLabel+'</span>'
+                  +'<span class="clima-sep">|</span>'
+                  +'<span><span class="clima-label">TEMP</span><span class="clima-val">'+Math.round(c.temperature_2m)+'°C</span></span>'
+                  +'<span class="clima-sep">|</span>'
+                  +'<span><span class="clima-label">HUM</span><span class="clima-val">'+c.relative_humidity_2m+'%</span></span>'
+                  +'<span class="clima-sep">|</span>'
+                  +'<span><span class="clima-label">VIENTO</span><span class="clima-val">'+Math.round(c.wind_speed_10m)+' km/h</span></span>'
+                  +'<span class="clima-sep">|</span>'
+                  +'<span><span class="clima-label">PRECIP</span><span class="clima-val">'+c.precipitation+' mm</span></span>'
+                  +'<span class="clima-sep">|</span>'
+                  +'<span style="color:#a0dfff;font-size:9px;">'+wmoDesc(c.weather_code)+'</span>';
+              })
+              .catch(function(){
+                bar.innerHTML='<span style="color:#80cfff;font-size:8px;">⚠️ CLIMA NO DISPONIBLE</span>';
+              });
+        }
+        function fetchPos() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(pos){
+                        var la = pos.coords.latitude.toFixed(3);
+                        var lo = pos.coords.longitude.toFixed(3);
+                        showClima(la, lo, la+'°N '+Math.abs(lo)+'°O');
+                    },
+                    function(){ showClima(7.0847,-70.7491,'ARAUCA'); },
+                    {timeout:8000, maximumAge:300000}
+                );
+            } else { showClima(7.0847,-70.7491,'ARAUCA'); }
+        }
+        fetchPos();
+        setInterval(fetchPos, 600000); // refresh every 10 min
+    })();
 
     </script>
 </body>
