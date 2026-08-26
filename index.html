@@ -226,6 +226,49 @@
             background:#ccc; border-radius:2px; margin:0 auto 10px;
         }
 
+
+        /* OPCIONES BUTTON & MENU */
+        #btn-opciones {
+            position:absolute; top:168px; left:10px; z-index:900;
+            background:white; border:2px solid #ccc; padding:6px 11px;
+            border-radius:8px; font-size:16px; cursor:pointer;
+            box-shadow:0 2px 6px rgba(0,0,0,0.15); line-height:1;
+        }
+        #btn-opciones:hover { background:#f5f5f5; border-color:#1565c0; }
+        #opciones-menu {
+            display:none; position:absolute; top:168px; left:52px;
+            z-index:1200; background:white; border-radius:10px;
+            box-shadow:0 6px 24px rgba(0,0,0,0.18); min-width:205px;
+            border:1px solid #e0e0e0; overflow:hidden;
+        }
+        #opciones-menu.visible { display:block; }
+        .opc-section-header {
+            background:#f5f5f5; padding:7px 14px; font-size:10px;
+            font-weight:bold; color:#666; text-transform:uppercase;
+            letter-spacing:.5px; border-bottom:1px solid #e0e0e0;
+        }
+        .opc-item {
+            padding:9px 16px; font-size:13px; cursor:pointer;
+            color:#333; display:flex; align-items:center; gap:9px;
+            border-bottom:1px solid #f0f0f0; transition:background 0.15s;
+        }
+        .opc-item:hover { background:#e3f2fd; color:#1565c0; }
+        .opc-item:last-child { border-bottom:none; }
+        .opc-icon { font-size:14px; min-width:18px; text-align:center; }
+        .opc-divider { height:6px; background:#f5f5f5; border-top:1px solid #e0e0e0; border-bottom:1px solid #e0e0e0; }
+        body.mobile-mode #btn-opciones {
+            top:auto; bottom:calc(45vh + 148px); left:10px; font-size:15px; padding:8px 10px;
+        }
+        body.mobile-mode #opciones-menu {
+            top:auto; bottom:calc(45vh + 192px); left:52px;
+        }
+        #opc-toast {
+            display:none; position:fixed; top:18px; left:50%;
+            transform:translateX(-50%); background:#1565c0; color:white;
+            padding:11px 26px; border-radius:8px; z-index:9999;
+            font-size:13px; font-weight:bold;
+            box-shadow:0 4px 16px rgba(0,0,0,0.25);
+        }
     </style>
 </head>
 <body>
@@ -258,6 +301,22 @@
     <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
     <button id="btn-basemap" onclick="toggleBasemap()" title="Cambiar mapa base">🗺️ OSM</button>
     <button id="btn-mobile" onclick="toggleMobile()" title="Modo móvil">📱 Móvil</button>
+    <button id="btn-opciones" onclick="toggleOpciones(event)" title="Opciones">🧰</button>
+    <div id="opciones-menu">
+        <div class="opc-section-header">&#128229; DESCARGAR</div>
+        <div class="opc-item" onclick="exportarPDF()"><span class="opc-icon">&#128196;</span>PDF</div>
+        <div class="opc-item" onclick="exportarJPG()"><span class="opc-icon">&#128444;&#65039;</span>JPG</div>
+        <div class="opc-item" onclick="exportarSHP()"><span class="opc-icon">&#128230;</span>Shapefile (.shp)</div>
+        <div class="opc-item" onclick="exportarKML_file()"><span class="opc-icon">&#128506;</span>KML</div>
+        <div class="opc-item" onclick="exportarExcel_file()"><span class="opc-icon">&#128202;</span>Excel (.xlsx)</div>
+        <div class="opc-item" onclick="exportarCSV()"><span class="opc-icon">&#128203;</span>CSV</div>
+        <div class="opc-item" onclick="copiarPython()"><span class="opc-icon">&#128013;</span>Python (copiar)</div>
+        <div class="opc-divider"></div>
+        <div class="opc-section-header">&#128260; ACTUALIZAR</div>
+        <div class="opc-item" onclick="actualizarExcel()"><span class="opc-icon">&#128202;</span>Cargar Excel</div>
+        <div class="opc-item" onclick="actualizarKML()"><span class="opc-icon">&#128506;</span>Cargar KML</div>
+    </div>
+    <div id="opc-toast"></div>
     <button id="btn-legend-tab" onclick="toggleLegendTab()">🏘️ Barrios ▲</button>
     <div id="reporte-backdrop" onclick="toggleReporte()"></div>
     <div id="reporte-overlay">
@@ -380,6 +439,191 @@
                 el.style.display=nombre.indexOf(texto)>=0?'flex':'none';
             });
         }
+
+    // OPCIONES – DESCARGAR & ACTUALIZAR
+    function toggleOpciones(e){
+        if(e) e.stopPropagation();
+        var menu=document.getElementById('opciones-menu');
+        menu.classList.toggle('visible');
+        if(menu.classList.contains('visible')){
+            setTimeout(function(){
+                document.addEventListener('click',function _cl(ev){
+                    if(!ev.target.closest('#opciones-menu')&&!ev.target.closest('#btn-opciones')){
+                        menu.classList.remove('visible');
+                        document.removeEventListener('click',_cl);
+                    }
+                });
+            },50);
+        }
+    }
+    function cerrarOpciones(){ document.getElementById('opciones-menu').classList.remove('visible'); }
+    function mostrarToast(msg){
+        var t=document.getElementById('opc-toast');
+        t.textContent=msg; t.style.display='block'; t.style.opacity='1';
+        clearTimeout(t._tid);
+        t._tid=setTimeout(function(){
+            t.style.transition='opacity .3s';
+            t.style.opacity='0';
+            setTimeout(function(){t.style.display='none';t.style.transition='';},300);
+        },3200);
+    }
+    function getPuntosVisibles(){ return barrioActivo?puntos.filter(function(p){return p.barrio===barrioActivo;}):puntos; }
+    function _descargar(blob,nombre){
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');a.href=url;a.download=nombre;a.click();
+        setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    }
+    function _sufijo(){ return barrioActivo?'_'+barrioActivo.replace(/\s+/g,'_'):''; }
+
+    // CSV
+    function exportarCSV(){
+        cerrarOpciones();
+        var datos=getPuntosVisibles();
+        var csv='﻿'+'BARRIO,CONCEPTO,FUNCIONARIO,LATITUD,LONGITUD,FOTO\n';
+        datos.forEach(function(p){
+            csv+=[p.barrio,p.concepto||'',p.funcionario||'',p.lat,p.lon,p.foto||'']
+                .map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(',')+'\n';
+        });
+        _descargar(new Blob([csv],{type:'text/csv;charset=utf-8;'}),'cruces_arauca'+_sufijo()+'.csv');
+        mostrarToast('CSV descargado – '+datos.length+' puntos');
+    }
+
+    // KML
+    function exportarKML_file(){
+        cerrarOpciones();
+        var datos=getPuntosVisibles();
+        var titulo=barrioActivo?'Cruces - '+barrioActivo:'Distribución Cruces Arauca';
+        var kml='<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document>\n<name>'+titulo+'</name>\n';
+        kml+='<Style id="c"><IconStyle><scale>0.8</scale><Icon><href>http://maps.google.com/mapfiles/ms/icons/blue-dot.png</href></Icon></IconStyle></Style>\n';
+        datos.forEach(function(p,i){
+            kml+='<Placemark><name>Cruce '+(i+1)+'</name><styleUrl>#c</styleUrl>';
+            kml+='<description><![CDATA[<b>'+p.barrio+'</b><br>Concepto: '+(p.concepto||'')+'<br>Funcionario: '+(p.funcionario||'')+']]></description>';
+            kml+='<Point><coordinates>'+p.lon+','+p.lat+',0</coordinates></Point></Placemark>\n';
+        });
+        kml+='</Document></kml>';
+        _descargar(new Blob([kml],{type:'application/vnd.google-earth.kml+xml'}),'cruces_arauca'+_sufijo()+'.kml');
+        mostrarToast('KML descargado – '+datos.length+' puntos');
+    }
+
+    // Excel
+    function exportarExcel_file(){
+        cerrarOpciones();
+        if(typeof XLSX==='undefined'){mostrarToast('⚠️ Excel no disponible, intente en un momento');return;}
+        var datos=getPuntosVisibles();
+        var filas=[['BARRIO','CONCEPTO','FUNCIONARIO','LATITUD','LONGITUD','FOTO']];
+        datos.forEach(function(p){filas.push([p.barrio,p.concepto||'',p.funcionario||'',p.lat,p.lon,p.foto||'']);});
+        var wb=XLSX.utils.book_new();
+        var ws=XLSX.utils.aoa_to_sheet(filas);
+        ws['!cols']=[{wch:26},{wch:20},{wch:15},{wch:12},{wch:12},{wch:55}];
+        XLSX.utils.book_append_sheet(wb,ws,'Cruces');
+        XLSX.writeFile(wb,'cruces_arauca'+_sufijo()+'.xlsx');
+        mostrarToast('Excel descargado – '+datos.length+' puntos');
+    }
+
+    // Shapefile
+    function exportarSHP(){
+        cerrarOpciones();
+        if(typeof shpwrite==='undefined'){mostrarToast('⚠️ shpwrite no disponible aún, intente de nuevo');return;}
+        var datos=getPuntosVisibles();
+        var geojson={type:'FeatureCollection',features:datos.map(function(p){
+            return{type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},
+                properties:{barrio:(p.barrio||'').substring(0,10),concepto:(p.concepto||'').substring(0,10),func:(p.funcionario||'').substring(0,8)}};
+        })};
+        try{shpwrite.download(geojson,{folder:'cruces_arauca',types:{point:'cruces'}});
+            mostrarToast('Shapefile descargado – '+datos.length+' puntos');}
+        catch(err){mostrarToast('⚠️ SHP error: '+err.message);}
+    }
+
+    // JPG
+    function exportarJPG(){
+        cerrarOpciones();
+        if(typeof html2canvas==='undefined'){mostrarToast('⚠️ Librería de captura no disponible aún');return;}
+        mostrarToast('⏳ Capturando mapa...');
+        setTimeout(function(){
+            html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:true,scale:2,logging:false}).then(function(c){
+                var a=document.createElement('a');a.download='mapa_cruces_arauca.jpg';a.href=c.toDataURL('image/jpeg',0.93);a.click();
+                mostrarToast('JPG descargado');
+            }).catch(function(){mostrarToast('⚠️ Error al capturar mapa');});
+        },200);
+    }
+
+    // PDF
+    function exportarPDF(){
+        cerrarOpciones();
+        if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){mostrarToast('⚠️ Librerías PDF no disponibles aún');return;}
+        mostrarToast('⏳ Generando PDF...');
+        setTimeout(function(){
+            html2canvas(document.getElementById('map'),{useCORS:true,allowTaint:true,scale:1.5,logging:false}).then(function(canvas){
+                var jsPDF=window.jspdf.jsPDF;
+                var ow=canvas.width,oh=canvas.height;
+                var pdf=new jsPDF({orientation:ow>oh?'landscape':'portrait',unit:'px',format:[ow,oh]});
+                pdf.addImage(canvas.toDataURL('image/jpeg',0.85),'JPEG',0,0,ow,oh);
+                var datos=getPuntosVisibles();
+                var sub=(barrioActivo?'Barrio: '+barrioActivo:'Distribución General')+' – '+datos.length+' cruces';
+                pdf.setFontSize(10);pdf.setTextColor(80,80,80);pdf.text(sub,10,oh-8);
+                pdf.save('mapa_cruces_arauca'+_sufijo()+'.pdf');
+                mostrarToast('PDF generado');
+            }).catch(function(){mostrarToast('⚠️ Error al generar PDF');});
+        },200);
+    }
+
+    // Python
+    function copiarPython(){
+        cerrarOpciones();
+        var datos=getPuntosVisibles();
+        var titulo=barrioActivo?'Barrio: '+barrioActivo:'Distribución Cruces Arauca';
+        var ptsJson=JSON.stringify(datos.map(function(p){return{lat:p.lat,lon:p.lon,barrio:p.barrio,concepto:p.concepto||''};}),null,2);
+        var lineas=[
+            '#!/usr/bin/env python3',
+            '# GEOVISOR ARAUCA - '+titulo+' ('+datos.length+' puntos)',
+            '# pip install folium pandas',
+            'import folium, pandas as pd, hashlib, webbrowser, os',
+            '',
+            'datos = '+ptsJson,
+            '',
+            'df = pd.DataFrame(datos)',
+            '',
+            'def color_barrio(n):',
+            '    return "#{:06X}".format(int(hashlib.md5(n.encode()).hexdigest()[:6],16) & 0xAAAAAA | 0x555555)',
+            '',
+            'colores = {b: color_barrio(b) for b in df["barrio"].unique()}',
+            'm = folium.Map(location=[7.08, -70.76], zoom_start=13)',
+            '',
+            'for _, r in df.iterrows():',
+            '    folium.CircleMarker(',
+            '        location=[r["lat"], r["lon"]], radius=6,',
+            '        color="#333", weight=1, fill=True,',
+            '        fill_color=colores[r["barrio"]], fill_opacity=0.85,',
+            '        popup=folium.Popup(f\'<b>{r["barrio"]}</b><br>{r["concepto"]}\',max_width=200)',
+            '    ).add_to(m)',
+            '',
+            'leyenda = (\'<div style="position:fixed;bottom:30px;right:30px;background:white;\'',
+            '           \'padding:15px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.3);\'',
+            '           \'z-index:9999;max-height:380px;overflow-y:auto;font-family:Arial">\')',
+            'leyenda += f\'<b>Barrios ({df["barrio"].nunique()})</b><hr>\'',
+            'for b,c in colores.items():',
+            '    n = len(df[df["barrio"]==b])',
+            '    leyenda += f\'<div><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:{c};margin-right:6px"></span>{b} ({n})</div>\'',
+            'leyenda += \'</div>\'',
+            'import folium.features',
+            'm.get_root().html.add_child(folium.Element(leyenda))',
+            '',
+            'm.save("mapa_cruces_arauca.html")',
+            'print("Mapa guardado: mapa_cruces_arauca.html")',
+            'webbrowser.open("file://"+os.path.abspath("mapa_cruces_arauca.html"))'
+        ];
+        var codigo=lineas.join('\n');
+        function _cp(t){
+            if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){mostrarToast('\U0001f40d Código Python copiado – pégalo en tu IDE y ejecuta');});}
+            else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);mostrarToast('\U0001f40d Código Python copiado');}
+        }
+        _cp(codigo);
+    }
+
+    // ACTUALIZAR
+    function actualizarExcel(){ cerrarOpciones(); document.getElementById('excelFile').click(); }
+    function actualizarKML(){ cerrarOpciones(); document.getElementById('kmlFile').click(); }
+
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
@@ -531,7 +775,10 @@
             reader.readAsArrayBuffer(file);
         }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/shpwrite@0.3.2/shpwrite.js"></script></script>
     <script>
         function cargarKML(input){
             var file=input.files[0];
@@ -846,5 +1093,4 @@
 
     </script>
 </body>
-    <!-- v2 -->
 </html>
