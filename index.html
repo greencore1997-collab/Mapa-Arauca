@@ -748,14 +748,16 @@
 
                     // ── Detectar coordenadas fuera de rango geográfico ──
                     function strCoord(v){var s=String(v===0?'0':(v||'')).trim().replace(',','.'); return s;}
-                    // Función que convierte automáticamente detectando el factor de escala
+                    // Conversión exacta: insertar decimal tras el 1er dígito (lat) o 2do dígito (lon)
+                    // Ej lat: 705255655 → 7.05255655 | Ej lon: -705264879 → -70.5264879
                     function cvtAuto(val, esLat){
                         var n=parseFloat(String(val===0?'0':(val||'')).replace(',','.'));
                         if(isNaN(n)) return NaN;
                         var maximo=esLat?90:180;
                         if(Math.abs(n)<=maximo) return n; // Ya es decimal válido
-                        var escala=10;
-                        while(Math.abs(n)/escala>maximo&&escala<1000000000) escala*=10;
+                        var absStr=Math.round(Math.abs(n)).toString();
+                        var digEnteros=esLat?1:2; // 1 dígito entero para lat, 2 para lon
+                        var escala=Math.pow(10, absStr.length-digEnteros);
                         return n/escala;
                     }
                     // Filtrar filas con valores numéricos válidos en ambas columnas
@@ -804,7 +806,8 @@
         }
 
         function _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,convertir,latEnt,lonEnt){
-            // Conversión automática: detecta el factor de escala por rango geográfico
+            // Conversión exacta: insertar decimal tras el 1er dígito (lat) o 2do dígito (lon)
+            // Ej lat: 705255655 → 7.05255655 | Ej lon: -705264879 → -70.5264879
             function cvt(val,esLat){
                 var n=parseFloat(String(val===0?'0':(val||'')).replace(',','.'));
                 if(isNaN(n)) return NaN;
@@ -813,8 +816,9 @@
                 if(Math.abs(n)<=maximo) return n; // Ya es decimal válido
                 if(esLat&&!latEnt) return n;
                 if(!esLat&&!lonEnt) return n;
-                var escala=10;
-                while(Math.abs(n)/escala>maximo&&escala<1000000000) escala*=10;
+                var absStr=Math.round(Math.abs(n)).toString();
+                var digEnteros=esLat?1:2; // 1 dígito entero para lat, 2 para lon
+                var escala=Math.pow(10, absStr.length-digEnteros);
                 return n/escala;
             }
             var nuevos=[];
