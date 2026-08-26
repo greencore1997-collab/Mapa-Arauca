@@ -79,11 +79,26 @@
         body.mobile-mode #geovisor-status { bottom:auto; top:205px; left:5px; width:175px; font-size:9px; }
         #minimap-container {
             position:absolute; bottom:15px; left:15px; z-index:800;
-            width:220px; height:200px; background:white;
-            border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.25);
-            overflow:hidden; border:2px solid #1565c0;
+            width:220px; height:200px;
+            background:rgba(0,12,35,0.78);
+            border-radius:14px;
+            box-shadow:0 0 28px rgba(0,180,255,0.35), inset 0 0 18px rgba(0,100,200,0.12);
+            overflow:hidden;
+            border-left:4px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.3);
+            border-right:1px solid rgba(0,200,255,0.15);
+            border-bottom:1px solid rgba(0,200,255,0.15);
+            backdrop-filter:blur(6px);
         }
-        #minimap-title { background:#1565c0; color:white; font-size:10px; padding:3px 8px; text-align:center; font-weight:bold; }
+        #minimap-title {
+            background:transparent;
+            color:#00c8ff;
+            font-size:9px; padding:4px 10px;
+            text-align:center; font-weight:bold;
+            font-family:'Orbitron', monospace; letter-spacing:2px;
+            text-shadow:0 0 8px #00c8ff, 0 0 2px #fff;
+            border-bottom:1px solid rgba(0,200,255,0.25);
+        }
         #minimap { width:100%; height:calc(100% - 22px); }
     
         /* REPORTE PANEL */
