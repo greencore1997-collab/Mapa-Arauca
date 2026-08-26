@@ -82,6 +82,64 @@
         #upload-kml-body p { color:#555; margin-bottom:8px; line-height:1.4; }
         #upload-kml-body input[type=file] { font-size:10px; width:100%; }
         #upload-kml-status { margin-top:8px; font-size:10px; color:#388e3c; display:none; }
+    
+        /* REPORTE PANEL */
+        #btn-reporte {
+            position:absolute; top:55px; left:10px; z-index:900;
+            background:#1565c0; color:white; border:none; padding:10px 20px;
+            border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer;
+            box-shadow:0 4px 15px rgba(0,0,0,0.25); transition:all 0.3s;
+            display:flex; align-items:center; gap:8px;
+        }
+        #btn-reporte:hover { background:#0d47a1; transform:scale(1.05); }
+        #reporte-overlay {
+            position:fixed; top:0; right:-100%; width:55%; height:100vh;
+            background:rgba(255,255,255,0.98); z-index:2000;
+            box-shadow:-5px 0 30px rgba(0,0,0,0.3);
+            transition:right 0.5s cubic-bezier(0.4,0,0.2,1);
+            overflow-y:auto; padding:0;
+        }
+        #reporte-overlay.visible { right:0; }
+        #reporte-backdrop {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.4); z-index:1999;
+            opacity:0; pointer-events:none; transition:opacity 0.4s;
+        }
+        #reporte-backdrop.visible { opacity:1; pointer-events:auto; }
+        .rep-header {
+            background:linear-gradient(135deg,#1565c0,#0d47a1);
+            color:white; padding:25px 30px; position:sticky; top:0; z-index:10;
+        }
+        .rep-header h2 { margin:0 0 5px; font-size:22px; }
+        .rep-header p { margin:0; opacity:0.85; font-size:13px; }
+        .rep-close { position:absolute; top:15px; right:20px; background:rgba(255,255,255,0.2);
+            border:none; color:white; font-size:22px; cursor:pointer; width:36px; height:36px;
+            border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .rep-close:hover { background:rgba(255,255,255,0.4); }
+        .rep-body { padding:25px 30px; }
+        .rep-section { margin-bottom:25px; }
+        .rep-section h3 { color:#1565c0; font-size:16px; margin-bottom:12px; border-bottom:2px solid #e3f2fd; padding-bottom:8px; }
+        .rep-kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:25px; }
+        .rep-kpi { background:linear-gradient(135deg,#e3f2fd,#bbdefb); padding:20px; border-radius:12px; text-align:center; }
+        .rep-kpi .num { font-size:32px; font-weight:bold; color:#1565c0; display:block; }
+        .rep-kpi .lbl { font-size:11px; color:#555; margin-top:5px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
+        .rep-bar-row { display:flex; align-items:center; margin:6px 0; font-size:12px; }
+        .rep-bar-label { width:140px; text-align:right; padding-right:10px; color:#333; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .rep-bar-track { flex:1; height:22px; background:#e0e0e0; border-radius:11px; overflow:hidden; position:relative; }
+        .rep-bar-fill { height:100%; border-radius:11px; transition:width 0.8s ease; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; }
+        .rep-bar-fill span { color:white; font-size:10px; font-weight:bold; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
+        .rep-bar-count { width:40px; text-align:left; padding-left:8px; font-weight:bold; color:#333; }
+        .rep-concepto-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+        .rep-concepto-card { padding:15px; border-radius:10px; text-align:center; }
+        .rep-concepto-card .num { font-size:28px; font-weight:bold; display:block; }
+        .rep-concepto-card .lbl { font-size:11px; margin-top:4px; display:block; }
+        .rep-table { width:100%; border-collapse:collapse; font-size:11px; }
+        .rep-table th { background:#1565c0; color:white; padding:10px 8px; text-align:left; }
+        .rep-table td { padding:8px; border-bottom:1px solid #e0e0e0; }
+        .rep-table tr:nth-child(even) { background:#f5f5f5; }
+        .rep-table tr:hover { background:#e3f2fd; }
+        .rep-pie-container { display:flex; justify-content:center; margin:15px 0; }
+
     </style>
 </head>
 <body>
@@ -110,7 +168,21 @@
         </div>
     </div>
 
-    <div id="minimap-container">
+    
+    <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
+    <div id="reporte-backdrop" onclick="toggleReporte()"></div>
+    <div id="reporte-overlay">
+        <div class="rep-header">
+            <button class="rep-close" onclick="toggleReporte()">✕</button>
+            <h2>📊 Reporte Estadístico</h2>
+            <p>Distribución de cruces - Red GLP Arauca</p>
+        </div>
+        <div class="rep-body" id="reporte-body">
+            <p style="text-align:center;padding:40px;color:#999;">Cargando datos...</p>
+        </div>
+    </div>
+
+<div id="minimap-container">
         <div id="minimap-title">Delimitación barrios</div>
         <div id="minimap"></div>
     </div>
@@ -458,6 +530,154 @@
             };
             reader.readAsArrayBuffer(file);
         }
+    
+
+    function toggleReporte() {
+        var panel = document.getElementById('reporte-overlay');
+        var backdrop = document.getElementById('reporte-backdrop');
+        var isOpen = panel.classList.contains('visible');
+        if (isOpen) {
+            panel.classList.remove('visible');
+            backdrop.classList.remove('visible');
+        } else {
+            generarReporte();
+            panel.classList.add('visible');
+            backdrop.classList.add('visible');
+        }
+    }
+
+    function generarReporte() {
+        var body = document.getElementById('reporte-body');
+        // Gather stats from markers
+        var totalPuntos = 0;
+        var barrioCount = {};
+        var conceptoCount = {};
+        var conFoto = 0;
+        var sinFoto = 0;
+        var latMin=999,latMax=-999,lonMin=999,lonMax=-999;
+
+        // Use puntos array for stats
+        if (typeof puntos !== 'undefined') {
+            puntos.forEach(function(p) {
+                totalPuntos++;
+                var b = p.barrio || 'Sin barrio';
+                barrioCount[b] = (barrioCount[b]||0) + 1;
+                var c = p.concepto || 'Sin dato';
+                conceptoCount[c] = (conceptoCount[c]||0) + 1;
+                if (p.foto1 || p.foto2) conFoto++; else sinFoto++;
+                if(p.lat<latMin) latMin=p.lat;
+                if(p.lat>latMax) latMax=p.lat;
+                if(p.lon<lonMin) lonMin=p.lon;
+                if(p.lon>lonMax) lonMax=p.lon;
+            });
+        }
+        // Also check for dynamically loaded markers
+        if (totalPuntos === 0) {
+            allMarkers.forEach(function(m) {
+                totalPuntos++;
+                var b = m._barrio || 'Sin barrio';
+                barrioCount[b] = (barrioCount[b]||0) + 1;
+                var ll = m.getLatLng();
+                if(ll.lat<latMin) latMin=ll.lat;
+                if(ll.lat>latMax) latMax=ll.lat;
+                if(ll.lng<lonMin) lonMin=ll.lng;
+                if(ll.lng>lonMax) lonMax=ll.lng;
+            });
+        }
+
+        var numBarrios = Object.keys(barrioCount).length;
+        var sorted = Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
+        var maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+        var avgPorBarrio = numBarrios > 0 ? (totalPuntos / numBarrios).toFixed(1) : 0;
+
+        // Top 3 barrios
+        var top3 = sorted.slice(0,3);
+        // Bottom 3
+        var bottom3 = sorted.slice(-3).reverse();
+
+        // Build HTML
+        var html = '';
+
+        // KPIs
+        html += '<div class="rep-kpi-grid">';
+        html += '<div class="rep-kpi"><span class="num">' + totalPuntos + '</span><span class="lbl">Total Cruces</span></div>';
+        html += '<div class="rep-kpi"><span class="num">' + numBarrios + '</span><span class="lbl">Barrios</span></div>';
+        html += '<div class="rep-kpi"><span class="num">' + avgPorBarrio + '</span><span class="lbl">Promedio por Barrio</span></div>';
+        html += '</div>';
+
+        // Concepto section
+        html += '<div class="rep-section"><h3>🔍 Distribución por Concepto</h3>';
+        html += '<div class="rep-concepto-grid">';
+        var conceptoColors = {'FAVORABLE':'#4caf50','FAVORABLE CONDICIONADO':'#ff9800','DESFAVORABLE':'#f44336','NO APLICA':'#9e9e9e','Sin dato':'#bdbdbd'};
+        var conceptoSorted = Object.entries(conceptoCount).sort(function(a,b){return b[1]-a[1];});
+        conceptoSorted.forEach(function(entry) {
+            var color = conceptoColors[entry[0]] || '#78909c';
+            var pct = totalPuntos > 0 ? ((entry[1]/totalPuntos)*100).toFixed(1) : 0;
+            html += '<div class="rep-concepto-card" style="background:' + color + '22;border:2px solid ' + color + '">';
+            html += '<span class="num" style="color:' + color + '">' + entry[1] + '</span>';
+            html += '<span class="lbl" style="color:' + color + '">' + entry[0] + ' (' + pct + '%)</span>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+
+        // Photos stats
+        html += '<div class="rep-section"><h3>📷 Registro Fotográfico</h3>';
+        html += '<div class="rep-kpi-grid" style="grid-template-columns:repeat(2,1fr)">';
+        html += '<div class="rep-kpi" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9)"><span class="num" style="color:#2e7d32">' + conFoto + '</span><span class="lbl">Con foto (' + (totalPuntos>0?((conFoto/totalPuntos)*100).toFixed(1):0) + '%)</span></div>';
+        html += '<div class="rep-kpi" style="background:linear-gradient(135deg,#fce4ec,#f8bbd0)"><span class="num" style="color:#c62828">' + sinFoto + '</span><span class="lbl">Sin foto (' + (totalPuntos>0?((sinFoto/totalPuntos)*100).toFixed(1):0) + '%)</span></div>';
+        html += '</div></div>';
+
+        // Bar chart by barrio
+        html += '<div class="rep-section"><h3>🏘️ Cruces por Barrio (' + numBarrios + ')</h3>';
+        sorted.forEach(function(entry) {
+            var pct = (entry[1]/maxCount*100);
+            var color = colores[entry[0]] || '#78909c';
+            html += '<div class="rep-bar-row">';
+            html += '<div class="rep-bar-label" title="' + entry[0] + '">' + entry[0] + '</div>';
+            html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:' + pct + '%;background:' + color + '"><span>' + ((entry[1]/totalPuntos)*100).toFixed(1) + '%</span></div></div>';
+            html += '<div class="rep-bar-count">' + entry[1] + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        // Top & Bottom
+        html += '<div class="rep-section"><h3>🏆 Ranking de Barrios</h3>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">';
+        html += '<div><h4 style="color:#2e7d32;font-size:13px;margin-bottom:8px">▲ Mayor concentración</h4>';
+        top3.forEach(function(e,i) {
+            html += '<div style="padding:8px 12px;background:#e8f5e9;border-radius:8px;margin:4px 0;font-size:12px"><strong>#' + (i+1) + '</strong> ' + e[0] + ' — <strong>' + e[1] + '</strong> cruces</div>';
+        });
+        html += '</div>';
+        html += '<div><h4 style="color:#c62828;font-size:13px;margin-bottom:8px">▼ Menor concentración</h4>';
+        bottom3.forEach(function(e,i) {
+            html += '<div style="padding:8px 12px;background:#fce4ec;border-radius:8px;margin:4px 0;font-size:12px"><strong>#' + (sorted.length-bottom3.length+i+1) + '</strong> ' + e[0] + ' — <strong>' + e[1] + '</strong> cruces</div>';
+        });
+        html += '</div></div></div>';
+
+        // Coverage area
+        html += '<div class="rep-section"><h3>📍 Cobertura Geográfica</h3>';
+        html += '<table class="rep-table"><tr><th>Parámetro</th><th>Valor</th></tr>';
+        html += '<tr><td>Latitud mínima</td><td>' + latMin.toFixed(6) + '</td></tr>';
+        html += '<tr><td>Latitud máxima</td><td>' + latMax.toFixed(6) + '</td></tr>';
+        html += '<tr><td>Longitud mínima</td><td>' + lonMin.toFixed(6) + '</td></tr>';
+        html += '<tr><td>Longitud máxima</td><td>' + lonMax.toFixed(6) + '</td></tr>';
+        html += '</table></div>';
+
+        // Full table
+        html += '<div class="rep-section"><h3>📋 Tabla Resumen por Barrio</h3>';
+        html += '<table class="rep-table"><tr><th>#</th><th>Barrio</th><th>Cruces</th><th>%</th><th>Acumulado</th></tr>';
+        var acum = 0;
+        sorted.forEach(function(e,i) {
+            acum += e[1];
+            var pct = ((e[1]/totalPuntos)*100).toFixed(1);
+            var acumPct = ((acum/totalPuntos)*100).toFixed(1);
+            html += '<tr><td>' + (i+1) + '</td><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (colores[e[0]]||'#999') + ';margin-right:6px"></span>' + e[0] + '</td><td style="font-weight:bold">' + e[1] + '</td><td>' + pct + '%</td><td>' + acumPct + '%</td></tr>';
+        });
+        html += '</table></div>';
+
+        body.innerHTML = html;
+    }
+    
     </script>
 </body>
 </html>
