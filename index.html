@@ -306,7 +306,13 @@
                 <div id="modal-ej-lat"></div>
                 <div id="modal-ej-lon"></div>
             </div>
-            <p style="color:#888;font-size:11px;">Se inserta el decimal después del "7" en latitud y después de "-70" en longitud.</p>
+            <div id="modal-neg-lon-wrap" style="margin:8px 0;display:none;">
+                <label style="font-size:13px;cursor:pointer;">
+                    <input type="checkbox" id="modal-neg-lon" checked>
+                    Longitud negativa (hemisferio occidental, p.ej. Colombia)
+                </label>
+            </div>
+            <p style="color:#888;font-size:11px;">Se inserta el decimal según el número de dígitos del valor.</p>
             <div class="modal-btns">
                 <button id="modal-si">✅ Sí, convertir</button>
                 <button id="modal-no">❌ No, usar tal cual</button>
@@ -778,20 +784,27 @@
 
                     if(latEnt||lonEnt){
                         var ejLat=strCoord(muestra[0][iLat]), ejLon=strCoord(muestra[0][iLon]);
-                        var cLat=latEnt?cvtAuto(ejLat,true).toFixed(6):ejLat;
-                        var cLon=lonEnt?cvtAuto(ejLon,false).toFixed(6):ejLon;
-                        statusLog('⚠️ Coords enteras → convertir? lat:'+ejLat+'→'+cLat,'error');
-                        document.getElementById('modal-ej-lat').textContent='Lat: '+ejLat+' → '+cLat;
-                        document.getElementById('modal-ej-lon').textContent='Lon: '+ejLon+' → '+cLon;
+                        var cLatNum=latEnt?cvtAuto(ejLat,true):parseFloat(ejLat);
+                        var cLonNum=lonEnt?cvtAuto(ejLon,false):parseFloat(ejLon);
+                        // Si la lon convertida es positiva, ofrecer negación (hemisferio occidental)
+                        var lonPositiva=lonEnt&&!isNaN(cLonNum)&&cLonNum>0;
+                        var cLonMostrar=lonPositiva?(-cLonNum).toFixed(6):(!isNaN(cLonNum)?cLonNum.toFixed(6):ejLon);
+                        statusLog('🔍 lon raw='+ejLon+' cvt='+(!isNaN(cLonNum)?cLonNum.toFixed(6):'?')+' lonPos='+lonPositiva,'info');
+                        document.getElementById('modal-ej-lat').textContent='Lat: '+ejLat+' → '+(isNaN(cLatNum)?ejLat:cLatNum.toFixed(6));
+                        document.getElementById('modal-ej-lon').textContent='Lon: '+ejLon+' → '+cLonMostrar;
+                        // Mostrar checkbox "negar lon" solo cuando la lon convertida es positiva
+                        document.getElementById('modal-neg-lon-wrap').style.display=lonPositiva?'block':'none';
+                        document.getElementById('modal-neg-lon').checked=lonPositiva;
                         document.getElementById('modal-conversion').style.display='flex';
                         document.getElementById('modal-si').onclick=function(){
                             document.getElementById('modal-conversion').style.display='none';
-                            statusLog('✅ Convirtiendo coordenadas...','ok');
-                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,true,latEnt,lonEnt);
+                            var negarLon=lonPositiva&&document.getElementById('modal-neg-lon').checked;
+                            statusLog('✅ Convirtiendo coordenadas'+(negarLon?' (lon negativa)':'')+'...','ok');
+                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,true,latEnt,lonEnt,negarLon);
                         };
                         document.getElementById('modal-no').onclick=function(){
                             document.getElementById('modal-conversion').style.display='none';
-                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,false,false,false);
+                            _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,false,false,false,false);
                         };
                     } else {
                         _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,false,false,false);
@@ -805,7 +818,7 @@
             if(esCSV) reader.readAsText(file,'UTF-8'); else reader.readAsArrayBuffer(file);
         }
 
-        function _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,convertir,latEnt,lonEnt){
+        function _procesarPuntos(rows,iLat,iLon,iFoto,iFoto2,iConc,iBarrio,convertir,latEnt,lonEnt,negarLon){
             // Conversión exacta: insertar decimal tras el 1er dígito (lat) o 2do dígito (lon)
             // Ej lat: 705255655 → 7.05255655 | Ej lon: -705264879 → -70.5264879
             function cvt(val,esLat){
@@ -813,13 +826,20 @@
                 if(isNaN(n)) return NaN;
                 if(!convertir) return n;
                 var maximo=esLat?90:180;
-                if(Math.abs(n)<=maximo) return n; // Ya es decimal válido
+                if(Math.abs(n)<=maximo){
+                    // Ya es decimal válido; si es lon positiva y negarLon, negar
+                    if(!esLat&&negarLon&&n>0) return -n;
+                    return n;
+                }
                 if(esLat&&!latEnt) return n;
                 if(!esLat&&!lonEnt) return n;
                 var absStr=Math.round(Math.abs(n)).toString();
                 var digEnteros=esLat?1:2; // 1 dígito entero para lat, 2 para lon
                 var escala=Math.pow(10, absStr.length-digEnteros);
-                return n/escala;
+                var resultado=n/escala;
+                // Si lon convertida es positiva y se solicitó negar, aplicar signo negativo
+                if(!esLat&&negarLon&&resultado>0) resultado=-resultado;
+                return resultado;
             }
             var nuevos=[];
             var primerPuntoLogueado=false;
