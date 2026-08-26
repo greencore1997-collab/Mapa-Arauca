@@ -21,11 +21,14 @@
         .info-panel img { max-width:100%; margin-top:10px; border-radius:4px; max-height:200px; cursor:pointer; border:2px solid #1a73e8; }
         .info-panel img:hover { opacity:0.85; }
         .legend {
-            position:absolute; top:165px; right:10px;
-            background:white; padding:10px 12px; border-radius:8px;
-            box-shadow:0 0 15px rgba(0,0,0,0.3); z-index:400;
-            max-height:calc(90vh - 165px); overflow-y:auto; font-size:11px;
-            width:185px;
+            position:absolute; top:203px; right:10px;
+            background:white; padding:0 12px; border-radius:0 0 8px 8px;
+            box-shadow:0 6px 15px rgba(0,0,0,0.25); z-index:400;
+            max-height:0; overflow:hidden; font-size:11px;
+            width:185px; transition:max-height 0.35s ease, padding 0.35s ease;
+        }
+        .legend.legend-open {
+            max-height:calc(90vh - 210px); padding:10px 12px; overflow-y:auto;
         }
         .legend-item { display:flex; align-items:center; margin:2px 0; cursor:pointer; padding:3px 6px; border-radius:5px; transition:all 0.15s; user-select:none; }
         .legend-item:hover { background:#e3f2fd; }
@@ -180,6 +183,23 @@
         body.mobile-mode .search-box { font-size:13px; padding:8px 12px; }
         body.mobile-mode .btn-todos { font-size:13px; padding:8px; }
         /* Tab trigger button */
+        /* Desktop barrios tab */
+        #btn-barrios-desktop {
+            display:block;
+            position:absolute; top:165px; right:10px; z-index:402;
+            background:rgba(0,12,35,0.78); color:#00c8ff;
+            border:1px solid rgba(0,200,255,0.5); border-radius:8px;
+            padding:7px 14px; font-size:10px; font-weight:bold;
+            cursor:pointer; width:185px; text-align:left;
+            font-family:'Orbitron', monospace; letter-spacing:1.5px;
+            box-shadow:0 0 10px rgba(0,180,255,0.15);
+            transition:background 0.2s; white-space:nowrap;
+            box-sizing:border-box;
+        }
+        #btn-barrios-desktop:hover { background:rgba(0,30,80,0.9); }
+        #btn-barrios-desktop.abierto { border-radius:8px 8px 0 0; border-bottom-color:transparent; }
+        body.mobile-mode #btn-barrios-desktop { display:none; }
+
         #btn-legend-tab {
             display:none;
             position:fixed; bottom:0; left:50%; transform:translateX(-50%);
@@ -320,6 +340,7 @@
 </head>
 <body>
     <div id="map"></div>
+    <button id="btn-barrios-desktop" onclick="toggleLegendDesktop()">🏘️ BARRIOS <span id="flecha-barrios">▼</span></button>
     <div id="header-marca">
       <div id="header-texto">
         <div class="geo-titulo">GEOVISOR</div>
@@ -1252,12 +1273,29 @@
         } else {
             document.body.classList.remove('mobile-mode');
             document.getElementById('legend').classList.remove('legend-open');
+            document.getElementById('btn-barrios-desktop').classList.remove('abierto');
+            document.getElementById('flecha-barrios').textContent = '▼';
             btn.innerHTML = '📱 Móvil';
             btn.classList.remove('active');
             setTimeout(function(){ map.invalidateSize(); }, 300);
         }
     }
 
+    function toggleLegendDesktop() {
+        var legend = document.getElementById('legend');
+        var btn = document.getElementById('btn-barrios-desktop');
+        var flecha = document.getElementById('flecha-barrios');
+        var isOpen = legend.classList.contains('legend-open');
+        if (isOpen) {
+            legend.classList.remove('legend-open');
+            btn.classList.remove('abierto');
+            flecha.textContent = '▼';
+        } else {
+            legend.classList.add('legend-open');
+            btn.classList.add('abierto');
+            flecha.textContent = '▲';
+        }
+    }
     function toggleLegendTab() {
         var legend = document.getElementById('legend');
         var tab = document.getElementById('btn-legend-tab');
