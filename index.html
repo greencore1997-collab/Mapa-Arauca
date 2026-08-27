@@ -2493,10 +2493,8 @@
                                 cred.style.opacity     = '0.9';
                                 cred.style.letterSpacing = '0.18em';
                                 cred.getBoundingClientRect(); // reflow
-                                cred.style.transition  = 'bottom 0.65s cubic-bezier(0.3,0,0.2,1), transform 0.65s cubic-bezier(0.3,0,0.2,1), font-size 0.5s ease, opacity 0.35s ease';
-                                cred.style.bottom      = '50%';
-                                cred.style.transform   = 'translateY(50%)';
-                                cred.style.fontSize    = 'clamp(10px,2vw,16px)';
+                                cred.style.transition  = 'bottom 0.5s cubic-bezier(0.3,0,0.2,1), opacity 0.35s ease';
+                                cred.style.bottom      = '50px'; // desciende a donde estaba la barra
                                 // ── Tras desplazamiento (650ms) + 2,5 s → "INNOVACION Y GESTION" ──
                                 setTimeout(function() {
                                     cred.style.opacity = '0';
@@ -2508,7 +2506,7 @@
                                             cred.style.opacity = '0';
                                             setTimeout(function() {
                                                 cred.innerHTML = _gcSrc
-                                                    ? '<img src="'+_gcSrc+'" style="height:72px;display:block;margin:0 auto;background:transparent;" alt="Green Core Analytics">'
+                                                    ? '<img src="'+_gcSrc+'" style="height:52px;display:block;margin:0 auto;background:transparent;filter:blur(0.35px) contrast(1.25) brightness(1.05);image-rendering:auto;" alt="Green Core Analytics">'
                                                     : '<span>GREEN CORE ANALYTICS</span>';
                                                 cred.style.opacity = '1';
                                                 // ── Tras 1 s → salida del overlay ──
@@ -2523,7 +2521,7 @@
                                             }, 350);
                                         }, 1500);
                                     }, 350);
-                                }, 650 + 2500);
+                                }, 500 + 2500);
                             }, 200);
                         }, 200);
                     }
