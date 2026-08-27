@@ -385,6 +385,42 @@
         #mlim-no { background:rgba(0,20,50,0.85); color:#00c8ff; border:1px solid #00c8ff; }
         #mlim-no:hover { background:rgba(0,40,80,0.95); }
 
+        /* ── AVISO SSPD ─────────────────────────────────────────── */
+        #aviso-sspd {
+            position:fixed; bottom:22px; left:50%;
+            transform:translateX(-50%) scaleX(0);
+            transform-origin:center center;
+            z-index:3000;
+            background:rgba(0,8,25,0.97);
+            border-left:4px solid #00c8ff;
+            border-right:4px solid #00c8ff;
+            border-top:1px solid rgba(0,200,255,0.28);
+            border-bottom:1px solid rgba(0,200,255,0.18);
+            border-radius:10px;
+            box-shadow:0 0 32px rgba(0,180,255,0.45), inset 0 0 18px rgba(0,60,120,0.15);
+            backdrop-filter:blur(8px);
+            padding:13px 32px;
+            max-width:92vw;
+            transition:transform 0.52s cubic-bezier(0.15,0,0.35,1);
+            pointer-events:none;
+            text-align:center;
+        }
+        #aviso-sspd.sspd-visible { transform:translateX(-50%) scaleX(1); }
+        #aviso-sspd-texto {
+            font-family:'Orbitron',monospace;
+            font-size:10px;
+            font-weight:700;
+            color:#00c8ff;
+            letter-spacing:0.6px;
+            line-height:1.65;
+            display:block;
+            text-shadow:0 0 8px rgba(0,200,255,0.5);
+        }
+        @media(max-width:600px){
+            #aviso-sspd { padding:10px 18px; bottom:14px; }
+            #aviso-sspd-texto { font-size:8px; letter-spacing:0.3px; }
+        }
+
         #opc-toast {
             display:none; position:fixed; top:18px; left:50%;
             transform:translateX(-50%); background:#1565c0; color:white;
@@ -2407,7 +2443,19 @@
                             setTimeout(function() {
                                 var ov = document.getElementById('intro-overlay');
                                 ov.classList.add('intro-exit');
-                                setTimeout(function(){ ov.style.display='none'; }, 470);
+                                setTimeout(function(){
+                                ov.style.display='none';
+                                // Aviso SSPD: 5 s después de que el mapa es visible
+                                setTimeout(function(){
+                                    var av=document.getElementById('aviso-sspd');
+                                    if(!av) return;
+                                    av.classList.add('sspd-visible');
+                                    // Desaparece después de 8 s
+                                    setTimeout(function(){
+                                        av.classList.remove('sspd-visible');
+                                    }, 8000);
+                                }, 5000);
+                            }, 470);
                             }, 200);
                         }, 200);
                     }
@@ -2496,5 +2544,10 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     .rep-exp-lbl { display:none; }
 }
 </style>
+    <!-- ── Aviso SSPD ── -->
+    <div id="aviso-sspd">
+        <span id="aviso-sspd-texto">LA SUPERINTENDENCIA DE SERVICIOS PÚBLICOS DOMICILIARIOS EXIGE, CONFORME A LA REGULACIÓN SECTORIAL APLICABLE,<br>MANTENER ACTUALIZADA LA INFORMACIÓN GEORREFERENCIADA DE LA INFRAESTRUCTURA,<br>DEBIDAMENTE CONSOLIDADA Y ESTRUCTURADA EN UNA BASE DE DATOS GEOGRÁFICO</span>
+    </div>
+
 </body>
 </html>
