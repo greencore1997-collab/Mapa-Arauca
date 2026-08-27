@@ -2916,6 +2916,112 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
       ctx.fillStyle=g; ctx.beginPath(); ctx.arc(pp.x,pp.y,R*0.17,0,Math.PI*2); ctx.fill();
     });
 
+
+    /* ── Satélite en órbita polar (inclinación 20° horario) ── */
+    (function(){
+      var INC  = 20 * Math.PI / 180;  /* inclinación 20° horaria */
+      var satPhi  = angle;              /* misma velocidad angular que la esfera */
+      var orbitR  = R * 1.19;          /* radio orbital */
+
+      /* Proyecta un punto de la órbita (en marco mundial, sin rotación de globo)
+         Solo se aplica el tilt de cámara */
+      function orbitPt(phi) {
+        var u =  Math.sin(phi) * Math.cos(INC);   /* componente E-O */
+        var v =  Math.cos(phi);                    /* componente N-S */
+        var w =  Math.sin(phi) * Math.sin(INC);   /* profundidad */
+        return {
+          sx:  u,
+          sy:  v * Math.cos(tilt) - w * Math.sin(tilt),
+          sz:  v * Math.sin(tilt) + w * Math.cos(tilt)
+        };
+      }
+
+      /* ── Traza orbital (128 segmentos) ── */
+      var OSEG = 128;
+      for (var oi = 0; oi < OSEG; oi++) {
+        var ph1 = (oi       / OSEG) * Math.PI * 2;
+        var ph2 = ((oi + 1) / OSEG) * Math.PI * 2;
+        var q1  = orbitPt(ph1);
+        var q2  = orbitPt(ph2);
+
+        /* Estela corta detrás del satélite */
+        var dph = ph1 - satPhi;
+        while (dph >  Math.PI) dph -= Math.PI * 2;
+        while (dph < -Math.PI) dph += Math.PI * 2;
+        var trail = (dph > -0.55 && dph < 0) ? 0.9 * (1 + dph / 0.55) : 0;
+        var base  = q1.sz > 0 ? 0.20 : 0.06;
+        var alpha = Math.max(base, trail);
+
+        ctx.strokeStyle = 'rgba(160,235,255,' + alpha + ')';
+        ctx.lineWidth   = q1.sz > 0 ? 0.9 : 0.35;
+        ctx.beginPath();
+        ctx.moveTo(CX + q1.sx * orbitR, CY - q1.sy * orbitR);
+        ctx.lineTo(CX + q2.sx * orbitR, CY - q2.sy * orbitR);
+        ctx.stroke();
+      }
+
+      /* ── Cuerpo del satélite ── */
+      var sat  = orbitPt(satPhi);
+      var sx   = CX + sat.sx * orbitR;
+      var sy   = CY - sat.sy * orbitR;
+      var vis  = sat.sz > -0.25;
+      if (!vis) return;
+
+      var al = sat.sz > 0 ? 1 : 0.55 + 0.45 * (sat.sz + 0.25) / 0.25;
+
+      /* Halo resplandor */
+      var glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, 16);
+      glow.addColorStop(0,   'rgba(220,248,255,' + (0.85 * al) + ')');
+      glow.addColorStop(0.35,'rgba(80,190,255,'  + (0.45 * al) + ')');
+      glow.addColorStop(1,   'rgba(0,120,255,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill();
+
+      ctx.save();
+      ctx.globalAlpha = al;
+
+      /* Paneles solares – izquierda */
+      ctx.strokeStyle = 'rgba(130,210,255,0.9)'; ctx.lineWidth = 4.5;
+      ctx.strokeRect(sx - 16, sy - 2.5, 9, 5);
+      ctx.fillStyle  = 'rgba(50,150,220,0.55)';
+      ctx.fillRect(sx - 16, sy - 2.5, 9, 5);
+
+      /* Paneles solares – derecha */
+      ctx.strokeStyle = 'rgba(130,210,255,0.9)';
+      ctx.strokeRect(sx + 7,  sy - 2.5, 9, 5);
+      ctx.fillStyle  = 'rgba(50,150,220,0.55)';
+      ctx.fillRect(sx + 7,  sy - 2.5, 9, 5);
+
+      /* Conector central */
+      ctx.strokeStyle = 'rgba(200,235,255,0.95)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(sx - 7, sy); ctx.lineTo(sx + 7, sy);
+      ctx.stroke();
+
+      /* Cuerpo principal */
+      ctx.strokeStyle = 'rgba(220,245,255,0.95)'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(sx - 5, sy - 3.5, 10, 7);
+      ctx.fillStyle  = 'rgba(80,170,240,0.5)';
+      ctx.fillRect(sx - 5, sy - 3.5, 10, 7);
+
+      /* Antena */
+      ctx.strokeStyle = 'rgba(220,245,255,0.9)'; ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy - 3.5);
+      ctx.lineTo(sx, sy - 9);
+      ctx.moveTo(sx, sy - 9);
+      ctx.lineTo(sx - 3, sy - 6);
+      ctx.moveTo(sx, sy - 9);
+      ctx.lineTo(sx + 3, sy - 6);
+      ctx.stroke();
+
+      /* Punto central brillante */
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.beginPath(); ctx.arc(sx, sy, 2, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    })();
+
     var ring=ctx.createRadialGradient(CX,CY,R*0.88,CX,CY,R*1.12);
     ring.addColorStop(0,'rgba(0,140,255,0)');
     ring.addColorStop(0.5,'rgba(0,180,255,0.12)');
