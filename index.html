@@ -1979,66 +1979,103 @@
 
     function generarReporte() {
         var body = document.getElementById('reporte-body');
-
-        // ── Usar SOLO marcadores visibles en el mapa (respeta todos los filtros activos) ──
         var visibles = allMarkers.filter(function(m){ return map.hasLayer(m); });
 
         var totalPuntos = 0;
-        var barrioCount = {};
-        var conceptoCount = {};
-        var conFoto = 0;
-        var sinFoto = 0;
-        var latMin=999,latMax=-999,lonMin=999,lonMax=-999;
+        var latMin=999, latMax=-999, lonMin=999, lonMax=-999;
+
+        /* Paleta dinámica para campos sin color predefinido */
+        var dynPalette = ['#26c6da','#ab47bc','#ef5350','#66bb6a','#ffa726',
+                          '#ec407a','#42a5f5','#d4e157','#26a69a','#ff7043'];
+        function pickColor(dist, key) {
+            var keys = Object.keys(dist);
+            var idx = keys.indexOf(key);
+            return dynPalette[idx % dynPalette.length];
+        }
+
+        /* Definición de campos a analizar */
+        var CAMPOS = [
+            { key:'barrio',      label:'&#x1F3D8; Distribución por Barrio',      tipo:'cat',
+              colorFn: function(v){ return colores[v] || '#78909c'; } },
+            { key:'concepto',    label:'&#x1F50D; Distribución por Concepto',    tipo:'cat',
+              colorFn: function(v,dist){
+                var c={'CRUCE DE VIA':'#00c8ff','FAVORABLE':'#4caf50',
+                       'FAVORABLE CONDICIONADO':'#ff9800','DESFAVORABLE':'#f44336',
+                       'NO APLICA':'#9e9e9e','Sin dato':'#bdbdbd'};
+                return c[v] || pickColor(dist, v); } },
+            { key:'unidad',      label:'&#x1F9F1; Tipo de Unidad / Material',    tipo:'cat',
+              colorFn: function(v,dist){ return pickColor(dist, v); } },
+            { key:'funcionario', label:'&#x1F477; Distribución por Funcionario', tipo:'cat',
+              colorFn: function(v,dist){ return pickColor(dist, v); } },
+            { key:'longitud',    label:'&#x1F4CF; Longitud de Cruces',           tipo:'num', unidad:'m' },
+            { key:'obs',         label:'&#x1F4DD; Observaciones',                tipo:'cat',
+              colorFn: function(v,dist){ return pickColor(dist, v); } }
+        ];
+
+        /* Recolección de datos */
+        var catData = {};
+        var numData = {};
+        var conFoto = 0, conFoto2 = 0, sinFoto = 0;
 
         visibles.forEach(function(m) {
             totalPuntos++;
             var p = m._punto || {};
-            var b = m._barrio || 'Sin barrio';
-            barrioCount[b] = (barrioCount[b]||0) + 1;
-            var c = p.concepto || 'Sin dato';
-            conceptoCount[c] = (conceptoCount[c]||0) + 1;
-            if (p.foto) conFoto++; else sinFoto++;
             var ll = m.getLatLng();
             if(ll.lat<latMin) latMin=ll.lat;
             if(ll.lat>latMax) latMax=ll.lat;
             if(ll.lng<lonMin) lonMin=ll.lng;
             if(ll.lng>lonMax) lonMax=ll.lng;
+
+            CAMPOS.forEach(function(campo) {
+                var v = p[campo.key];
+                if (campo.tipo === 'cat') {
+                    var val = (v !== undefined && v !== null && String(v).trim() !== '')
+                              ? String(v).trim() : null;
+                    if (val) {
+                        if (!catData[campo.key]) catData[campo.key] = {};
+                        catData[campo.key][val] = (catData[campo.key][val] || 0) + 1;
+                    }
+                } else if (campo.tipo === 'num') {
+                    var n = parseFloat(v);
+                    if (!isNaN(n)) {
+                        if (!numData[campo.key])
+                            numData[campo.key] = { sum:0, count:0, min:Infinity, max:-Infinity };
+                        numData[campo.key].sum   += n;
+                        numData[campo.key].count++;
+                        if(n < numData[campo.key].min) numData[campo.key].min = n;
+                        if(n > numData[campo.key].max) numData[campo.key].max = n;
+                    }
+                }
+            });
+
+            if (p.foto)              conFoto++;
+            if (p.foto2)             conFoto2++;
+            if (!p.foto && !p.foto2) sinFoto++;
         });
 
-        // Actualizar subtítulo del header con contexto de filtros
+        /* Filtros activos */
         var filtrosActivos = [];
         if (barrioFiltrado) filtrosActivos.push('Barrio: ' + barrioFiltrado);
-        if (barrioActivo) filtrosActivos.push('Leyenda: ' + barrioActivo);
+        if (barrioActivo)   filtrosActivos.push('Leyenda: ' + barrioActivo);
         if (typeof restriccionesActivas !== 'undefined') {
             Object.keys(restriccionesActivas).forEach(function(campo) {
                 var s = restriccionesActivas[campo];
-                if (s && s.size > 0) filtrosActivos.push(campo + ' restringido (' + s.size + ')');
+                if (s && s.size > 0) filtrosActivos.push(campo + ' (' + s.size + ')');
             });
         }
         var subtitulo = document.getElementById('rep-subtitulo');
         if (subtitulo) {
             subtitulo.innerHTML = filtrosActivos.length > 0
-                ? '🔽 Filtros activos: <strong style="color:#00c8ff">' + filtrosActivos.join(' · ') + '</strong>'
-                : 'Distribución de cruces - Red GLP Arauca';
+                ? '&#x1F53D; Filtros activos: <strong style="color:#00c8ff">' + filtrosActivos.join(' · ') + '</strong>'
+                : 'Distribución dinámica según datos visibles';
         }
 
-        var numBarrios = Object.keys(barrioCount).length;
-        var sorted = Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
-        var maxCount = sorted.length > 0 ? sorted[0][1] : 1;
-        var avgPorBarrio = numBarrios > 0 ? (totalPuntos / numBarrios).toFixed(1) : 0;
-
-        // Top 3 barrios
-        var top3 = sorted.slice(0,3);
-        // Bottom 3
-        var bottom3 = sorted.slice(-3).reverse();
-
-        // Build HTML
+        /* Construir HTML */
         var html = '';
 
-        // Banner de filtros activos
         if (filtrosActivos.length > 0) {
             html += '<div style="background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.3);border-left:3px solid #00c8ff;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:#a0e8ff">';
-            html += '🔽 <strong style="color:#00c8ff">Filtros activos:</strong> ' + filtrosActivos.join(' &nbsp;·&nbsp; ');
+            html += '&#x1F53D; <strong style="color:#00c8ff">Filtros activos:</strong> ' + filtrosActivos.join(' &nbsp;·&nbsp; ');
             html += '<br><span style="opacity:0.7">Mostrando ' + totalPuntos + ' de ' + allMarkers.length + ' puntos totales</span>';
             html += '</div>';
         }
@@ -2048,82 +2085,131 @@
             body.innerHTML = html; return;
         }
 
-        // KPIs
+        /* Contar atributos con datos activos */
+        var numCamposActivos = CAMPOS.filter(function(c){
+            return (c.tipo==='cat' && catData[c.key]) || (c.tipo==='num' && numData[c.key]);
+        }).length + (conFoto + conFoto2 > 0 ? 1 : 0);
+
+        var numBarrios   = catData['barrio'] ? Object.keys(catData['barrio']).length : 0;
+        var avgPorBarrio = numBarrios > 0 ? (totalPuntos / numBarrios).toFixed(1) : '—';
+
+        /* KPIs principales */
         html += '<div class="rep-kpi-grid">';
-        html += '<div class="rep-kpi"><span class="num">' + totalPuntos + '</span><span class="lbl">Total Cruces</span></div>';
+        html += '<div class="rep-kpi"><span class="num">' + totalPuntos + '</span><span class="lbl">Puntos visibles</span></div>';
         html += '<div class="rep-kpi"><span class="num">' + numBarrios + '</span><span class="lbl">Barrios</span></div>';
-        html += '<div class="rep-kpi"><span class="num">' + avgPorBarrio + '</span><span class="lbl">Promedio por Barrio</span></div>';
+        html += '<div class="rep-kpi"><span class="num">' + avgPorBarrio + '</span><span class="lbl">Prom. / Barrio</span></div>';
+        html += '<div class="rep-kpi"><span class="num">' + numCamposActivos + '</span><span class="lbl">Atributos activos</span></div>';
         html += '</div>';
 
-        // Concepto section
-        html += '<div class="rep-section"><h3>🔍 Distribución por Concepto</h3>';
-        html += '<div class="rep-concepto-grid">';
-        var conceptoColors = {'FAVORABLE':'#4caf50','FAVORABLE CONDICIONADO':'#ff9800','DESFAVORABLE':'#f44336','NO APLICA':'#9e9e9e','Sin dato':'#bdbdbd'};
-        var conceptoSorted = Object.entries(conceptoCount).sort(function(a,b){return b[1]-a[1];});
-        conceptoSorted.forEach(function(entry) {
-            var color = conceptoColors[entry[0]] || '#78909c';
-            var pct = totalPuntos > 0 ? ((entry[1]/totalPuntos)*100).toFixed(1) : 0;
-            html += '<div class="rep-concepto-card" style="background:' + color + '22;border:2px solid ' + color + '">';
-            html += '<span class="num" style="color:' + color + '">' + entry[1] + '</span>';
-            html += '<span class="lbl" style="color:' + color + '">' + entry[0] + ' (' + pct + '%)</span>';
-            html += '</div>';
-        });
-        html += '</div></div>';
+        /* Secciones dinámicas por campo */
+        CAMPOS.forEach(function(campo) {
 
-        // Photos stats
-        html += '<div class="rep-section"><h3>📷 Registro Fotográfico</h3>';
-        html += '<div class="rep-kpi-grid" style="grid-template-columns:repeat(2,1fr)">';
-        html += '<div class="rep-kpi" style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9)"><span class="num" style="color:#2e7d32">' + conFoto + '</span><span class="lbl">Con foto (' + (totalPuntos>0?((conFoto/totalPuntos)*100).toFixed(1):0) + '%)</span></div>';
-        html += '<div class="rep-kpi" style="background:linear-gradient(135deg,#fce4ec,#f8bbd0)"><span class="num" style="color:#c62828">' + sinFoto + '</span><span class="lbl">Sin foto (' + (totalPuntos>0?((sinFoto/totalPuntos)*100).toFixed(1):0) + '%)</span></div>';
-        html += '</div></div>';
+            /* Campos CATEGÓRICOS */
+            if (campo.tipo === 'cat' && catData[campo.key]) {
+                var dist    = catData[campo.key];
+                var entries = Object.entries(dist).sort(function(a,b){ return b[1]-a[1]; });
+                var maxV    = entries[0][1];
+                var numValores = entries.length;
 
-        // Bar chart by barrio
-        html += '<div class="rep-section"><h3>🏘️ Cruces por Barrio (' + numBarrios + ')</h3>';
-        sorted.forEach(function(entry) {
-            var pct = (entry[1]/maxCount*100);
-            var color = colores[entry[0]] || '#78909c';
-            html += '<div class="rep-bar-row">';
-            html += '<div class="rep-bar-label" title="' + entry[0] + '">' + entry[0] + '</div>';
-            html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:' + pct + '%;background:' + color + '"><span>' + ((entry[1]/totalPuntos)*100).toFixed(1) + '%</span></div></div>';
-            html += '<div class="rep-bar-count">' + entry[1] + '</div>';
-            html += '</div>';
-        });
-        html += '</div>';
+                html += '<div class="rep-section"><h3>' + campo.label + '</h3>';
 
-        // Top & Bottom
-        html += '<div class="rep-section"><h3>🏆 Ranking de Barrios</h3>';
-        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">';
-        html += '<div><h4 style="color:#2e7d32;font-size:13px;margin-bottom:8px">▲ Mayor concentración</h4>';
-        top3.forEach(function(e,i) {
-            html += '<div style="padding:8px 12px;background:#e8f5e9;border-radius:8px;margin:4px 0;font-size:12px"><strong>#' + (i+1) + '</strong> ' + e[0] + ' — <strong>' + e[1] + '</strong> cruces</div>';
-        });
-        html += '</div>';
-        html += '<div><h4 style="color:#c62828;font-size:13px;margin-bottom:8px">▼ Menor concentración</h4>';
-        bottom3.forEach(function(e,i) {
-            html += '<div style="padding:8px 12px;background:#fce4ec;border-radius:8px;margin:4px 0;font-size:12px"><strong>#' + (sorted.length-bottom3.length+i+1) + '</strong> ' + e[0] + ' — <strong>' + e[1] + '</strong> cruces</div>';
-        });
-        html += '</div></div></div>';
+                if (numValores <= 4) {
+                    /* Tarjetas grandes */
+                    html += '<div class="rep-concepto-grid">';
+                    entries.forEach(function(e) {
+                        var color = campo.colorFn(e[0], dist);
+                        var pct   = ((e[1]/totalPuntos)*100).toFixed(1);
+                        html += '<div class="rep-concepto-card" style="background:' + color + '22;border:2px solid ' + color + '">';
+                        html += '<span class="num" style="color:' + color + '">' + e[1] + '</span>';
+                        html += '<span class="lbl" style="color:' + color + '">' + e[0] + ' (' + pct + '%)</span>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                } else {
+                    /* Barras horizontales */
+                    entries.forEach(function(e) {
+                        var color    = campo.colorFn(e[0], dist);
+                        var pct      = (e[1]/maxV*100);
+                        var pctTotal = ((e[1]/totalPuntos)*100).toFixed(1);
+                        html += '<div class="rep-bar-row">';
+                        html += '<div class="rep-bar-label" title="' + e[0] + '">' + e[0] + '</div>';
+                        html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:' + pct + '%;background:' + color + '"><span>' + pctTotal + '%</span></div></div>';
+                        html += '<div class="rep-bar-count">' + e[1] + '</div>';
+                        html += '</div>';
+                    });
+                    /* Ranking top/bottom */
+                    if (numValores >= 4) {
+                        var top3 = entries.slice(0,3);
+                        var bot3 = entries.slice(-3).reverse();
+                        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">';
+                        html += '<div><h4 style="color:#2e7d32;font-size:12px;margin-bottom:6px">&#x25B2; Mayor</h4>';
+                        top3.forEach(function(e,i){
+                            html += '<div style="padding:6px 10px;background:rgba(46,125,50,0.15);border-radius:6px;margin:3px 0;font-size:11px"><strong>#'+(i+1)+'</strong> '+e[0]+' — <strong>'+e[1]+'</strong></div>';
+                        });
+                        html += '</div><div><h4 style="color:#c62828;font-size:12px;margin-bottom:6px">&#x25BC; Menor</h4>';
+                        bot3.forEach(function(e,i){
+                            html += '<div style="padding:6px 10px;background:rgba(198,40,40,0.12);border-radius:6px;margin:3px 0;font-size:11px"><strong>#'+(numValores-bot3.length+i+1)+'</strong> '+e[0]+' — <strong>'+e[1]+'</strong></div>';
+                        });
+                        html += '</div></div>';
+                    }
+                }
+                html += '</div>';
+            }
 
-        // Coverage area
-        html += '<div class="rep-section"><h3>📍 Cobertura Geográfica</h3>';
-        html += '<table class="rep-table"><tr><th>Parámetro</th><th>Valor</th></tr>';
-        html += '<tr><td>Latitud mínima</td><td>' + latMin.toFixed(6) + '</td></tr>';
-        html += '<tr><td>Latitud máxima</td><td>' + latMax.toFixed(6) + '</td></tr>';
-        html += '<tr><td>Longitud mínima</td><td>' + lonMin.toFixed(6) + '</td></tr>';
-        html += '<tr><td>Longitud máxima</td><td>' + lonMax.toFixed(6) + '</td></tr>';
-        html += '</table></div>';
-
-        // Full table
-        html += '<div class="rep-section"><h3>📋 Tabla Resumen por Barrio</h3>';
-        html += '<table class="rep-table"><tr><th>#</th><th>Barrio</th><th>Cruces</th><th>%</th><th>Acumulado</th></tr>';
-        var acum = 0;
-        sorted.forEach(function(e,i) {
-            acum += e[1];
-            var pct = ((e[1]/totalPuntos)*100).toFixed(1);
-            var acumPct = ((acum/totalPuntos)*100).toFixed(1);
-            html += '<tr><td>' + (i+1) + '</td><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (colores[e[0]]||'#999') + ';margin-right:6px"></span>' + e[0] + '</td><td style="font-weight:bold">' + e[1] + '</td><td>' + pct + '%</td><td>' + acumPct + '%</td></tr>';
+            /* Campos NUMÉRICOS */
+            if (campo.tipo === 'num' && numData[campo.key]) {
+                var nd    = numData[campo.key];
+                var avg   = nd.count > 0 ? (nd.sum / nd.count).toFixed(2) : '—';
+                var total = nd.sum.toFixed(2);
+                var un    = campo.unidad || '';
+                html += '<div class="rep-section"><h3>' + campo.label + '</h3>';
+                html += '<div class="rep-kpi-grid" style="grid-template-columns:repeat(4,1fr)">';
+                html += '<div class="rep-kpi"><span class="num">' + total + '</span><span class="lbl">Total ' + un + '</span></div>';
+                html += '<div class="rep-kpi"><span class="num">' + avg + '</span><span class="lbl">Promedio ' + un + '</span></div>';
+                html += '<div class="rep-kpi"><span class="num">' + nd.min.toFixed(1) + '</span><span class="lbl">Mínimo ' + un + '</span></div>';
+                html += '<div class="rep-kpi"><span class="num">' + nd.max.toFixed(1) + '</span><span class="lbl">Máximo ' + un + '</span></div>';
+                html += '</div></div>';
+            }
         });
-        html += '</table></div>';
+
+        /* Fotos: solo si hay puntos con foto */
+        if (conFoto > 0 || conFoto2 > 0) {
+            html += '<div class="rep-section"><h3>&#x1F4F7; Registro Fotográfico</h3>';
+            html += '<div class="rep-kpi-grid" style="grid-template-columns:repeat(' + (conFoto2>0?'3':'2') + ',1fr)">';
+            html += '<div class="rep-kpi" style="background:linear-gradient(135deg,rgba(46,125,50,0.18),rgba(46,125,50,0.05))"><span class="num" style="color:#4caf50">' + conFoto + '</span><span class="lbl">Foto principal (' + ((conFoto/totalPuntos)*100).toFixed(1) + '%)</span></div>';
+            if (conFoto2 > 0) {
+                html += '<div class="rep-kpi" style="background:linear-gradient(135deg,rgba(0,150,255,0.18),rgba(0,100,200,0.05))"><span class="num" style="color:#29b6f6">' + conFoto2 + '</span><span class="lbl">Foto adicional (' + ((conFoto2/totalPuntos)*100).toFixed(1) + '%)</span></div>';
+            }
+            html += '<div class="rep-kpi" style="background:linear-gradient(135deg,rgba(198,40,40,0.18),rgba(198,40,40,0.05))"><span class="num" style="color:#ef5350">' + sinFoto + '</span><span class="lbl">Sin foto (' + ((sinFoto/totalPuntos)*100).toFixed(1) + '%)</span></div>';
+            html += '</div></div>';
+        }
+
+        /* Cobertura geográfica */
+        if (latMin < 999) {
+            html += '<div class="rep-section"><h3>&#x1F4CD; Cobertura Geográfica</h3>';
+            html += '<table class="rep-table"><tr><th>Parámetro</th><th>Valor</th></tr>';
+            html += '<tr><td>Latitud mínima</td><td>'  + latMin.toFixed(6) + '</td></tr>';
+            html += '<tr><td>Latitud máxima</td><td>'  + latMax.toFixed(6) + '</td></tr>';
+            html += '<tr><td>Longitud mínima</td><td>' + lonMin.toFixed(6) + '</td></tr>';
+            html += '<tr><td>Longitud máxima</td><td>' + lonMax.toFixed(6) + '</td></tr>';
+            html += '</table></div>';
+        }
+
+        /* Tabla resumen por barrio */
+        if (catData['barrio']) {
+            var sortedB = Object.entries(catData['barrio']).sort(function(a,b){return b[1]-a[1];});
+            html += '<div class="rep-section"><h3>&#x1F4CB; Tabla Resumen por Barrio</h3>';
+            html += '<table class="rep-table"><tr><th>#</th><th>Barrio</th><th>Puntos</th><th>%</th><th>Acumulado</th></tr>';
+            var acum = 0;
+            sortedB.forEach(function(e,i) {
+                acum += e[1];
+                var pct     = ((e[1]/totalPuntos)*100).toFixed(1);
+                var acumPct = ((acum/totalPuntos)*100).toFixed(1);
+                var dot = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + (colores[e[0]]||'#999') + ';margin-right:6px"></span>';
+                html += '<tr><td>'+(i+1)+'</td><td>'+dot+e[0]+'</td><td style="font-weight:bold">'+e[1]+'</td><td>'+pct+'%</td><td>'+acumPct+'%</td></tr>';
+            });
+            html += '</table></div>';
+        }
 
         body.innerHTML = html;
     }
