@@ -1167,10 +1167,11 @@
             if(sinBarrio>0) statusLog('⚠️ '+sinBarrio+' puntos sin barrio asignado','error');
         }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/shpwrite@0.3.2/shpwrite.js"></script>
+    <script>
     // ═══ FILTER & DIALOG SYSTEM ═══
     var BARRIOS_LISTA = ['BELLO HORIZONTE','CABAÑAS DEL RIO','COPEBANCARIOS','CORDOBA',
         'COSTA HERMOSA','CRISTO REY','EL HORCON','EL PALMAR','FUNDADORES','GABANES',
@@ -1686,29 +1687,6 @@
 
     
     
-        if (btn) btn.classList.add('cargando');
-        navigator.geolocation.getCurrentPosition(
-            function(pos) {
-                var lat = pos.coords.latitude;
-                var lon = pos.coords.longitude;
-                map.setView([lat, lon], 15);
-                if (window._miUbicMarker) {
-                    window._miUbicMarker.setLatLng([lat, lon]);
-                } else {
-                    window._miUbicMarker = L.circleMarker([lat, lon], {
-                        radius:9, color:'#ffffff', fillColor:'#00c8ff',
-                        fillOpacity:0.88, weight:2.5
-                    }).addTo(map).bindPopup('<b style="font-size:12px;">📍 Mi ubicación</b>');
-                }
-                if (btn) btn.classList.remove('cargando');
-            },
-            function(err) {
-                alert('No se pudo obtener la ubicación.');
-                if (btn) btn.classList.remove('cargando');
-            },
-            { timeout:12000, enableHighAccuracy:true }
-        );
-    }
     </script>
 
 <style>
