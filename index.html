@@ -1235,7 +1235,7 @@
         var h = '';
         BARRIOS_LISTA.forEach(function(b) {
             h += '<label style="display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;font-size:10px;color:#333;">'
-               + '<input type="checkbox" checked onchange="toggleRestriccion('' + b + '',this)"> ' + b
+               + '<input type="checkbox" checked onchange="toggleRestriccion(\'' + b + '\',this)"> ' + b
                + '</label>';
         });
         div.innerHTML = h;
@@ -1271,7 +1271,7 @@
                 + 'cursor:pointer;font-size:11px;color:#333;border-bottom:1px solid #f0f0f0;">'
                 + '<input type="radio" name="attr-radio" value="' + attr + '"'
                 + (attr==='barrio'?' checked':'')
-                + ' onchange="colorearPor('' + attr + '')">' + label + '</label>';
+                + ' onchange="colorearPor(\'' + attr + '\')">' + label + '</label>';
         });
     }
 
