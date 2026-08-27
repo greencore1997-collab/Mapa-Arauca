@@ -247,21 +247,6 @@
         #btn-mobile.active { background:#1565c0; color:white; border-color:#1565c0; }
 
         /* MOBILE MODE STYLES */
-        body.mobile-mode .legend {
-            width:100vw; left:0; right:0; top:auto; bottom:0;
-            max-height:0; border-radius:16px 16px 0 0;
-            box-shadow:0 -4px 20px rgba(0,0,0,0.2);
-            padding:0 15px; font-size:13px;
-            overflow:hidden; transition:max-height 0.4s ease, padding 0.4s ease;
-        }
-        body.mobile-mode .legend.legend-open {
-            max-height:55vh; padding:10px 15px 20px;
-            overflow-y:auto;
-        }
-        body.mobile-mode .legend-item { padding:8px 10px; font-size:13px; }
-        body.mobile-mode .legend-color { width:16px; height:16px; }
-        body.mobile-mode .search-box { font-size:13px; padding:8px 12px; }
-        body.mobile-mode .btn-todos { font-size:13px; padding:8px; }
         /* Tab trigger button */
         /* Desktop barrios tab */
         #btn-barrios-desktop {
@@ -278,19 +263,8 @@
         }
         #btn-barrios-desktop:hover { background:rgba(0,30,80,0.9); }
         #btn-barrios-desktop.abierto { border-radius:8px 8px 0 0; border-bottom-color:transparent; }
-        body.mobile-mode #btn-barrios-desktop { display:none; }
 
-        #btn-legend-tab {
-            display:none;
-            position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-            z-index:1100; background:#1565c0; color:white;
-            border:none; border-radius:16px 16px 0 0;
-            padding:8px 30px 6px; font-size:13px; font-weight:bold;
-            cursor:pointer; box-shadow:0 -3px 12px rgba(0,0,0,0.2);
-            transition:background 0.2s; white-space:nowrap;
-        }
-        #btn-legend-tab:hover { background:#0d47a1; }
-        body.mobile-mode #btn-legend-tab { display:block; }
+        #btn-legend-tab { display:none !important; }
 
         body.mobile-mode .title {
             top:5px; left:50%; transform:translateX(-50%);
@@ -322,14 +296,6 @@
         }
         body.mobile-mode #btn-mobile {
             top:auto; bottom:calc(45vh + 100px); left:10px; font-size:12px; padding:8px 12px;
-        }
-        body.mobile-mode .legend h3 {
-            font-size:14px; margin-bottom:8px;
-        }
-        /* drag handle for mobile panel */
-        body.mobile-mode .legend.legend-open::before {
-            content:''; display:block; width:40px; height:4px;
-            background:#ccc; border-radius:2px; margin:0 auto 10px;
         }
 
 
@@ -497,7 +463,6 @@
         #panel-atributo label:last-child { border-bottom:none; }
         #panel-atributo .attr-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
         #panel-atributo .attr-title { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
-        body.mobile-mode #btn-atributo-desktop, body.mobile-mode #panel-atributo { display:none; }
 
         /* ── Pestaña restricciones ── */
         #btn-restricciones-desktop {
@@ -529,7 +494,6 @@
         .restr-campo.active { background:#1565c0; color:white; border-color:#1565c0; }
         #restr-valores label { display:flex; align-items:center; gap:6px; padding:3px 0; cursor:pointer; font-size:10px; color:#333; border-bottom:1px solid #f5f5f5; }
         #restr-valores label:last-child { border-bottom:none; }
-        body.mobile-mode #btn-restricciones-desktop, body.mobile-mode #panel-restricciones { display:none; }
         </style>
 </head>
 <body>
