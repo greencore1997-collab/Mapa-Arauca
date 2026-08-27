@@ -1992,8 +1992,9 @@
 
     // ══════ INTRO SPLASH LOGIC ══════
     (function() {
-        // SVG vectorial del escudo (sin pixelación, escala perfecta a cualquier tamaño)
-        document.getElementById('intro-shield').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTAgMjYwIj4KICA8ZWxsaXBzZSBjeD0iMTAxIiBjeT0iMTIwIiByeD0iNTUiIHJ5PSIzMiIgZmlsbD0iIzYwQ0Q0NSIvPgogIDxwYXRoIGQ9Ik0gOTQgNiBDIDEwMyA0MCwgMTAxIDc4LCA3MyAxMjYgQyA2OSAxMzQsIDY0IDE0NiwgNjIgMTUyIEMgNTkgMTQ2LCA1OSAxMzQsIDYxIDEyNiBDIDYzIDc4LCA4NCA0MCwgOTIgNiBaIiBmaWxsPSIjRkE4RDM0Ii8+CiAgPHBhdGggZD0iTSAxMTMgMzIgQyAxMjIgNjQsIDExOCA4OCwgMTAwIDE1MCBDIDkwIDEzMCwgODcgMTAwLCA4OCA4OCBDIDkwIDY0LCAxMTIgNDYsIDExMyAzMiBaIiBmaWxsPSIjMUU4OEQ1Ii8+CiAgPHRleHQgeD0iOTUiIHk9IjE4NSIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLCBIZWx2ZXRpY2EgTmV1ZSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNiIgZm9udC13ZWlnaHQ9IjkwMCIgZm9udC1zdHlsZT0iaXRhbGljIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMUIyRTBBIj5BcmF1Y2FuYTwvdGV4dD4KICA8dGV4dCB4PSI5NSIgeT0iMjE0IiBmb250LWZhbWlseT0iQXJpYWwgQmxhY2ssIEhlbHZldGljYSBOZXVlLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI2IiBmb250LXdlaWdodD0iOTAwIiBmb250LXN0eWxlPSJpdGFsaWMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMxQjJFMEEiPmRlIEdhc2VzPC90ZXh0PgogIDx0ZXh0IHg9Ijk1IiB5PSIyMzQiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMyIgbGV0dGVyLXNwYWNpbmc9IjEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjY2NjYiPlNBUyBFU1A8L3RleHQ+Cjwvc3ZnPg==';
+        // Usar el logo original de Araucana de Gases desde el header
+        var hLogo = document.querySelector('#header-logo img');
+        if (hLogo) document.getElementById('intro-shield').src = hLogo.src;
 
         window.introEntrar = function() {
             var s1 = document.getElementById('intro-s1');
