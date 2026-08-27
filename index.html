@@ -1385,6 +1385,22 @@
                 if(!esLat&&negarLon&&resultado>0) resultado=-resultado;
                 return resultado;
             }
+            // Detectar columnas extra (todo excepto lat/lon/foto)
+            var _excCols={};
+            [iLat,iLon,iFoto,iFoto2].forEach(function(i){ if(i>=0) _excCols[i]=true; });
+            var extraCols=[];
+            (rows[0]||[]).forEach(function(h,i){
+                if(_excCols[i]) return;
+                var key=String(h||'').trim()
+                    .toLowerCase()
+                    .replace(/[áàäâ]/g,'a').replace(/[éèëê]/g,'e')
+                    .replace(/[íìïî]/g,'i').replace(/[óòöô]/g,'o')
+                    .replace(/[úùüû]/g,'u').replace(/ñ/g,'n')
+                    .replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+                if(!key) return;
+                extraCols.push({idx:i, key:key, label:String(h||'').trim()});
+            });
+
             var nuevos=[];
             var primerPuntoLogueado=false;
             for(var r=1;r<rows.length;r++){
@@ -1400,7 +1416,12 @@
                 var conc=''; if(iConc>=0&&row[iConc]) conc=String(row[iConc]);
                 var barrio=asignarBarrio(lat,lon);
                 if(!barrio){ barrio=(iBarrio>=0&&row[iBarrio])?String(row[iBarrio]):'SIN BARRIO'; }
-                nuevos.push({lat:lat,lon:lon,foto:foto,concepto:conc,barrio:barrio,funcionario:''});
+                var _pt={lat:lat,lon:lon,foto:foto,concepto:conc,barrio:barrio};
+                extraCols.forEach(function(col){
+                    var v=row[col.idx];
+                    _pt[col.key]=(v!==undefined&&v!==null&&v!=='')?String(v).trim():'';
+                });
+                nuevos.push(_pt);
             }
             if(nuevos.length===0){ statusLog('❌ No se encontraron puntos válidos en el archivo','error'); return; }
 
@@ -1464,6 +1485,23 @@
                 if(fpts.length > 0) map.fitBounds(L.latLngBounds(fpts), {padding:[30,30]});
                 statusLog('🏘️ Filtro activo: '+barrioFiltrado+' ('+fpts.length+' puntos)','ok');
             }
+
+            // ── Actualizar paneles ATRIBUTO y RESTRICCIONES con columnas del nuevo Excel ──
+            var _fotoKeys={'foto':1};
+            extraCols.forEach(function(c){ if(c.key.indexOf('foto')>=0) _fotoKeys[c.key]=1; });
+            var _nuevosCampos=['barrio'];
+            extraCols.forEach(function(col){
+                if(_fotoKeys[col.key]) return;
+                var tieneValor=allMarkers.some(function(m){ return m._punto&&m._punto[col.key]&&m._punto[col.key].trim(); });
+                if(!tieneValor) return;
+                _nuevosCampos.push(col.key);
+            });
+            if(_nuevosCampos.length>1) CAMPOS_RESTR=_nuevosCampos;
+            restriccionCampoActivo='barrio';
+            restriccionesActivas={};
+            var _attrDiv=document.getElementById('attr-opciones');
+            if(_attrDiv){ _attrDiv.innerHTML=''; buildAttrPanel(); }
+            buildRestrPanel();
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1698,8 +1736,11 @@
     function buildAttrPanel() {
         var div = document.getElementById('attr-opciones');
         if (!div) return;
-        ['barrio','concepto','funcionario'].forEach(function(attr) {
-            var label = attr.charAt(0).toUpperCase() + attr.slice(1);
+        div.innerHTML = '';
+        var campos = (typeof CAMPOS_RESTR !== 'undefined' && CAMPOS_RESTR.length > 0)
+            ? CAMPOS_RESTR : ['barrio','concepto','funcionario'];
+        campos.forEach(function(attr) {
+            var label = attr.charAt(0).toUpperCase() + attr.slice(1).replace(/_/g,' ');
             div.innerHTML += '<label style="display:flex;align-items:center;gap:6px;padding:4px 0;'
                 + 'cursor:pointer;font-size:11px;color:#333;border-bottom:1px solid #f0f0f0;">'
                 + '<input type="radio" name="attr-radio" value="' + attr + '"'
@@ -1707,7 +1748,6 @@
                 + ' onchange="colorearPor(\'' + attr + '\')">' + label + '</label>';
         });
     }
-
     function colorearPor(atributo) {
         var valores = {}; var idx = 0;
         allMarkers.forEach(function(m) {
