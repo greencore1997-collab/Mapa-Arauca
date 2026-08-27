@@ -107,19 +107,23 @@
         /* REPORTE PANEL */
         #btn-reporte {
             position:absolute; top:55px; left:10px; z-index:900;
-            background:rgba(0,12,35,0.82); color:#00c8ff;
-            border:none; border-left:3px solid #00c8ff;
+            background:rgba(0,12,35,0.78); color:#00c8ff;
+            border:none; border-left:4px solid #00c8ff;
             border-top:1px solid rgba(0,200,255,0.3);
             border-right:1px solid rgba(0,200,255,0.15);
             border-bottom:1px solid rgba(0,200,255,0.15);
-            padding:9px 18px; border-radius:8px;
+            padding:9px 18px; border-radius:14px;
             font-weight:bold; font-size:11px; cursor:pointer;
             font-family:'Orbitron',monospace; letter-spacing:1.5px;
-            box-shadow:0 0 18px rgba(0,180,255,0.3); transition:all 0.2s;
+            box-shadow:0 0 28px rgba(0,180,255,0.35), inset 0 0 18px rgba(0,100,200,0.12);
+            transition:all 0.25s;
             display:flex; align-items:center; gap:6px;
             backdrop-filter:blur(6px);
         }
-        #btn-reporte:hover { background:rgba(0,40,90,0.95); box-shadow:0 0 28px rgba(0,200,255,0.5); }
+        #btn-reporte:hover {
+            background:rgba(0,20,55,0.92);
+            box-shadow:0 0 38px rgba(0,200,255,0.55), inset 0 0 22px rgba(0,140,255,0.18);
+        }
         #reporte-overlay {
             position:fixed; top:0; right:-100%; width:55%; height:100vh;
             background:rgba(255,255,255,0.98); z-index:2000;
