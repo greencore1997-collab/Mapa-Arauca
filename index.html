@@ -687,8 +687,20 @@
             allMarkers.push(marker);
 
             marker.on('click',function(){
+                // Resaltar marcador con estilo cyan
+                resaltarMarcador(marker);
+                // Si el panel de coordenadas está abierto y este punto está en él, sincronizar selección
+                var pblIdx = pblMarkers ? pblMarkers.indexOf(marker) : -1;
+                if (pblIdx >= 0) {
+                    document.querySelectorAll('.pbl-item').forEach(function(el){ el.classList.remove('active'); });
+                    pblSelectedIdx = pblIdx;
+                    var items = document.querySelectorAll('.pbl-item');
+                    if (items[pblIdx]) {
+                        items[pblIdx].classList.add('active');
+                        items[pblIdx].scrollIntoView({block:'nearest', behavior:'smooth'});
+                    }
+                }
                 var html='<h3>'+p.barrio+'</h3>';
-                
                 html+='<p><strong>Lat:</strong> '+p.lat.toFixed(6)+'</p>';
                 html+='<p><strong>Lon:</strong> '+p.lon.toFixed(6)+'</p>';
                 if(p.concepto) html+='<p><strong>Concepto:</strong> '+p.concepto+'</p>';
@@ -1177,8 +1189,19 @@
 
             nuevos.forEach(function(p){
                 var m=L.circleMarker([p.lat,p.lon],{radius:6,fillColor:colores[p.barrio]||'#888',color:'#333',weight:1,opacity:0.8,fillOpacity:0.85}).addTo(map);
-                m._barrio=p.barrio; allMarkers.push(m);
+                m._barrio=p.barrio; m._punto=p; allMarkers.push(m);
                 m.on('click',function(){
+                    resaltarMarcador(m);
+                    var pblIdx = pblMarkers ? pblMarkers.indexOf(m) : -1;
+                    if (pblIdx >= 0) {
+                        document.querySelectorAll('.pbl-item').forEach(function(el){ el.classList.remove('active'); });
+                        pblSelectedIdx = pblIdx;
+                        var items = document.querySelectorAll('.pbl-item');
+                        if (items[pblIdx]) {
+                            items[pblIdx].classList.add('active');
+                            items[pblIdx].scrollIntoView({block:'nearest', behavior:'smooth'});
+                        }
+                    }
                     var html='<h3>'+p.barrio+'</h3>';
                     html+='<p><strong>Lat:</strong> '+p.lat.toFixed(6)+'</p>';
                     html+='<p><strong>Lon:</strong> '+p.lon.toFixed(6)+'</p>';
@@ -1253,17 +1276,25 @@
 
     var pblMarkers = [];
     var pblSelectedIdx = -1;
+    var highlightedMarker = null;
+
+    function resaltarMarcador(m) {
+        if (highlightedMarker && highlightedMarker !== m) {
+            highlightedMarker.setStyle({radius:6, color:'#333', weight:1, fillOpacity:0.85,
+                fillColor: highlightedMarker._origFill || highlightedMarker.options.fillColor});
+        }
+        if (!m) { highlightedMarker = null; return; }
+        if (!m._origFill) m._origFill = m.options.fillColor;
+        m.setStyle({radius:11, fillColor:'#00c8ff', color:'#ffffff', weight:2.5, fillOpacity:1});
+        m.bringToFront();
+        highlightedMarker = m;
+    }
 
     function mostrarDialogoCoordenadas(nombre) {
         var panel = document.getElementById('panel-puntos-barrio');
         if (!nombre) {
             panel.classList.remove('visible');
-            // Reset highlighted marker
-            if (pblSelectedIdx >= 0 && pblMarkers[pblSelectedIdx]) {
-                var prev = pblMarkers[pblSelectedIdx];
-                prev.setStyle({radius:6, color:'#333', weight:1, fillOpacity:0.85,
-                               fillColor: prev._origFill || prev.options.fillColor});
-            }
+            resaltarMarcador(null);
             pblMarkers = []; pblSelectedIdx = -1;
             return;
         }
@@ -1287,26 +1318,17 @@
     function seleccionarPuntoPbl(idx) {
         // Reset previous list highlight
         document.querySelectorAll('.pbl-item').forEach(function(el){ el.classList.remove('active'); });
-        // Reset previous marker highlight
-        if (pblSelectedIdx >= 0 && pblMarkers[pblSelectedIdx]) {
-            var prev = pblMarkers[pblSelectedIdx];
-            prev.setStyle({radius:6, color:'#333', weight:1, fillOpacity:0.85,
-                           fillColor: prev._origFill || prev.options.fillColor});
-        }
         pblSelectedIdx = idx;
         var m = pblMarkers[idx];
         if (!m) return;
-        // Store original fill for later restore
-        if (!m._origFill) m._origFill = m.options.fillColor;
         // Highlight item in list
         var items = document.querySelectorAll('.pbl-item');
         if (items[idx]) {
             items[idx].classList.add('active');
             items[idx].scrollIntoView({block:'nearest', behavior:'smooth'});
         }
-        // Highlight marker on map
-        m.setStyle({radius:11, fillColor:'#00c8ff', color:'#ffffff', weight:2.5, fillOpacity:1});
-        m.bringToFront();
+        // Highlight marker on map (shared helper)
+        resaltarMarcador(m);
         // Pan & zoom to marker
         map.setView(m.getLatLng(), Math.max(map.getZoom(), 16), {animate:true, duration:0.5});
         // Show infoPanel with point data
