@@ -723,7 +723,18 @@
         <div class="rep-header">
             <button class="rep-close" onclick="toggleReporte()">✕</button>
             <h2>📊 Reporte Estadístico</h2>
-            <p>Distribución de cruces - Red GLP Arauca</p>
+            <p id="rep-subtitulo">Distribución de cruces - Red GLP Arauca</p>
+            <div class="rep-export-btns">
+                <button class="rep-exp-btn rep-exp-excel" onclick="exportarReporteExcel()" title="Descargar Excel">
+                    <span class="rep-exp-icon">📊</span><span class="rep-exp-lbl">Excel</span>
+                </button>
+                <button class="rep-exp-btn rep-exp-pdf" onclick="exportarReportePDF()" title="Descargar PDF">
+                    <span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>
+                </button>
+                <button class="rep-exp-btn rep-exp-jpg" onclick="exportarReporteJPEG()" title="Descargar imagen JPEG">
+                    <span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>
+                </button>
+            </div>
         </div>
         <div class="rep-body" id="reporte-body">
             <p style="text-align:center;padding:40px;color:#999;">Cargando datos...</p>
@@ -1777,7 +1788,7 @@
                 if (s && s.size > 0) filtrosActivos.push(campo + ' restringido (' + s.size + ')');
             });
         }
-        var subtitulo = document.querySelector('.rep-header p');
+        var subtitulo = document.getElementById('rep-subtitulo');
         if (subtitulo) {
             subtitulo.innerHTML = filtrosActivos.length > 0
                 ? '🔽 Filtros activos: <strong style="color:#00c8ff">' + filtrosActivos.join(' · ') + '</strong>'
@@ -1891,6 +1902,108 @@
     }
     
     
+    // ═══ EXPORTAR REPORTE ═══
+
+    function _sufijo_rep() {
+        var partes = [];
+        if (barrioFiltrado) partes.push(barrioFiltrado.replace(/\s+/g,'_'));
+        if (barrioActivo)   partes.push(barrioActivo.replace(/\s+/g,'_'));
+        return partes.length ? '_' + partes.join('-') : '';
+    }
+
+    function exportarReporteExcel() {
+        var visibles = allMarkers.filter(function(m){ return map.hasLayer(m); });
+        if (!visibles.length) { statusLog('⚠️ No hay datos visibles para exportar','error'); return; }
+
+        var wb = XLSX.utils.book_new();
+
+        // ── Hoja 1: Resumen / KPIs ──
+        var barrioCount = {}, conceptoCount = {}, conFoto = 0, sinFoto = 0, total = visibles.length;
+        visibles.forEach(function(m){
+            var p = m._punto || {};
+            var b = m._barrio || 'Sin barrio';
+            barrioCount[b] = (barrioCount[b]||0) + 1;
+            var c = p.concepto || 'Sin dato';
+            conceptoCount[c] = (conceptoCount[c]||0) + 1;
+            if (p.foto) conFoto++; else sinFoto++;
+        });
+        var numBarrios = Object.keys(barrioCount).length;
+        var resumen = [
+            ['REPORTE ESTADÍSTICO - GEOVISOR ARAUCANA DE GASES'],
+            ['Fecha de generación:', new Date().toLocaleString('es-CO')],
+            [],
+            ['INDICADOR', 'VALOR'],
+            ['Total de cruces visibles', total],
+            ['Barrios con cobertura', numBarrios],
+            ['Promedio por barrio', numBarrios > 0 ? (total/numBarrios).toFixed(1) : 0],
+            ['Con foto', conFoto],
+            ['Sin foto', sinFoto],
+            ['% Con foto', total > 0 ? ((conFoto/total)*100).toFixed(1)+'%' : '0%'],
+        ];
+        if (barrioFiltrado || barrioActivo) {
+            resumen.splice(2, 0, ['Filtro activo:', (barrioFiltrado || barrioActivo)]);
+        }
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+
+        // ── Hoja 2: Por Barrio ──
+        var sortedB = Object.entries(barrioCount).sort(function(a,b){ return b[1]-a[1]; });
+        var dataB = [['#','BARRIO','CRUCES','PORCENTAJE','ACUMULADO']];
+        var acum = 0;
+        sortedB.forEach(function(e, i){
+            acum += e[1];
+            dataB.push([i+1, e[0], e[1], ((e[1]/total)*100).toFixed(2)+'%', ((acum/total)*100).toFixed(2)+'%']);
+        });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataB), 'Por Barrio');
+
+        // ── Hoja 3: Por Concepto ──
+        var sortedC = Object.entries(conceptoCount).sort(function(a,b){ return b[1]-a[1]; });
+        var dataC = [['#','CONCEPTO','CRUCES','PORCENTAJE']];
+        sortedC.forEach(function(e, i){
+            dataC.push([i+1, e[0], e[1], ((e[1]/total)*100).toFixed(2)+'%']);
+        });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataC), 'Por Concepto');
+
+        // ── Hoja 4: Datos completos ──
+        var dataD = [['#','BARRIO','CONCEPTO','FUNCIONARIO','LATITUD','LONGITUD','FOTO']];
+        visibles.forEach(function(m, i){
+            var p = m._punto || {};
+            var ll = m.getLatLng();
+            dataD.push([i+1, m._barrio||'', p.concepto||'', p.funcionario||'', ll.lat, ll.lng, p.foto||'']);
+        });
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataD), 'Datos Completos');
+
+        XLSX.writeFile(wb, 'Reporte_Arauca' + _sufijo_rep() + '.xlsx');
+        statusLog('✅ Reporte Excel descargado','ok');
+    }
+
+    function exportarReportePDF() {
+        var btn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
+        var panel = document.getElementById('reporte-overlay');
+        if (btn) btn.textContent = '⏳ PDF...';
+        html2canvas(panel, {scale:1.8, useCORS:true, backgroundColor:'#000814'}).then(function(canvas){
+            var imgData = canvas.toDataURL('image/jpeg', 0.93);
+            var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'px', format:[canvas.width/1.8, canvas.height/1.8]});
+            pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width/1.8, canvas.height/1.8);
+            pdf.save('Reporte_Arauca' + _sufijo_rep() + '.pdf');
+            if (btn) { btn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>'; }
+            statusLog('✅ Reporte PDF descargado','ok');
+        }).catch(function(){ if(btn){ btn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>'; } });
+    }
+
+    function exportarReporteJPEG() {
+        var btn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
+        var panel = document.getElementById('reporte-overlay');
+        if (btn) btn.textContent = '⏳ JPEG...';
+        html2canvas(panel, {scale:2, useCORS:true, backgroundColor:'#000814'}).then(function(canvas){
+            var link = document.createElement('a');
+            link.download = 'Reporte_Arauca' + _sufijo_rep() + '.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.92);
+            link.click();
+            if (btn) { btn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>'; }
+            statusLog('✅ Reporte JPEG descargado','ok');
+        }).catch(function(){ if(btn){ btn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>'; } });
+    }
+
     var _currentBasemap = 'osm';
     var _osmLayer = map.eachLayer(function(l){ if(l._url && l._url.includes('openstreetmap')) return l; });
     
@@ -2138,6 +2251,31 @@
 .pbl-coord { color:#a0e8ff; font-size:9px; font-family:monospace; display:block; margin-top:1px; }
 .pbl-concepto { color:#60b8d8; font-size:8px; font-family:monospace; display:block; margin-top:2px; opacity:0.85; }
 body.mobile-mode #panel-puntos-barrio { display:none; }
+
+/* ── Botones de exportación del reporte ── */
+.rep-export-btns {
+    display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;
+}
+.rep-exp-btn {
+    display:flex; align-items:center; gap:5px;
+    padding:6px 13px; border:none; border-radius:7px;
+    font-size:11px; font-weight:bold; cursor:pointer;
+    font-family:'Orbitron',monospace; letter-spacing:0.5px;
+    transition:all 0.18s; opacity:0.92;
+}
+.rep-exp-btn:hover { opacity:1; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.rep-exp-btn:active { transform:translateY(0); }
+.rep-exp-excel { background:#1e7e34; color:#fff; }
+.rep-exp-excel:hover { background:#25a244; }
+.rep-exp-pdf   { background:#c0392b; color:#fff; }
+.rep-exp-pdf:hover   { background:#e74c3c; }
+.rep-exp-jpg   { background:#2471a3; color:#fff; }
+.rep-exp-jpg:hover   { background:#2e86c1; }
+.rep-exp-icon { font-size:13px; }
+@media (max-width:600px) {
+    .rep-exp-btn { padding:5px 10px; font-size:10px; }
+    .rep-exp-lbl { display:none; }
+}
 </style>
 </body>
 </html>
