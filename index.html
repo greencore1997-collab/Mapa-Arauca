@@ -2963,11 +2963,11 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     var capaActiva = {};
     var _cnvRend = L.canvas({ padding: 0.5 });
 
+    window._piHide = function(e){ e.style.display = 'none'; };
     function _popupFoto(url, lbl) {
         if (!url) return '';
         return '<br><a href="' + url + '" target="_blank" style="display:block;margin-top:5px">'
-             + '<img src="' + url + '" style="max-width:220px;max-height:150px;border-radius:6px;'
-             + 'border:1px solid rgba(0,200,255,0.35)" onerror="this.style.display='none'" loading="lazy"></a>'
+             + '<img src="' + url + '" style="max-width:220px;max-height:150px;border-radius:6px;border:1px solid rgba(0,200,255,0.35)" onerror="_piHide(this)" loading="lazy"></a>'
              + '<span style="font-size:9px;opacity:0.55">' + lbl + '</span>';
     }
 
