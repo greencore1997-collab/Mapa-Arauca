@@ -532,9 +532,14 @@
             transition:max-height 0.35s ease, padding 0.35s ease;
             padding:0 12px; box-sizing:border-box;
         }
-        #panel-restricciones.panel-open { max-height:220px; padding:8px 12px; overflow-y:auto; }
-        #panel-restricciones label { display:flex; align-items:center; gap:6px; padding:3px 0; cursor:pointer; font-size:10px; color:#333; }
-        #panel-restricciones .restr-titulo { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
+        #panel-restricciones.panel-open { max-height:320px; padding:8px 12px; overflow-y:auto; }
+        #panel-restricciones .restr-titulo { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:6px; text-transform:uppercase; }
+        .restr-campos { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+        .restr-campo { background:#e8f4ff; color:#1565c0; border:1px solid rgba(21,101,192,0.3); border-radius:12px; padding:3px 8px; font-size:9px; font-family:'Orbitron',monospace; letter-spacing:0.5px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+        .restr-campo:hover { background:#d0e8ff; }
+        .restr-campo.active { background:#1565c0; color:white; border-color:#1565c0; }
+        #restr-valores label { display:flex; align-items:center; gap:6px; padding:3px 0; cursor:pointer; font-size:10px; color:#333; border-bottom:1px solid #f5f5f5; }
+        #restr-valores label:last-child { border-bottom:none; }
         </style>
 </head>
 <body>
@@ -549,7 +554,7 @@
     </div>
     <button id="btn-restricciones-desktop" onclick="toggleRestricciones()">🚫 RESTRICCIONES <span id="flecha-restricciones">▼</span></button>
     <div id="panel-restricciones">
-      <div class="restr-titulo">Ocultar barrios:</div>
+      <div class="restr-titulo">Omitir del mapa:</div>
       <div id="restr-lista"></div>
     </div>
     <div id="panel-puntos-barrio"></div>
@@ -1243,12 +1248,23 @@
         'LOS GUARATAROS','MANHATAN','MIRAMAR','MIRAMAR FRONTERA','PRIMERO DE MAYO',
         'SAN LUIS','SAN VICENTE','SANTA FE','SANTA TERESITA','VEINTE DE JULIO'];
 
-    var barriosOcultos = {}; // populated by restricciones checkboxes
+    var restriccionesActivas = {}; // campo → Set de valores a omitir
+    var restriccionCampoActivo = 'barrio';
 
     function aplicarFiltros() {
         allMarkers.forEach(function(m) {
             var b = m._barrio;
-            var hide = !!barriosOcultos[b] || (barrioFiltrado ? b !== barrioFiltrado : false);
+            var p = m._punto || {};
+            var hide = barrioFiltrado ? b !== barrioFiltrado : false;
+            if (!hide) {
+                for (var campo in restriccionesActivas) {
+                    var omitidos = restriccionesActivas[campo];
+                    if (omitidos && omitidos.size > 0) {
+                        var val = campo === 'barrio' ? b : (p[campo] || 'Sin dato');
+                        if (omitidos.has(val)) { hide = true; break; }
+                    }
+                }
+            }
             if (hide) { if (map.hasLayer(m))  map.removeLayer(m); }
             else      { if (!map.hasLayer(m)) m.addTo(map); }
         });
@@ -1267,7 +1283,7 @@
             document.getElementById('minimap-title').textContent = nombre + '  ✕';
             aplicarFiltros();
             var pts = allMarkers
-                .filter(function(m){ return m._barrio === nombre && !barriosOcultos[nombre]; })
+                .filter(function(m){ return m._barrio === nombre; })
                 .map(function(m){ return m.getLatLng(); });
             if (pts.length > 0) map.fitBounds(L.latLngBounds(pts), {padding:[30,30]});
             mostrarDialogoCoordenadas(nombre);
@@ -1345,21 +1361,65 @@
         document.getElementById('infoPanel').style.display = 'block';
     }
 
-    // ── Restricciones ──
+    // ── Restricciones (2 niveles: campo → valores) ──
+    var CAMPOS_RESTR = ['barrio', 'concepto', 'funcionario'];
+
     function buildRestrPanel() {
         var div = document.getElementById('restr-lista');
         if (!div) return;
+        var h = '<div class="restr-campos">';
+        CAMPOS_RESTR.forEach(function(c) {
+            var lbl = c.charAt(0).toUpperCase() + c.slice(1);
+            h += '<span class="restr-campo' + (c === restriccionCampoActivo ? ' active' : '')
+               + '" onclick="seleccionarCampoRestr(\'' + c + '\')">' + lbl + '</span>';
+        });
+        h += '</div><div id="restr-valores"></div>';
+        div.innerHTML = h;
+        renderRestrValores();
+    }
+
+    function seleccionarCampoRestr(campo) {
+        restriccionCampoActivo = campo;
+        document.querySelectorAll('.restr-campo').forEach(function(el) {
+            el.classList.toggle('active', el.textContent.trim().toLowerCase() === campo.toLowerCase());
+        });
+        renderRestrValores();
+    }
+
+    function renderRestrValores() {
+        var div = document.getElementById('restr-valores');
+        if (!div) return;
+        var campo = restriccionCampoActivo;
+        var omitidos = restriccionesActivas[campo] || new Set();
+        var conteos = {};
+        allMarkers.forEach(function(m) {
+            var val = campo === 'barrio'
+                ? (m._barrio || 'Sin dato')
+                : ((m._punto && m._punto[campo]) || 'Sin dato');
+            conteos[val] = (conteos[val] || 0) + 1;
+        });
+        var keys = Object.keys(conteos).sort();
+        if (!keys.length) {
+            div.innerHTML = '<em style="color:#999;font-size:9px;padding:4px 0;display:block;">Sin datos para este campo</em>';
+            return;
+        }
         var h = '';
-        BARRIOS_LISTA.forEach(function(b) {
-            h += '<label style="display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;font-size:10px;color:#333;">'
-               + '<input type="checkbox" checked onchange="toggleRestriccion(\'' + b + '\',this)"> ' + b
+        keys.forEach(function(v) {
+            var safe = v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            h += '<label>'
+               + '<input type="checkbox"' + (omitidos.has(v) ? '' : ' checked')
+               + ' onchange="toggleRestriccionValor(\'' + campo + '\',\'' + safe + '\',this)">'
+               + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + v + '">' + v + '</span>'
+               + '<span style="font-size:8px;color:#999;background:#f0f0f0;border-radius:8px;padding:1px 5px;flex-shrink:0;">' + conteos[v] + '</span>'
                + '</label>';
         });
         div.innerHTML = h;
     }
 
-    function toggleRestriccion(barrio, cb) {
-        barriosOcultos[barrio] = !cb.checked;
+    function toggleRestriccionValor(campo, valor, cb) {
+        if (!restriccionesActivas[campo]) restriccionesActivas[campo] = new Set();
+        if (cb.checked) restriccionesActivas[campo].delete(valor);
+        else restriccionesActivas[campo].add(valor);
         aplicarFiltros();
     }
 
