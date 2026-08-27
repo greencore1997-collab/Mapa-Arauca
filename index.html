@@ -708,25 +708,37 @@
             100% { transform:translateX(-100vw); opacity:0; }
         }
         
-
-        /* ══ INTRO SPHERE CANVAS ══ */
-        #s1-sphere-canvas {
-            display: block;
-            width: 220px;
-            height: 220px;
-            margin: 0 auto 18px auto;
+        /* ══ PRE-INTRO ENERGY SPHERE ══ */
+        #pre-intro {
+            position: fixed; inset: 0; z-index: 999999;
+            background: #000814; cursor: pointer; overflow: hidden;
+            opacity: 1; transition: opacity 0.8s ease-out;
         }
+        #pre-intro-canvas { position: absolute; inset: 0; display: block; }
+        #pre-intro-hint {
+            position: absolute; bottom: 58px; left: 50%;
+            transform: translateX(-50%);
+            color: rgba(100,200,255,0.7); font-size: 13px;
+            letter-spacing: 4px; font-family: 'Roboto', sans-serif;
+            white-space: nowrap;
+            animation: pi-blink 2.4s ease-in-out infinite;
+        }
+        @keyframes pi-blink { 0%,100%{ opacity:0.2; } 50%{ opacity:1; } }
 </style>
 </head>
 <body>
 
+<!-- ════ PRE-INTRO SPHERE ════ -->
+<div id="pre-intro">
+  <canvas id="pre-intro-canvas"></canvas>
+  <div id="pre-intro-hint">· TOCA PARA INICIAR ·</div>
+</div>
 <!-- ════ INTRO SPLASH ════ -->
 <div id="intro-overlay">
   <div class="ic tl"></div><div class="ic tr"></div>
   <div class="ic bl"></div><div class="ic br"></div>
   <img id="intro-shield" src="" alt="">
   <div id="intro-s1">
-    <canvas id="s1-sphere-canvas"></canvas>
     <div id="intro-geovisor">GEOVISOR</div>
     <div id="intro-araucana">ARAUCANA DE GASES</div>
     <button id="intro-entrar" onclick="introEntrar()">
@@ -2635,27 +2647,40 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
 
 <script>
-/* ══ INTRO S1 SPHERE ══ */
+/* ══ PRE-INTRO SPHERE ══ */
 (function(){
-  var cnv = document.getElementById('s1-sphere-canvas');
-  if (!cnv) return;
-  var W = 440, H = 440;
-  cnv.width = W; cnv.height = H;
+  var el    = document.getElementById('pre-intro');
+  var cnv   = document.getElementById('pre-intro-canvas');
+  if (!el || !cnv) return;
+
   var ctx = cnv.getContext('2d');
   var angle = 0, tilt = -0.3;
   var RPS = 0.3, FRAME_MS = 1000/80, lastT = 0, acc = 0;
-  var N_LON = 16, N_LAT = 9, SEGS = 64, R = 185;
-  var CX = W/2, CY = H/2;
+  var N_LON = 16, N_LAT = 9, SEGS = 64;
+  var clicked = false;
+
+  function resize() {
+    cnv.width  = window.innerWidth;
+    cnv.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
   function proj(lat, lon) {
+    var W = cnv.width, H = cnv.height;
+    var R = Math.min(W, H) * 0.38;
     var x = Math.cos(lat)*Math.sin(lon+angle);
     var y = Math.sin(lat)*Math.cos(tilt) - Math.cos(lat)*Math.cos(lon+angle)*Math.sin(tilt);
     var z = Math.sin(lat)*Math.sin(tilt) + Math.cos(lat)*Math.cos(lon+angle)*Math.cos(tilt);
-    return {x: CX+x*R, y: CY-y*R, z: z};
+    return {x: W/2+x*R, y: H/2-y*R, z: z, R: R, W: W, H: H};
   }
 
   function draw() {
+    var W = cnv.width, H = cnv.height;
+    var R = Math.min(W, H) * 0.38;
+    var CX = W/2, CY = H/2;
     ctx.clearRect(0,0,W,H);
+
     var bg = ctx.createRadialGradient(CX,CY,0,CX,CY,R*1.1);
     bg.addColorStop(0,'rgba(0,70,160,0.18)');
     bg.addColorStop(0.6,'rgba(0,30,90,0.08)');
@@ -2670,7 +2695,7 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         if(f){ctx.moveTo(p.x,p.y);f=false;}else ctx.lineTo(p.x,p.y);
       }
       var a=0.12+0.28*Math.max(0,Math.cos(lon+angle));
-      ctx.strokeStyle='rgba(0,180,255,'+a+')'; ctx.lineWidth=0.7; ctx.stroke();
+      ctx.strokeStyle='rgba(0,180,255,'+a+')'; ctx.lineWidth=0.8; ctx.stroke();
     }
 
     for(var j=1;j<N_LAT;j++){
@@ -2692,16 +2717,16 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         if(pa.z<0){fa=true;continue;}
         if(fa){ctx.moveTo(pa.x,pa.y);fa=false;}else ctx.lineTo(pa.x,pa.y);
       }
-      ctx.strokeStyle='rgba(120,240,255,0.45)'; ctx.lineWidth=1.1; ctx.stroke();
+      ctx.strokeStyle='rgba(120,240,255,0.45)'; ctx.lineWidth=1.2; ctx.stroke();
     }
 
     [[Math.PI/2-0.01,0],[-Math.PI/2+0.01,0]].forEach(function(ll){
       var pp=proj(ll[0],ll[1]); if(pp.z<0)return;
-      var g=ctx.createRadialGradient(pp.x,pp.y,0,pp.x,pp.y,32);
+      var g=ctx.createRadialGradient(pp.x,pp.y,0,pp.x,pp.y,R*0.17);
       g.addColorStop(0,'rgba(100,220,255,0.9)');
       g.addColorStop(0.4,'rgba(0,150,255,0.4)');
       g.addColorStop(1,'rgba(0,0,255,0)');
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(pp.x,pp.y,32,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(pp.x,pp.y,R*0.17,0,Math.PI*2); ctx.fill();
     });
 
     var ring=ctx.createRadialGradient(CX,CY,R*0.88,CX,CY,R*1.12);
@@ -2711,11 +2736,30 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     ctx.fillStyle=ring; ctx.beginPath(); ctx.arc(CX,CY,R*1.12,0,Math.PI*2); ctx.fill();
   }
 
+  /* Click → desvanece pre-intro → lanza animaciones de intro-s1 */
+  el.addEventListener('click', function(){
+    if (clicked) return;
+    clicked = true;
+    el.style.opacity = '0';
+    setTimeout(function(){
+      el.style.display = 'none';
+      /* Reiniciar animaciones de intro-s1 desde cero */
+      ['intro-geovisor','intro-araucana','intro-entrar','intro-shield'].forEach(function(id){
+        var e = document.getElementById(id);
+        if (!e) return;
+        e.style.animation = 'none';
+        void e.offsetWidth;
+        e.style.animation = '';
+      });
+    }, 800);
+  });
+
   function loop(ts){
-    if(!lastT)lastT=ts;
+    if(!lastT) lastT=ts;
     acc+=ts-lastT; lastT=ts;
-    while(acc>=FRAME_MS){angle+=Math.PI*2*RPS*(FRAME_MS/1000);acc-=FRAME_MS;}
-    draw(); requestAnimationFrame(loop);
+    while(acc>=FRAME_MS){ angle+=Math.PI*2*RPS*(FRAME_MS/1000); acc-=FRAME_MS; }
+    draw();
+    requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 })();
