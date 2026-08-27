@@ -715,6 +715,26 @@
             opacity: 1; transition: opacity 0.8s ease-out;
         }
         #pre-intro-canvas { position: absolute; inset: 0; display: block; }
+        #pre-intro-title {
+            position: absolute; top: 42px; left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0,220,255,0.92); font-size: 28px;
+            letter-spacing: 12px; font-family: 'Orbitron', monospace;
+            font-weight: 700; white-space: nowrap; text-align: center;
+            text-shadow: 0 0 18px rgba(0,200,255,0.7), 0 0 40px rgba(0,180,255,0.3);
+            animation: pi-title-in 1.2s cubic-bezier(0.15,0,0.35,1) 0.2s both;
+            pointer-events: none;
+        }
+        #pre-intro-subtitle {
+            position: absolute; top: 82px; left: 50%;
+            transform: translateX(-50%);
+            color: rgba(100,200,255,0.50); font-size: 9px;
+            letter-spacing: 5px; font-family: 'Orbitron', monospace;
+            font-weight: 400; white-space: nowrap; text-align: center;
+            animation: pi-title-in 1.2s cubic-bezier(0.15,0,0.35,1) 0.45s both;
+            pointer-events: none;
+        }
+        @keyframes pi-title-in { from{ opacity:0; transform:translateX(-50%) translateY(-10px); } to{ opacity:1; transform:translateX(-50%) translateY(0); } }
         #pre-intro-hint {
             position: absolute; bottom: 58px; left: 50%;
             transform: translateX(-50%);
@@ -766,6 +786,8 @@
 <!-- ════ PRE-INTRO SPHERE ════ -->
 <div id="pre-intro">
   <canvas id="pre-intro-canvas"></canvas>
+  <div id="pre-intro-title">GEOVISOR</div>
+  <div id="pre-intro-subtitle">ARAUCANA DE GASES · RED DE DISTRIBUCIÓN GLP</div>
   <div id="pre-intro-hint">· TOCA PARA INICIAR ·</div>
 </div>
 <!-- ════ INTRO SPLASH ════ -->
