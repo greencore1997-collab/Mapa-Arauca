@@ -2437,9 +2437,31 @@
 
     // ══════ INTRO SPLASH LOGIC ══════
     (function() {
-        // Usar el logo original de Araucana de Gases desde el header
+        // Logos
         var hLogo = document.querySelector('#header-logo img');
         if (hLogo) document.getElementById('intro-shield').src = hLogo.src;
+        var _footerGC = document.querySelector('#footer-credito img');
+        var _gcSrc = _footerGC ? _footerGC.src : '';
+
+        function _avisosSspd() {
+            // Aviso SSPD: 5 s después de que el mapa es visible
+            setTimeout(function(){
+                var av=document.getElementById('aviso-sspd');
+                if(!av) return;
+                av.classList.add('sspd-visible');
+                // Desaparece después de 12 s → luego aviso Araucana
+                setTimeout(function(){
+                    av.classList.remove('sspd-visible');
+                    // Segundo aviso: 15 s después del primer letrero
+                    setTimeout(function(){
+                        var av2=document.getElementById('aviso-araucana');
+                        if(!av2) return;
+                        av2.classList.add('sspd-visible');
+                        setTimeout(function(){ av2.classList.remove('sspd-visible'); }, 12000);
+                    }, 15000);
+                }, 12000);
+            }, 5000);
+        }
 
         window.introEntrar = function() {
             var s1 = document.getElementById('intro-s1');
@@ -2447,53 +2469,68 @@
             s1.style.opacity = '0';
             setTimeout(function() {
                 s1.style.display = 'none';
-                // Show loading bar
+                // Mostrar barra de carga
                 var bw = document.getElementById('intro-bar-wrap');
                 bw.style.display = 'block';
                 var bar = document.getElementById('intro-bar');
-                var t0 = Date.now(), dur = 3000;
+                var t0 = Date.now(), dur = 3500; // 3,5 segundos
 
                 function tick() {
                     var pct = Math.min((Date.now()-t0)/dur*100, 100);
                     bar.style.width = pct + '%';
                     if (pct < 100) { requestAnimationFrame(tick); }
                     else {
-                        // bar done → wait 0.2s → hide bar → wait 0.2s → slide exit
+                        // Barra completa → desvanece barra
                         setTimeout(function() {
                             bw.style.transition = 'opacity 0.18s';
                             bw.style.opacity = '0';
                             setTimeout(function() {
-                                var ov = document.getElementById('intro-overlay');
-                                ov.classList.add('intro-exit');
-                                setTimeout(function(){
-                                ov.style.display='none';
-                                // Aviso SSPD: 5 s después de que el mapa es visible
-                                setTimeout(function(){
-                                    var av=document.getElementById('aviso-sspd');
-                                    if(!av) return;
-                                    av.classList.add('sspd-visible');
-                                    // Desaparece después de 12 s → luego aviso Araucana
-                                    setTimeout(function(){
-                                        av.classList.remove('sspd-visible');
-                                        // Segundo aviso: 15 s después del primer letrero
-                                        setTimeout(function(){
-                                            var av2=document.getElementById('aviso-araucana');
-                                            if(!av2) return;
-                                            av2.classList.add('sspd-visible');
-                                            setTimeout(function(){
-                                                av2.classList.remove('sspd-visible');
-                                            }, 12000);
-                                        }, 15000);
-                                    }, 12000);
-                                }, 5000);
-                            }, 470);
+                                bw.style.display = 'none';
+                                // ── Mover letrero GREEN CORE al centro ──
+                                var cred = document.getElementById('intro-credito');
+                                cred.style.transition = 'none';
+                                cred.style.animation  = 'none';
+                                cred.style.opacity     = '0.9';
+                                cred.style.letterSpacing = '0.18em';
+                                cred.getBoundingClientRect(); // reflow
+                                cred.style.transition  = 'bottom 0.65s cubic-bezier(0.3,0,0.2,1), transform 0.65s cubic-bezier(0.3,0,0.2,1), font-size 0.5s ease, opacity 0.35s ease';
+                                cred.style.bottom      = '50%';
+                                cred.style.transform   = 'translateY(50%)';
+                                cred.style.fontSize    = 'clamp(10px,2vw,16px)';
+                                // ── Tras desplazamiento (650ms) + 2,5 s → "INNOVACION Y GESTION" ──
+                                setTimeout(function() {
+                                    cred.style.opacity = '0';
+                                    setTimeout(function() {
+                                        cred.textContent = 'INNOVACIÓN Y GESTIÓN';
+                                        cred.style.opacity = '0.9';
+                                        // ── Tras 1,5 s → logo Green Core ──
+                                        setTimeout(function() {
+                                            cred.style.opacity = '0';
+                                            setTimeout(function() {
+                                                cred.innerHTML = _gcSrc
+                                                    ? '<img src="'+_gcSrc+'" style="height:72px;display:block;margin:0 auto;background:transparent;" alt="Green Core Analytics">'
+                                                    : '<span>GREEN CORE ANALYTICS</span>';
+                                                cred.style.opacity = '1';
+                                                // ── Tras 1 s → salida del overlay ──
+                                                setTimeout(function() {
+                                                    var ov = document.getElementById('intro-overlay');
+                                                    ov.classList.add('intro-exit');
+                                                    setTimeout(function(){
+                                                        ov.style.display='none';
+                                                        _avisosSspd();
+                                                    }, 470);
+                                                }, 1000);
+                                            }, 350);
+                                        }, 1500);
+                                    }, 350);
+                                }, 650 + 2500);
                             }, 200);
                         }, 200);
                     }
                 }
                 requestAnimationFrame(tick);
 
-                // Credit text after 1 s
+                // Letrero crédito aparece a 1 s
                 setTimeout(function() {
                     document.getElementById('intro-credito').classList.add('iv');
                 }, 1000);
