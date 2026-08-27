@@ -347,6 +347,44 @@
         body.mobile-mode #opciones-menu {
             top:auto; bottom:calc(45vh + 192px); left:52px;
         }
+        /* BOTÓN LIMPIAR */
+        #btn-limpiar {
+            position:absolute; top:212px; left:10px; z-index:900;
+            background:rgba(160,25,25,0.88); color:#fff;
+            border:none; border-left:3px solid #ff4444;
+            border-top:1px solid rgba(255,100,100,0.35);
+            border-right:1px solid rgba(255,100,100,0.15);
+            border-bottom:1px solid rgba(255,100,100,0.15);
+            padding:7px 12px; border-radius:8px; font-size:11px; font-weight:bold;
+            cursor:pointer; letter-spacing:0.6px;
+            box-shadow:0 0 16px rgba(255,60,60,0.4); transition:all 0.2s;
+            backdrop-filter:blur(6px); font-family:'Orbitron',monospace;
+        }
+        #btn-limpiar:hover { background:rgba(210,30,30,0.95); box-shadow:0 0 24px rgba(255,60,60,0.6); transform:scale(1.04); }
+        body.mobile-mode #btn-limpiar { top:212px; left:10px; }
+
+        /* MODAL LIMPIAR */
+        #modal-limpiar {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.68); z-index:9999; align-items:center; justify-content:center;
+        }
+        #modal-limpiar.visible { display:flex; }
+        .mlim-box {
+            background:rgba(0,8,25,0.97); border-radius:14px; padding:26px 28px;
+            max-width:360px; width:90%;
+            box-shadow:0 0 40px rgba(255,60,60,0.3), 0 8px 32px rgba(0,0,0,0.55);
+            border-left:4px solid #ff4444; border-top:1px solid rgba(255,80,80,0.3);
+            border-right:1px solid rgba(255,80,80,0.1); border-bottom:1px solid rgba(255,80,80,0.1);
+        }
+        .mlim-box h3 { font-size:14px; color:#ff7777; margin-bottom:10px; font-family:'Orbitron',monospace; letter-spacing:0.5px; }
+        .mlim-box p { font-size:12px; color:#aac8e0; margin:6px 0; line-height:1.65; }
+        .mlim-btns { display:flex; gap:10px; margin-top:18px; }
+        .mlim-btns button { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-size:12px; font-weight:bold; font-family:'Orbitron',monospace; letter-spacing:0.4px; transition:all 0.18s; }
+        #mlim-si { background:#cc2222; color:#fff; border-left:2px solid #ff4444; }
+        #mlim-si:hover { background:#e53333; transform:translateY(-1px); }
+        #mlim-no { background:rgba(0,20,50,0.85); color:#00c8ff; border:1px solid #00c8ff; }
+        #mlim-no:hover { background:rgba(0,40,80,0.95); }
+
         #opc-toast {
             display:none; position:fixed; top:18px; left:50%;
             transform:translateX(-50%); background:#1565c0; color:white;
@@ -695,6 +733,22 @@
         <div class="opc-item" onclick="actualizarExcel()"><span class="opc-icon">&#128202;</span>Cargar Excel</div>
         <div class="opc-item" onclick="actualizarKML()"><span class="opc-icon">&#128506;</span>Cargar KML</div>
     </div>
+    <button id="btn-limpiar" onclick="limpiarGeovisor()" title="Limpiar todos los datos cargados">🗑️ LIMPIAR</button>
+
+    <!-- Modal confirmación limpiar -->
+    <div id="modal-limpiar">
+        <div class="mlim-box">
+            <h3>⚠️ LIMPIAR GEOVISOR</h3>
+            <p>Esta acción eliminará todos los datos actualmente cargados:</p>
+            <p style="margin-top:6px;">📊 Puntos del Excel &nbsp;·&nbsp; 🗺️ Polígonos del KML<br>🔽 Filtros y selecciones activas</p>
+            <p style="color:#ff9999;margin-top:10px;font-size:11px;">Podrás cargar nuevos archivos Excel y KML desde cero.</p>
+            <div class="mlim-btns">
+                <button id="mlim-si" onclick="confirmarLimpiar()">✅ Sí, limpiar</button>
+                <button id="mlim-no" onclick="document.getElementById('modal-limpiar').classList.remove('visible')">✕ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="opc-toast"></div>
     <div id="modal-conversion">
         <div class="modal-box">
@@ -896,6 +950,60 @@
         }
     }
     function cerrarOpciones(){ document.getElementById('opciones-menu').classList.remove('visible'); }
+    function limpiarGeovisor(){
+        document.getElementById('modal-limpiar').classList.add('visible');
+    }
+    function confirmarLimpiar(){
+        document.getElementById('modal-limpiar').classList.remove('visible');
+
+        // 1. Quitar todos los marcadores del mapa
+        allMarkers.forEach(function(m){ if(map.hasLayer(m)) map.removeLayer(m); });
+        allMarkers = [];
+
+        // 2. Quitar polígonos del minimap (cargados por KML)
+        Object.values(miniLayers).forEach(function(l){ minimap.removeLayer(l); });
+        miniLayers = {};
+        window._poligonosCargados = null;
+
+        // 3. Resetear filtros
+        barrioFiltrado = null;
+        barrioActivo   = null;
+        if(typeof restriccionesActivas !== 'undefined') restriccionesActivas = {};
+
+        // 4. Resetear colores (se regeneran al cargar nuevo Excel)
+        colores = {};
+
+        // 5. Minimap title y destaque
+        document.getElementById('minimap-title').textContent = 'Delimitación barrios';
+        destacarMinimap(null);
+
+        // 6. Ocultar paneles de punto e info
+        document.getElementById('infoPanel').style.display = 'none';
+        var pblPanel = document.getElementById('panel-puntos-barrio');
+        if(pblPanel) pblPanel.classList.remove('visible');
+
+        // 7. Limpiar leyenda lateral
+        var leg = document.getElementById('legend');
+        if(leg){
+            leg.innerHTML = '<p style="font-size:11px;color:#aaa;padding:8px 2px;text-align:center;">Carga un Excel para ver los barrios</p>';
+            leg.classList.remove('legend-open');
+        }
+        var btnBarrios = document.getElementById('btn-barrios-desktop');
+        if(btnBarrios) btnBarrios.classList.remove('abierto');
+
+        // 8. Limpiar panel de restricciones
+        var panelRestr = document.getElementById('panel-restricciones');
+        if(panelRestr) panelRestr.innerHTML = '<p style="font-size:11px;color:#aaa;padding:8px 2px;text-align:center;">Sin datos cargados</p>';
+
+        // 9. Ocultar status log
+        document.getElementById('geovisor-status').style.display = 'none';
+
+        // 10. Vista general
+        map.setView([7.08, -70.76], 11);
+
+        statusLog('🧹 Geovisor limpio — listo para cargar nuevos datos', 'ok');
+    }
+
     function statusLog(msg, tipo){
         var panel=document.getElementById('geovisor-status');
         panel.style.display='block';
