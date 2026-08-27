@@ -707,9 +707,267 @@
             0%   { transform:translateX(0); opacity:1; }
             100% { transform:translateX(-100vw); opacity:0; }
         }
-        </style>
+        
+        /* ══ PRE-INTRO ENERGY SPHERE ══ */
+        #pre-intro {
+            position:fixed; inset:0; z-index:999999;
+            background:#000814; cursor:pointer; overflow:hidden;
+        }
+        #pre-intro-canvas { position:absolute; inset:0; display:block; }
+        #pre-intro-hint {
+            position:absolute; bottom:58px; left:0; right:0;
+            text-align:center;
+            font-family:'Orbitron',monospace;
+            font-size:clamp(9px,1.5vw,13px);
+            color:rgba(0,200,255,0.65);
+            letter-spacing:0.42em;
+            animation:pi-blink 2.4s ease-in-out infinite;
+            pointer-events:none; user-select:none;
+            transition:opacity 0.4s;
+        }
+        @keyframes pi-blink {
+            0%,100%{ opacity:0.2; }
+            50%    { opacity:1;   }
+        }
+</style>
 </head>
 <body>
+
+<!-- ════ PRE-INTRO SPHERE ════ -->
+<div id="pre-intro">
+  <canvas id="pre-intro-canvas"></canvas>
+  <div id="pre-intro-hint">· TOCA PARA INICIAR ·</div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var cv=document.getElementById('pre-intro-canvas');
+  var ctx=cv.getContext('2d');
+  var hint=document.getElementById('pre-intro-hint');
+  var overlay=document.getElementById('pre-intro');
+  var W,H,CX,CY,R;
+
+  function resize(){
+    W=cv.width=window.innerWidth;
+    H=cv.height=window.innerHeight;
+    CX=W/2; CY=H/2;
+    R=Math.min(W,H)*0.28;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  // Star field
+  var stars=[];
+  for(var i=0;i<200;i++){
+    stars.push({
+      x:Math.random(),y:Math.random(),
+      r:0.3+Math.random()*1.5,
+      a:0.1+Math.random()*0.7,
+      sp:0.4+Math.random()*1.8,
+      ph:Math.random()*Math.PI*2
+    });
+  }
+
+  var rps=0.7, angle=0, tilt=-0.3;
+  var clicked=false, clickTs=0, done=false;
+  var prevTs=null, acc=0;
+  var FRAME_MS=1000/80;
+  var N_LON=16, N_LAT=9, SEGS=64;
+
+  function rot(x,y,z,ay,ax){
+    var rx=x*Math.cos(ay)-z*Math.sin(ay);
+    var rz=x*Math.sin(ay)+z*Math.cos(ay);
+    var ry=y*Math.cos(ax)-rz*Math.sin(ax);
+    var rz2=y*Math.sin(ax)+rz*Math.cos(ax);
+    return [rx,ry,rz2];
+  }
+
+  function drawPts(pts,energy,maxA,wBase){
+    for(var i=0;i<pts.length-1;i++){
+      var a=pts[i],b=pts[i+1];
+      var zf=((a.z+b.z)/2/R+1)/2;
+      var alpha=Math.min(0.98,maxA*(0.06+zf*0.94)*(0.55+energy*0.45));
+      if(alpha<0.018) continue;
+      ctx.beginPath();
+      ctx.moveTo(a.px,a.py);
+      ctx.lineTo(b.px,b.py);
+      ctx.lineWidth=wBase*(0.5+zf*0.7)*(0.65+energy*0.45);
+      ctx.strokeStyle='rgba(0,200,255,'+alpha.toFixed(3)+')';
+      ctx.stroke();
+    }
+  }
+
+  function drawPole(p,ts,energy){
+    if(p[2]<-R*0.15) return;
+    var px=CX+p[0],py=CY+p[1];
+    var pls=0.65+0.35*Math.sin(ts*0.006);
+    var pr=R*0.11*pls*(1+energy*0.55);
+    var pg=ctx.createRadialGradient(px,py,0,px,py,pr*4);
+    pg.addColorStop(0,'rgba(255,255,255,'+(0.88+energy*0.12)+')');
+    pg.addColorStop(0.18,'rgba(100,230,255,'+(0.72+energy*0.28)+')');
+    pg.addColorStop(0.55,'rgba(0,140,255,'+(0.28+energy*0.5)+')');
+    pg.addColorStop(1,'rgba(0,30,180,0)');
+    ctx.fillStyle=pg;
+    ctx.beginPath();
+    ctx.arc(px,py,pr*4,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  function draw(ts){
+    var energy=0;
+    if(clicked){
+      var el=(ts-clickTs)/1000;
+      energy=Math.min(1, el<0.5 ? el/0.5 : 1);
+    }
+    var pulse=0.86+0.14*Math.sin(ts*0.0022);
+
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    var bg=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.sqrt(W*W+H*H)/1.8);
+    bg.addColorStop(0,'#000e2a');
+    bg.addColorStop(1,'#000208');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    // Stars
+    for(var s of stars){
+      var twinkle=s.a*(0.65+0.35*Math.sin(ts*0.001*s.sp+s.ph));
+      ctx.beginPath();
+      ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(210,225,255,'+twinkle.toFixed(3)+')';
+      ctx.fill();
+    }
+
+    // Corona
+    var cR=R*(1.55+energy*0.75)*pulse;
+    var cor=ctx.createRadialGradient(CX,CY,R*0.35,CX,CY,cR);
+    cor.addColorStop(0,'rgba(0,110,255,'+(0.18+energy*0.32)+')');
+    cor.addColorStop(0.45,'rgba(0,45,200,'+(0.055+energy*0.1)+')');
+    cor.addColorStop(1,'rgba(0,0,35,0)');
+    ctx.fillStyle=cor;
+    ctx.beginPath(); ctx.arc(CX,CY,cR,0,Math.PI*2); ctx.fill();
+
+    // Core glow
+    var cg=ctx.createRadialGradient(CX,CY,0,CX,CY,R*1.05);
+    cg.addColorStop(0,'rgba(155,220,255,'+(0.14+energy*0.26)+')');
+    cg.addColorStop(0.4,'rgba(0,145,255,'+(0.09+energy*0.2)+')');
+    cg.addColorStop(1,'rgba(0,15,90,0)');
+    ctx.fillStyle=cg;
+    ctx.beginPath(); ctx.arc(CX,CY,R*1.05,0,Math.PI*2); ctx.fill();
+
+    var ay=angle, ax=tilt;
+
+    // ── Longitude lines ──
+    for(var i=0;i<N_LON;i++){
+      var lon=(i/N_LON)*Math.PI*2;
+      var pts=[];
+      for(var j=0;j<=SEGS;j++){
+        var lat=(j/SEGS)*Math.PI-Math.PI/2;
+        var p=rot(R*Math.cos(lat)*Math.cos(lon), R*Math.sin(lat), R*Math.cos(lat)*Math.sin(lon), ay,ax);
+        pts.push({px:CX+p[0],py:CY+p[1],z:p[2]});
+      }
+      drawPts(pts,energy,0.68,0.72);
+    }
+
+    // ── Latitude lines ──
+    for(var i=0;i<=N_LAT;i++){
+      var lat2=(i/N_LAT)*Math.PI-Math.PI/2;
+      var isEq=(i===Math.round(N_LAT/2));
+      var pts=[];
+      for(var j=0;j<=SEGS*2;j++){
+        var lon2=(j/(SEGS*2))*Math.PI*2;
+        var p=rot(R*Math.cos(lat2)*Math.cos(lon2), R*Math.sin(lat2), R*Math.cos(lat2)*Math.sin(lon2), ay,ax);
+        pts.push({px:CX+p[0],py:CY+p[1],z:p[2]});
+      }
+      drawPts(pts,energy,isEq?0.9:0.52,isEq?1.1:0.68);
+    }
+
+    // ── Poles ──
+    drawPole(rot(0,-R,0,ay,ax),ts,energy);
+    drawPole(rot(0, R,0,ay,ax),ts,energy);
+
+    // ── Energy arcs ──
+    if(energy>0.04){
+      var nA=Math.floor(2+energy*7);
+      var t2=ts/1000;
+      for(var a=0;a<nA;a++){
+        var la1=Math.sin(t2*0.38+a*1.31)*0.78;
+        var lo1=angle*1.25+(a/nA)*Math.PI*2+t2*0.18;
+        var la2=Math.sin(t2*0.55+a*1.73+1.1)*0.52;
+        var lo2=lo1+0.55+Math.sin(t2*0.42+a)*0.55;
+
+        var x1=R*Math.cos(la1)*Math.cos(lo1),y1=R*Math.sin(la1),z1=R*Math.cos(la1)*Math.sin(lo1);
+        var x2=R*Math.cos(la2)*Math.cos(lo2),y2=R*Math.sin(la2),z2=R*Math.cos(la2)*Math.sin(lo2);
+        var r1=rot(x1,y1,z1,ay,ax), r2=rot(x2,y2,z2,ay,ax);
+        if(r1[2]<-R*0.12||r2[2]<-R*0.12) continue;
+
+        var p1x=CX+r1[0],p1y=CY+r1[1];
+        var p2x=CX+r2[0],p2y=CY+r2[1];
+        var mcx=(p1x+p2x)/2+(Math.random()-0.5)*R*0.55;
+        var mcy=(p1y+p2y)/2+(Math.random()-0.5)*R*0.55;
+
+        ctx.save();
+        ctx.shadowColor='rgba(0,255,190,0.85)';
+        ctx.shadowBlur=7+energy*14;
+        ctx.beginPath();
+        ctx.moveTo(p1x,p1y);
+        ctx.quadraticCurveTo(mcx,mcy,p2x,p2y);
+        ctx.strokeStyle='rgba(0,255,175,'+(energy*0.72).toFixed(3)+')';
+        ctx.lineWidth=0.8+energy*2.2;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // Flash on click
+    if(clicked){
+      var fe=ts-clickTs;
+      if(fe<380){
+        ctx.fillStyle='rgba(0,180,255,'+(0.38*(1-fe/380)).toFixed(3)+')';
+        ctx.fillRect(0,0,W,H);
+      }
+    }
+  }
+
+  function loop(ts){
+    if(done) return;
+    if(!prevTs) prevTs=ts;
+    var dt=Math.min(ts-prevTs,50); // cap dt to avoid huge jumps
+    prevTs=ts;
+    acc+=dt;
+
+    // update logic at TARGET_FPS
+    while(acc>=FRAME_MS){
+      acc-=FRAME_MS;
+      if(clicked){
+        var el2=(ts-clickTs)/1000;
+        rps = el2<0.5 ? 0.7+(5-0.7)*(el2/0.5) : 5;
+        if(el2>=3&&!done){
+          done=true;
+          overlay.style.transition='opacity 0.6s ease';
+          overlay.style.opacity='0';
+          setTimeout(function(){overlay.style.display='none';},650);
+          return;
+        }
+      }
+      angle+=rps*2*Math.PI*(FRAME_MS/1000);
+    }
+
+    draw(ts);
+    requestAnimationFrame(loop);
+  }
+
+  overlay.addEventListener('click',function(){
+    if(!clicked){
+      clicked=true;
+      clickTs=performance.now();
+      hint.style.opacity='0';
+    }
+  });
+
+  requestAnimationFrame(loop);
+})();
+</script>
 
 <!-- ════ INTRO SPLASH ════ -->
 <div id="intro-overlay">
