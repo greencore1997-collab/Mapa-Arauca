@@ -1332,6 +1332,19 @@
             var sinBarrio=nuevos.filter(function(p){return p.barrio==='SIN BARRIO';}).length;
             statusLog('✅ Cargado: '+nuevos.length+' puntos ('+(nuevos.length-sinBarrio)+' con barrio)','ok');
             if(sinBarrio>0) statusLog('⚠️ '+sinBarrio+' puntos sin barrio asignado','error');
+
+            // Reaplicar filtro de minimap si estaba activo
+            aplicarFiltros();
+            if(barrioFiltrado){
+                document.getElementById('minimap-title').textContent = barrioFiltrado + '  ✕';
+                destacarMinimap(barrioFiltrado);
+                mostrarDialogoCoordenadas(barrioFiltrado);
+                var fpts = allMarkers
+                    .filter(function(m){ return m._barrio === barrioFiltrado; })
+                    .map(function(m){ return m.getLatLng(); });
+                if(fpts.length > 0) map.fitBounds(L.latLngBounds(fpts), {padding:[30,30]});
+                statusLog('🏘️ Filtro activo: '+barrioFiltrado+' ('+fpts.length+' puntos)','ok');
+            }
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
