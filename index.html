@@ -1976,32 +1976,103 @@
         statusLog('✅ Reporte Excel descargado','ok');
     }
 
+    // ── Helper: clona el reporte en un div sin restricciones de altura y lo captura completo ──
+    function _buildReporteClone() {
+        var overlay = document.getElementById('reporte-overlay');
+        var panelW  = overlay.offsetWidth || 560;
+
+        var wrap = document.createElement('div');
+        wrap.style.cssText = [
+            'position:absolute',
+            'top:-999999px',
+            'left:0',
+            'width:' + panelW + 'px',
+            'background:rgba(0,8,25,0.97)',
+            'border-left:4px solid #00c8ff',
+            'overflow:visible',
+            'z-index:-9999',
+            'box-sizing:border-box'
+        ].join(';');
+
+        // Clonar header (sin sticky)
+        var hdr = overlay.querySelector('.rep-header');
+        var hClone = hdr.cloneNode(true);
+        hClone.style.position = 'relative';
+        hClone.style.top = '0';
+        // Ocultar botones de exportación en el descargable
+        var expBtns = hClone.querySelector('.rep-export-btns');
+        if (expBtns) expBtns.style.display = 'none';
+        wrap.appendChild(hClone);
+
+        // Clonar body sin restricción de altura
+        var body = document.getElementById('reporte-body');
+        var bClone = body.cloneNode(true);
+        bClone.style.height   = 'auto';
+        bClone.style.maxHeight = 'none';
+        bClone.style.overflow  = 'visible';
+        wrap.appendChild(bClone);
+
+        document.body.appendChild(wrap);
+        return wrap;
+    }
+
     function exportarReportePDF() {
-        var btn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
-        var panel = document.getElementById('reporte-overlay');
-        if (btn) btn.textContent = '⏳ PDF...';
-        html2canvas(panel, {scale:1.8, useCORS:true, backgroundColor:'#000814'}).then(function(canvas){
-            var imgData = canvas.toDataURL('image/jpeg', 0.93);
-            var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'px', format:[canvas.width/1.8, canvas.height/1.8]});
-            pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width/1.8, canvas.height/1.8);
-            pdf.save('Reporte_Arauca' + _sufijo_rep() + '.pdf');
-            if (btn) { btn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>'; }
-            statusLog('✅ Reporte PDF descargado','ok');
-        }).catch(function(){ if(btn){ btn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>'; } });
+        var evtBtn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
+        if (evtBtn) evtBtn.textContent = '⏳ PDF...';
+
+        var wrap = _buildReporteClone();
+
+        setTimeout(function() {
+            html2canvas(wrap, {scale:1.8, useCORS:true, backgroundColor:'#000814', logging:false}).then(function(canvas){
+                document.body.removeChild(wrap);
+
+                // Paginar en A4 (210 mm × 297 mm)
+                var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+                var pageW  = pdf.internal.pageSize.getWidth();   // 210 mm
+                var pageH  = pdf.internal.pageSize.getHeight();  // 297 mm
+                var imgW   = pageW;
+                var imgH   = canvas.height * (pageW / canvas.width);
+                var y      = 0;
+
+                while (y < imgH) {
+                    if (y > 0) pdf.addPage();
+                    pdf.addImage(canvas.toDataURL('image/jpeg', 0.93), 'JPEG',
+                        0, -y, imgW, imgH);
+                    y += pageH;
+                }
+
+                pdf.save('Reporte_Arauca' + _sufijo_rep() + '.pdf');
+                if (evtBtn) evtBtn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>';
+                statusLog('✅ Reporte PDF descargado','ok');
+            }).catch(function(e){
+                if(document.body.contains(wrap)) document.body.removeChild(wrap);
+                if(evtBtn) evtBtn.innerHTML = '<span class="rep-exp-icon">📄</span><span class="rep-exp-lbl">PDF</span>';
+                statusLog('❌ Error al generar PDF','error');
+            });
+        }, 120);
     }
 
     function exportarReporteJPEG() {
-        var btn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
-        var panel = document.getElementById('reporte-overlay');
-        if (btn) btn.textContent = '⏳ JPEG...';
-        html2canvas(panel, {scale:2, useCORS:true, backgroundColor:'#000814'}).then(function(canvas){
-            var link = document.createElement('a');
-            link.download = 'Reporte_Arauca' + _sufijo_rep() + '.jpg';
-            link.href = canvas.toDataURL('image/jpeg', 0.92);
-            link.click();
-            if (btn) { btn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>'; }
-            statusLog('✅ Reporte JPEG descargado','ok');
-        }).catch(function(){ if(btn){ btn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>'; } });
+        var evtBtn = event && event.target ? event.target.closest('.rep-exp-btn') : null;
+        if (evtBtn) evtBtn.textContent = '⏳ JPEG...';
+
+        var wrap = _buildReporteClone();
+
+        setTimeout(function() {
+            html2canvas(wrap, {scale:2, useCORS:true, backgroundColor:'#000814', logging:false}).then(function(canvas){
+                document.body.removeChild(wrap);
+                var link = document.createElement('a');
+                link.download = 'Reporte_Arauca' + _sufijo_rep() + '.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.93);
+                link.click();
+                if (evtBtn) evtBtn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>';
+                statusLog('✅ Reporte JPEG descargado','ok');
+            }).catch(function(e){
+                if(document.body.contains(wrap)) document.body.removeChild(wrap);
+                if(evtBtn) evtBtn.innerHTML = '<span class="rep-exp-icon">🖼️</span><span class="rep-exp-lbl">JPEG</span>';
+                statusLog('❌ Error al generar JPEG','error');
+            });
+        }, 120);
     }
 
     var _currentBasemap = 'osm';
