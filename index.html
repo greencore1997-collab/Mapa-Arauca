@@ -1655,7 +1655,10 @@
                         if(latlngs.length<3) return;
 
                         var color=colores[nombre]||'#'+Math.floor(Math.random()*0xAAAAAA+0x555555).toString(16);
-                        var poly=L.polygon(latlngs,{color:color,weight:1.5,fillColor:color,fillOpacity:0.15}).addTo(minimap);
+                        var poly=L.polygon(latlngs,{color:color,weight:1.5,fillColor:color,fillOpacity:0.15,className:'minimap-poly'}).addTo(minimap);
+                        poly.on('click',function(){ filtrarPorBarrio(nombre); });
+                        poly.on('mouseover',function(){ if(barrioFiltrado!==nombre) poly.setStyle({fillOpacity:0.45}); });
+                        poly.on('mouseout',function(){ if(barrioFiltrado!==nombre) poly.setStyle({fillOpacity:0.15}); });
                         miniLayers[nombre]=poly;
                         if(!window._poligonosCargados) window._poligonosCargados={};
                         window._poligonosCargados[nombre]=latlngs;
@@ -1664,7 +1667,6 @@
 
                     if(count>0){
                         statusLog('✅ KML cargado: '+count+' polígonos','ok');
-                        statusLog('💡 Ahora carga el Excel para asignar barrios','info');
                         // Ajustar vista del minimap
                         var allBounds=[];
                         Object.values(miniLayers).forEach(function(l){allBounds.push(l.getBounds());});
@@ -1672,6 +1674,27 @@
                             var bounds=allBounds[0];
                             allBounds.forEach(function(b){bounds.extend(b);});
                             minimap.fitBounds(bounds,{padding:[10,10]});
+                        }
+                        // Reasignar barrios a marcadores existentes con los nuevos polígonos
+                        if(allMarkers.length>0){
+                            allMarkers.forEach(function(m){
+                                var p=m._punto||{};
+                                var nuevo=asignarBarrio(p.lat,p.lon);
+                                if(nuevo){ m._barrio=nuevo; p.barrio=nuevo; }
+                            });
+                            aplicarFiltros();
+                            if(barrioFiltrado){
+                                document.getElementById('minimap-title').textContent=barrioFiltrado+'  ✕';
+                                destacarMinimap(barrioFiltrado);
+                                mostrarDialogoCoordenadas(barrioFiltrado);
+                                var fpts=allMarkers.filter(function(m){return m._barrio===barrioFiltrado;}).map(function(m){return m.getLatLng();});
+                                if(fpts.length>0) map.fitBounds(L.latLngBounds(fpts),{padding:[30,30]});
+                                statusLog('🏘️ Filtro activo: '+barrioFiltrado+' ('+fpts.length+' puntos)','ok');
+                            } else {
+                                statusLog('💡 Barrios reasignados con nuevos polígonos','info');
+                            }
+                        } else {
+                            statusLog('💡 Ahora carga el Excel para asignar barrios','info');
                         }
                     } else {
                         statusLog('❌ No se encontraron polígonos en el KML','error');
