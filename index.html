@@ -521,21 +521,21 @@
         /* watermark shield */
         #intro-shield {
             position:absolute;
-            width:min(58vw,58vh); height:min(58vw,58vh);
+            width:min(87vw,87vh); height:min(87vw,87vh);
             object-fit:contain; pointer-events:none;
-            filter:invert(1); mix-blend-mode:screen;
+            mix-blend-mode:screen;
             opacity:0;
             animation:intro-wm 0.25s ease 0.05s forwards;
         }
         @keyframes intro-wm {
             from { opacity:0; transform:scale(0.88); }
-            to   { opacity:0.28; transform:scale(1); }
+            to   { opacity:0.32; transform:scale(1); }
         }
         /* screen 1 content */
         #intro-s1 { display:flex; flex-direction:column; align-items:center; z-index:1; }
         #intro-geovisor {
             font-family:'Orbitron',monospace; font-weight:900;
-            font-size:clamp(32px,9vw,92px); color:#00c8ff;
+            font-size:clamp(48px,13.5vw,138px); color:#00c8ff;
             text-shadow:0 0 22px rgba(0,200,255,0.75),0 0 55px rgba(0,200,255,0.3);
             letter-spacing:-0.05em; opacity:0; text-align:center; white-space:nowrap;
             animation:intro-geo 0.85s cubic-bezier(0.15,0,0.35,1) 0.1s forwards;
