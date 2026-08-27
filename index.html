@@ -1413,6 +1413,30 @@
         aplicarFiltros();
     }
 
+    // ── Acordeón de pestañas: al abrir una, oculta las demás y el panel emergente ──
+    var _pblVisiblePreTab = false;
+
+    function ocultarOtrosTabs(idActivo) {
+        ['btn-barrios-desktop','btn-atributo-desktop','btn-restricciones-desktop'].forEach(function(id) {
+            if (id !== idActivo) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            }
+        });
+        var pp = document.getElementById('panel-puntos-barrio');
+        _pblVisiblePreTab = pp && pp.classList.contains('visible');
+        if (pp) { pp.style.visibility = 'hidden'; pp.style.pointerEvents = 'none'; }
+    }
+
+    function mostrarTodosTabs() {
+        ['btn-barrios-desktop','btn-atributo-desktop','btn-restricciones-desktop'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'block';
+        });
+        var pp = document.getElementById('panel-puntos-barrio');
+        if (pp) { pp.style.visibility = ''; pp.style.pointerEvents = ''; }
+    }
+
     function toggleRestricciones() {
         var panel  = document.getElementById('panel-restricciones');
         var btn    = document.getElementById('btn-restricciones-desktop');
@@ -1422,6 +1446,8 @@
         panel.classList.toggle('panel-open', !isOpen);
         btn.classList.toggle('abierto', !isOpen);
         flecha.textContent = isOpen ? '▼' : '▲';
+        if (!isOpen) ocultarOtrosTabs('btn-restricciones-desktop');
+        else mostrarTodosTabs();
     }
 
     // ── Atributos ──
@@ -1463,6 +1489,8 @@
         panel.classList.toggle('panel-open', !isOpen);
         btn.classList.toggle('abierto', !isOpen);
         f.textContent = isOpen ? '▼' : '▲';
+        if (!isOpen) ocultarOtrosTabs('btn-atributo-desktop');
+        else mostrarTodosTabs();
     }
 
     buildRestrPanel();
@@ -1774,10 +1802,12 @@
             legend.classList.remove('legend-open');
             btn.classList.remove('abierto');
             flecha.textContent = '▼';
+            mostrarTodosTabs();
         } else {
             legend.classList.add('legend-open');
             btn.classList.add('abierto');
             flecha.textContent = '▲';
+            ocultarOtrosTabs('btn-barrios-desktop');
         }
     }
     function toggleLegendTab() {
