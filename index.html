@@ -710,6 +710,99 @@
             100% { transform:translateX(-100vw); opacity:0; }
         }
         
+        /* ══ MÓDULO SELECTOR ══ */
+        #modulo-selector {
+            position:fixed; inset:0; z-index:1000000;
+            background:#000814;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:0; overflow:hidden;
+        }
+        #modulo-selector canvas#ms-bg {
+            position:absolute; inset:0; pointer-events:none;
+        }
+        .ms-header {
+            position:relative; z-index:1; text-align:center; margin-bottom:48px;
+        }
+        .ms-header .ms-logo {
+            font-family:'Orbitron',monospace; font-size:11px; letter-spacing:5px;
+            color:rgba(0,200,255,0.45); text-transform:uppercase; margin-bottom:10px;
+        }
+        .ms-header .ms-titulo {
+            font-family:'Orbitron',monospace; font-size:clamp(18px,3vw,28px);
+            font-weight:900; letter-spacing:3px; color:#fff;
+            text-shadow:0 0 30px rgba(0,200,255,0.5);
+        }
+        .ms-header .ms-sub {
+            font-family:'Orbitron',monospace; font-size:9px; letter-spacing:4px;
+            color:rgba(0,200,255,0.4); margin-top:8px;
+        }
+        .ms-cards {
+            position:relative; z-index:1;
+            display:flex; gap:28px; flex-wrap:wrap; justify-content:center;
+            padding:0 20px;
+        }
+        .ms-card {
+            width:260px; height:320px; border-radius:18px; cursor:pointer;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:18px; padding:32px 24px;
+            background:rgba(0,12,35,0.82);
+            border:1px solid rgba(0,200,255,0.2);
+            box-shadow:0 0 40px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,100,200,0.04);
+            backdrop-filter:blur(12px);
+            transition:all 0.3s ease; text-decoration:none;
+            position:relative; overflow:hidden;
+        }
+        .ms-card::before {
+            content:''; position:absolute; inset:0; border-radius:18px;
+            background:linear-gradient(135deg, rgba(0,200,255,0.06) 0%, transparent 60%);
+            opacity:0; transition:opacity 0.3s;
+        }
+        .ms-card:hover::before { opacity:1; }
+        .ms-card:hover {
+            border-color:rgba(0,200,255,0.55);
+            box-shadow:0 0 60px rgba(0,200,255,0.2), inset 0 0 40px rgba(0,100,200,0.08);
+            transform:translateY(-4px);
+        }
+        .ms-card.ms-analisis:hover {
+            border-color:rgba(105,240,174,0.55);
+            box-shadow:0 0 60px rgba(105,240,174,0.15), inset 0 0 40px rgba(0,100,60,0.08);
+        }
+        .ms-card.ms-analisis::before {
+            background:linear-gradient(135deg, rgba(105,240,174,0.06) 0%, transparent 60%);
+        }
+        .ms-card-icon {
+            font-size:52px; line-height:1;
+            filter:drop-shadow(0 0 12px currentColor);
+        }
+        .ms-card-title {
+            font-family:'Orbitron',monospace; font-size:11px; font-weight:900;
+            letter-spacing:2px; text-align:center; line-height:1.4;
+        }
+        .ms-card.ms-geovisor .ms-card-title { color:#00c8ff; }
+        .ms-card.ms-analisis .ms-card-title { color:#69f0ae; }
+        .ms-card-desc {
+            font-size:10px; color:rgba(180,210,240,0.6); text-align:center;
+            line-height:1.6; font-family:Arial,sans-serif; letter-spacing:0.3px;
+        }
+        .ms-card-badge {
+            font-family:'Orbitron',monospace; font-size:8px; letter-spacing:2px;
+            padding:4px 12px; border-radius:20px; margin-top:4px;
+        }
+        .ms-card.ms-geovisor .ms-card-badge {
+            background:rgba(0,200,255,0.12); color:#00c8ff;
+            border:1px solid rgba(0,200,255,0.3);
+        }
+        .ms-card.ms-analisis .ms-card-badge {
+            background:rgba(105,240,174,0.12); color:#69f0ae;
+            border:1px solid rgba(105,240,174,0.3);
+        }
+        .ms-footer {
+            position:relative; z-index:1; margin-top:40px;
+            font-family:'Orbitron',monospace; font-size:8px; letter-spacing:3px;
+            color:rgba(0,200,255,0.2); text-align:center;
+        }
+
         /* ══ PRE-INTRO ENERGY SPHERE ══ */
         #pre-intro {
             position: fixed; inset: 0; z-index: 999999;
@@ -774,6 +867,31 @@
 </style>
 </head>
 <body>
+
+<!-- ════ MÓDULO SELECTOR ════ -->
+<div id="modulo-selector">
+  <canvas id="ms-bg"></canvas>
+  <div class="ms-header">
+    <div class="ms-logo">ARAUCANA DE GASES E.S.P.</div>
+    <div class="ms-titulo">PLATAFORMA DIGITAL</div>
+    <div class="ms-sub">SELECCIONE UN MÓDULO</div>
+  </div>
+  <div class="ms-cards">
+    <div class="ms-card ms-geovisor" onclick="seleccionarModulo('geovisor')">
+      <div class="ms-card-icon">🗺️</div>
+      <div class="ms-card-title">GEOVISOR<br>CARTOGRÁFICO</div>
+      <div class="ms-card-desc">Visualización geoespacial de redes, usuarios, acometidas y cruces de vía en el municipio de Arauca.</div>
+      <div class="ms-card-badge">ACTIVO</div>
+    </div>
+    <a class="ms-card ms-analisis" href="analisis.html">
+      <div class="ms-card-icon">📊</div>
+      <div class="ms-card-title">MÓDULO DE<br>ANÁLISIS DE DATOS</div>
+      <div class="ms-card-desc">Herramientas de inteligencia de datos, indicadores operativos y reportes estadísticos avanzados.</div>
+      <div class="ms-card-badge">EN CONSTRUCCIÓN</div>
+    </a>
+  </div>
+  <div class="ms-footer">SISTEMA DE INFORMACIÓN GEOGRÁFICA · v2026</div>
+</div>
 
 <!-- ════ PRE-INTRO SPHERE ════ -->
 <div id="pre-intro">
@@ -2939,6 +3057,69 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
 
 <script>
+/* ══ MÓDULO SELECTOR ══ */
+(function(){
+  var ms = document.getElementById('modulo-selector');
+  var cnv = document.getElementById('ms-bg');
+  if (!ms || !cnv) return;
+  var ctx = cnv.getContext('2d');
+  var pts = [];
+  function resize(){ cnv.width=innerWidth; cnv.height=innerHeight; }
+  resize(); addEventListener('resize', resize);
+  for(var i=0;i<80;i++) pts.push({
+    x:Math.random()*innerWidth, y:Math.random()*innerHeight,
+    vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3,
+    r:Math.random()*1.5+0.3, a:Math.random()
+  });
+  var raf;
+  function draw(){
+    ctx.clearRect(0,0,cnv.width,cnv.height);
+    pts.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=cnv.width; if(p.x>cnv.width)p.x=0;
+      if(p.y<0)p.y=cnv.height; if(p.y>cnv.height)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,200,255,'+p.a*0.4+')';
+      ctx.fill();
+    });
+    // líneas entre puntos cercanos
+    for(var i=0;i<pts.length;i++){
+      for(var j=i+1;j<pts.length;j++){
+        var dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle='rgba(0,200,255,'+(0.08*(1-d/120))+')';
+          ctx.lineWidth=0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.seleccionarModulo = function(tipo){
+    if(tipo==='geovisor'){
+      cancelAnimationFrame(raf);
+      ms.style.transition='opacity 0.5s ease';
+      ms.style.opacity='0';
+      setTimeout(function(){
+        ms.style.display='none';
+        var pi = document.getElementById('pre-intro');
+        if(pi) pi.style.display='';
+      }, 500);
+    }
+  };
+
+  // Ocultar pre-intro hasta que se elija módulo
+  var pi = document.getElementById('pre-intro');
+  if(pi) pi.style.display='none';
+})();
+
 /* ══ PRE-INTRO SPHERE ══ */
 (function(){
   var el    = document.getElementById('pre-intro');
