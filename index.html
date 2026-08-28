@@ -716,51 +716,6 @@
             opacity: 1; transition: opacity 0.8s ease-out;
         }
         #pre-intro-canvas { position: absolute; inset: 0; display: block; }
-        /* ══ PANEL DESPLEGABLE GEOVISOR ══ */
-        #panel-geovisor-toggle {
-            position: absolute; top: 10px; left: 52px; z-index: 410;
-            background: rgba(0,12,35,0.85); border: 1px solid rgba(0,200,255,0.35);
-            border-radius: 10px; cursor: pointer; user-select: none;
-            backdrop-filter: blur(6px); transition: border-color 0.2s;
-            overflow: hidden; min-width: 160px;
-        }
-        #panel-geovisor-toggle:hover { border-color: rgba(0,200,255,0.65); }
-        #panel-geovisor-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 7px 12px; gap: 8px;
-        }
-        #panel-geovisor-label {
-            font-family: 'Orbitron', monospace; font-weight: 900;
-            font-size: 14px; letter-spacing: 5px; color: #00e5ff;
-            text-shadow: 0 0 10px rgba(0,200,255,0.7);
-        }
-        #panel-geovisor-arrow {
-            font-size: 10px; color: rgba(0,200,255,0.6);
-            transition: transform 0.25s ease; line-height: 1;
-        }
-        #panel-geovisor-toggle.open #panel-geovisor-arrow { transform: rotate(180deg); }
-        #panel-geovisor-body {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.3s ease, padding 0.3s ease;
-            padding: 0 12px;
-        }
-        #panel-geovisor-toggle.open #panel-geovisor-body {
-            max-height: 120px; padding: 0 12px 10px;
-        }
-        #panel-geovisor-body .gv-empresa {
-            font-family: 'Orbitron', monospace; font-size: 9px;
-            letter-spacing: 2.5px; color: #80cfff; margin-bottom: 3px;
-            border-top: 1px solid rgba(0,200,255,0.15); padding-top: 8px;
-        }
-        #panel-geovisor-body .gv-esp {
-            font-family: 'Orbitron', monospace; font-size: 8px;
-            letter-spacing: 2px; color: rgba(128,207,255,0.6); margin-bottom: 6px;
-        }
-        #panel-geovisor-body .gv-desc {
-            font-family: 'Roboto', sans-serif; font-size: 9px;
-            color: rgba(180,220,255,0.55); letter-spacing: 0.3px; line-height: 1.5;
-        }
-        body.mobile-mode #panel-geovisor-toggle { display: none; }
         #pre-intro-hint {
             position: absolute; bottom: 58px; left: 50%;
             transform: translateX(-50%);
@@ -874,18 +829,6 @@
         <span class="capa-badge">128</span>
     </button>
 <div id="panel-puntos-barrio"></div>
-    <!-- PANEL DESPLEGABLE GEOVISOR -->
-    <div id="panel-geovisor-toggle" onclick="togglePanelGeovisor()">
-      <div id="panel-geovisor-header">
-        <span id="panel-geovisor-label">GEOVISOR</span>
-        <span id="panel-geovisor-arrow">▼</span>
-      </div>
-      <div id="panel-geovisor-body">
-        <div class="gv-empresa">ARAUCANA DE GASES</div>
-        <div class="gv-esp">S.A.S. E.S.P.</div>
-        <div class="gv-desc">Red de distribución GLP<br>Arauca · Colombia</div>
-      </div>
-    </div>
     <div id="header-marca">
       <div id="header-texto">
         <div class="geo-titulo">GEOVISOR</div>
@@ -1142,10 +1085,6 @@
         }
     }
     function cerrarOpciones(){ document.getElementById('opciones-menu').classList.remove('visible'); }
-    function togglePanelGeovisor(){
-        var panel = document.getElementById('panel-geovisor-toggle');
-        panel.classList.toggle('open');
-    }
     function limpiarGeovisor(){
         document.getElementById('modal-limpiar').classList.add('visible');
     }
