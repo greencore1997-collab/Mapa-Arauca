@@ -3533,6 +3533,30 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         capaLayers[tipo] = lg;
     }
 
+    var _capaBotonesOcultos = false;
+    function _ocultarBotonesExcepto(tipoActivo) {
+        ['cruces','usuarios','acometidas','polivalvulas'].forEach(function(t){
+            if(t !== tipoActivo) {
+                var b = document.getElementById('btn-capa-'+t);
+                if(b) b.style.display='none';
+            }
+        });
+        ['btn-reporte','btn-basemap','btn-mobile','btn-opciones','capas-section-label'].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.style.display='none';
+        });
+        _capaBotonesOcultos = true;
+    }
+    function _mostrarTodosBotones() {
+        ['cruces','usuarios','acometidas','polivalvulas'].forEach(function(t){
+            var b = document.getElementById('btn-capa-'+t);
+            if(b) b.style.display='';
+        });
+        ['btn-reporte','btn-basemap','btn-mobile','btn-opciones','capas-section-label'].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.style.display='';
+        });
+        _capaBotonesOcultos = false;
+    }
+
     function toggleCapa(tipo) {
         if (!capaLayers[tipo]) _buildCapa(tipo);
         var btn = document.getElementById('btn-capa-' + tipo);
@@ -3540,10 +3564,12 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             map.removeLayer(capaLayers[tipo]);
             capaActiva[tipo] = false;
             if (btn) btn.classList.remove('capa-activa');
+            _mostrarTodosBotones();
         } else {
             capaLayers[tipo].addTo(map);
             capaActiva[tipo] = true;
             if (btn) btn.classList.add('capa-activa');
+            _ocultarBotonesExcepto(tipo);
         }
     }
 
