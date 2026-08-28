@@ -2051,6 +2051,8 @@
         }
     
 
+    var _capaReporteActual = null;
+
     function toggleReporte() {
         var panel = document.getElementById('reporte-overlay');
         var backdrop = document.getElementById('reporte-backdrop');
@@ -2058,8 +2060,10 @@
         if (!isOpen) {
             var capasOn = Object.keys(capaActiva).filter(function(k){ return capaActiva[k]; });
             if (capasOn.length > 0) {
+                _capaReporteActual = capasOn[0];
                 _generarReporteCapa(capasOn[0]);
             } else {
+                _capaReporteActual = null;
                 generarReporte();
             }
             panel.classList.add('visible');
@@ -2368,67 +2372,110 @@
     }
 
     function exportarReporteExcel() {
-        var visibles = allMarkers.filter(function(m){ return map.hasLayer(m); });
-        if (!visibles.length) { statusLog('⚠️ No hay datos visibles para exportar','error'); return; }
-
+        if(typeof XLSX==='undefined'){ statusLog('⚠️ XLSX no disponible, intente de nuevo','error'); return; }
         var wb = XLSX.utils.book_new();
+        var capa = _capaReporteActual;
+        var fecha = new Date().toLocaleString('es-CO');
 
-        // ── Hoja 1: Resumen / KPIs ──
-        var barrioCount = {}, conceptoCount = {}, conFoto = 0, sinFoto = 0, total = visibles.length;
-        visibles.forEach(function(m){
-            var p = m._punto || {};
-            var b = m._barrio || 'Sin barrio';
-            barrioCount[b] = (barrioCount[b]||0) + 1;
-            var c = p.concepto || 'Sin dato';
-            conceptoCount[c] = (conceptoCount[c]||0) + 1;
-            if (p.foto) conFoto++; else sinFoto++;
-        });
-        var numBarrios = Object.keys(barrioCount).length;
-        var resumen = [
-            ['REPORTE ESTADÍSTICO - GEOVISOR ARAUCANA DE GASES'],
-            ['Fecha de generación:', new Date().toLocaleString('es-CO')],
-            [],
-            ['INDICADOR', 'VALOR'],
-            ['Total de cruces visibles', total],
-            ['Barrios con cobertura', numBarrios],
-            ['Promedio por barrio', numBarrios > 0 ? (total/numBarrios).toFixed(1) : 0],
-            ['Con foto', conFoto],
-            ['Sin foto', sinFoto],
-            ['% Con foto', total > 0 ? ((conFoto/total)*100).toFixed(1)+'%' : '0%'],
-        ];
-        if (barrioFiltrado || barrioActivo) {
-            resumen.splice(2, 0, ['Filtro activo:', (barrioFiltrado || barrioActivo)]);
+        if (capa === 'cruces' && typeof datCruces !== 'undefined') {
+            var datos = datCruces;
+            var total = datos.length;
+            var barrioCount = {};
+            datos.forEach(function(p){ var b=p.barrio||'Sin barrio'; barrioCount[b]=(barrioCount[b]||0)+1; });
+            var numB = Object.keys(barrioCount).length;
+            var resumen = [
+                ['REPORTE — CRUCES DE VÍA — ARAUCANA DE GASES'],['Fecha:',fecha],[],
+                ['INDICADOR','VALOR'],['Total puntos',total],['Barrios con cobertura',numB],
+                ['Promedio por barrio', numB>0?(total/numB).toFixed(1):0]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            var sortedB=Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
+            var hB=[['#','BARRIO','CANTIDAD','%']]; var acum=0;
+            sortedB.forEach(function(e,i){ acum+=e[1]; hB.push([i+1,e[0],e[1],((e[1]/total)*100).toFixed(2)+'%']); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hB), 'Por Barrio');
+            var hD=[['#','BARRIO','CONCEPTO','LONGITUD_M','OBSERVACION','LATITUD','LONGITUD']];
+            datos.forEach(function(p,i){ hD.push([i+1,p.barrio||'',p.u||'',p.l||'',p.b||'',p.a,p.o]); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hD), 'Datos');
+            XLSX.writeFile(wb, 'Reporte_Cruces'+_sufijo_rep()+'.xlsx');
+
+        } else if (capa === 'usuarios' && typeof datUsuarios !== 'undefined') {
+            var datos = datUsuarios;
+            var total = datos.length;
+            var barrioCount = {};
+            datos.forEach(function(p){ var b=p[4]||'Sin barrio'; barrioCount[b]=(barrioCount[b]||0)+1; });
+            var numB = Object.keys(barrioCount).length;
+            var resumen = [
+                ['REPORTE — USUARIOS GLP — ARAUCANA DE GASES'],['Fecha:',fecha],[],
+                ['INDICADOR','VALOR'],['Total usuarios',total],['Barrios con cobertura',numB]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            var sortedB=Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
+            var hB=[['#','BARRIO','USUARIOS','%']];
+            sortedB.forEach(function(e,i){ hB.push([i+1,e[0],e[1],((e[1]/total)*100).toFixed(2)+'%']); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hB), 'Por Barrio');
+            var hD=[['#','BARRIO','N_VENTA','DIRECCION','LATITUD','LONGITUD']];
+            datos.forEach(function(p,i){ hD.push([i+1,p[4]||'',p[2]||'',p[3]||'',p[0],p[1]]); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hD), 'Datos');
+            XLSX.writeFile(wb, 'Reporte_Usuarios'+_sufijo_rep()+'.xlsx');
+
+        } else if (capa === 'acometidas' && typeof datAcometidas !== 'undefined') {
+            var datos = datAcometidas;
+            var total = datos.length;
+            var barrioCount = {}, servCount = {};
+            datos.forEach(function(p){
+                var b=p.barrio||'Sin barrio'; barrioCount[b]=(barrioCount[b]||0)+1;
+                var s=p.e||'Sin dato'; servCount[s]=(servCount[s]||0)+1;
+            });
+            var numB = Object.keys(barrioCount).length;
+            var resumen = [
+                ['REPORTE — ACOMETIDAS — ARAUCANA DE GASES'],['Fecha:',fecha],[],
+                ['INDICADOR','VALOR'],['Total acometidas',total],['Barrios con cobertura',numB]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            var sortedB=Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
+            var hB=[['#','BARRIO','CANTIDAD','%']];
+            sortedB.forEach(function(e,i){ hB.push([i+1,e[0],e[1],((e[1]/total)*100).toFixed(2)+'%']); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hB), 'Por Barrio');
+            var hD=[['#','BARRIO','DESEA_SERVICIO','OBSERVACION','LATITUD','LONGITUD']];
+            datos.forEach(function(p,i){ hD.push([i+1,p.barrio||'',p.e||'',p.b||'',p.a,p.o]); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hD), 'Datos');
+            XLSX.writeFile(wb, 'Reporte_Acometidas'+_sufijo_rep()+'.xlsx');
+
+        } else if (capa === 'polivalvulas' && typeof datPolivalvulas !== 'undefined') {
+            var datos = datPolivalvulas;
+            var total = datos.length;
+            var barrioCount = {};
+            datos.forEach(function(p){ var b=p.barrio||'Sin barrio'; barrioCount[b]=(barrioCount[b]||0)+1; });
+            var numB = Object.keys(barrioCount).length;
+            var resumen = [
+                ['REPORTE — POLIVALVULAS — ARAUCANA DE GASES'],['Fecha:',fecha],[],
+                ['INDICADOR','VALOR'],['Total polivalvulas',total],['Barrios con cobertura',numB]
+            ];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            var sortedB=Object.entries(barrioCount).sort(function(a,b){return b[1]-a[1];});
+            var hB=[['#','BARRIO','CANTIDAD','%']];
+            sortedB.forEach(function(e,i){ hB.push([i+1,e[0],e[1],((e[1]/total)*100).toFixed(2)+'%']); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hB), 'Por Barrio');
+            var hD=[['#','BARRIO','CONCEPTO','LONGITUD_M','OBSERVACION','LATITUD','LONGITUD']];
+            datos.forEach(function(p,i){ hD.push([i+1,p.barrio||'',p.u||'',p.l||'',p.b||'',p.a,p.o]); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hD), 'Datos');
+            XLSX.writeFile(wb, 'Reporte_Polivalvulas'+_sufijo_rep()+'.xlsx');
+
+        } else {
+            // Fallback: exportar allMarkers
+            var visibles = allMarkers.filter(function(m){ return map.hasLayer(m); });
+            if (!visibles.length) { statusLog('⚠️ No hay datos visibles para exportar','error'); return; }
+            var barrioCount={}, total=visibles.length;
+            visibles.forEach(function(m){ var b=m._barrio||'Sin barrio'; barrioCount[b]=(barrioCount[b]||0)+1; });
+            var numB=Object.keys(barrioCount).length;
+            var resumen=[['REPORTE — GEOVISOR ARAUCANA DE GASES'],['Fecha:',fecha],[],
+                ['INDICADOR','VALOR'],['Total puntos',total],['Barrios',numB]];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            var hD=[['#','BARRIO','LATITUD','LONGITUD']];
+            visibles.forEach(function(m,i){ var ll=m.getLatLng(); hD.push([i+1,m._barrio||'',ll.lat,ll.lng]); });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(hD), 'Datos');
+            XLSX.writeFile(wb, 'Reporte_Arauca'+_sufijo_rep()+'.xlsx');
         }
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
-
-        // ── Hoja 2: Por Barrio ──
-        var sortedB = Object.entries(barrioCount).sort(function(a,b){ return b[1]-a[1]; });
-        var dataB = [['#','BARRIO','CRUCES','PORCENTAJE','ACUMULADO']];
-        var acum = 0;
-        sortedB.forEach(function(e, i){
-            acum += e[1];
-            dataB.push([i+1, e[0], e[1], ((e[1]/total)*100).toFixed(2)+'%', ((acum/total)*100).toFixed(2)+'%']);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataB), 'Por Barrio');
-
-        // ── Hoja 3: Por Concepto ──
-        var sortedC = Object.entries(conceptoCount).sort(function(a,b){ return b[1]-a[1]; });
-        var dataC = [['#','CONCEPTO','CRUCES','PORCENTAJE']];
-        sortedC.forEach(function(e, i){
-            dataC.push([i+1, e[0], e[1], ((e[1]/total)*100).toFixed(2)+'%']);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataC), 'Por Concepto');
-
-        // ── Hoja 4: Datos completos ──
-        var dataD = [['#','BARRIO','CONCEPTO','FUNCIONARIO','LATITUD','LONGITUD','FOTO']];
-        visibles.forEach(function(m, i){
-            var p = m._punto || {};
-            var ll = m.getLatLng();
-            dataD.push([i+1, m._barrio||'', p.concepto||'', p.funcionario||'', ll.lat, ll.lng, p.foto||'']);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataD), 'Datos Completos');
-
-        XLSX.writeFile(wb, 'Reporte_Arauca' + _sufijo_rep() + '.xlsx');
         statusLog('✅ Reporte Excel descargado','ok');
     }
 
