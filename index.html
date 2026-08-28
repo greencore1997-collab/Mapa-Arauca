@@ -750,6 +750,20 @@
             width:7px; height:7px; border-radius:50%; display:inline-block;
             margin-right:5px; flex-shrink:0;
         }
+        .btn-capa-wrap { position:absolute; right:10px; display:flex; align-items:center; z-index:404; }
+        .btn-capa-wrap:nth-of-type(1) { top:308px; }
+        .btn-capa-wrap:nth-of-type(2) { top:347px; }
+        .btn-capa-wrap:nth-of-type(3) { top:386px; }
+        .btn-capa-wrap:nth-of-type(4) { top:425px; }
+        .btn-capa-wrap .btn-capa { position:static; right:auto; top:auto; flex:1; }
+        .btn-capa-rep {
+            width:28px; height:28px; margin-left:3px; flex-shrink:0;
+            background:rgba(0,12,35,0.78); border:1px solid rgba(0,200,255,0.3);
+            color:#00c8ff; border-radius:6px; cursor:pointer; font-size:12px;
+            display:flex; align-items:center; justify-content:center;
+            transition:background 0.2s;
+        }
+        .btn-capa-rep:hover { background:rgba(0,60,120,0.9); border-color:#00e5ff; }
         #btn-capa-cruces      { top:308px; }
         #btn-capa-usuarios    { top:347px; }
         #btn-capa-acometidas  { top:386px; }
@@ -759,7 +773,8 @@
         #btn-capa-acometidas.capa-activa  { background:rgba(190,90,0,0.4);   border-color:#ffa726; color:#ffa726; box-shadow:0 0 14px rgba(255,167,38,0.45); }
         #btn-capa-polivalvulas.capa-activa{ background:rgba(130,0,180,0.4);  border-color:#ea80fc; color:#ea80fc; box-shadow:0 0 14px rgba(234,128,252,0.45); }
         body.mobile-mode #capas-section-label,
-        body.mobile-mode .btn-capa { display:none !important; }
+        body.mobile-mode .btn-capa,
+        body.mobile-mode .btn-capa-wrap { display:none !important; }
 
 </style>
 </head>
@@ -813,22 +828,30 @@
     
     <!-- ════ CAPAS CARTOGRÁFICAS ════ -->
     <div id="capas-section-label">⬡ CAPAS</div>
+    <div class="btn-capa-wrap">
     <button id="btn-capa-cruces" class="btn-capa" onclick="toggleCapa('cruces')">
         <span><span class="capa-dot" style="background:#00e5ff;box-shadow:0 0 4px #00e5ff"></span>🛣️ CRUCES DE VÍA</span>
         <span class="capa-badge">535</span>
-    </button>
+    </button><button class="btn-capa-rep" onclick="_abrirReporteCapa('cruces')" title="Reporte de Cruces">📊</button>
+    </div>
+    <div class="btn-capa-wrap">
     <button id="btn-capa-usuarios" class="btn-capa" onclick="toggleCapa('usuarios')">
         <span><span class="capa-dot" style="background:#69f0ae;box-shadow:0 0 4px #69f0ae"></span>👤 USUARIOS</span>
         <span class="capa-badge">17,059</span>
-    </button>
+    </button><button class="btn-capa-rep" onclick="_abrirReporteCapa('usuarios')" title="Reporte de Usuarios">📊</button>
+    </div>
+    <div class="btn-capa-wrap">
     <button id="btn-capa-acometidas" class="btn-capa" onclick="toggleCapa('acometidas')">
         <span><span class="capa-dot" style="background:#ffa726;box-shadow:0 0 4px #ffa726"></span>🔧 ACOMETIDAS</span>
         <span class="capa-badge">670</span>
-    </button>
+    </button><button class="btn-capa-rep" onclick="_abrirReporteCapa('acometidas')" title="Reporte de Acometidas">📊</button>
+    </div>
+    <div class="btn-capa-wrap">
     <button id="btn-capa-polivalvulas" class="btn-capa" onclick="toggleCapa('polivalvulas')">
         <span><span class="capa-dot" style="background:#ea80fc;box-shadow:0 0 4px #ea80fc"></span>⚙️ POLIVALVULAS</span>
         <span class="capa-badge">128</span>
-    </button>
+    </button><button class="btn-capa-rep" onclick="_abrirReporteCapa('polivalvulas')" title="Reporte de Polivalvulas">📊</button>
+    </div>
 <div id="panel-puntos-barrio"></div>
     <div id="header-marca">
       <div id="header-texto">
@@ -1858,9 +1881,8 @@
             }
         });
         // Ocultar botones de capa y su etiqueta
-        ['capas-section-label','btn-capa-cruces','btn-capa-usuarios','btn-capa-acometidas','btn-capa-polivalvulas'].forEach(function(id){
-            var el = document.getElementById(id); if (el) el.style.display = 'none';
-        });
+        document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='none');
+        document.querySelectorAll('.btn-capa-wrap').forEach(function(el){ el.style.display='none'; });
         var pp = document.getElementById('panel-puntos-barrio');
         _pblVisiblePreTab = pp && pp.classList.contains('visible');
         if (pp) { pp.style.visibility = 'hidden'; pp.style.pointerEvents = 'none'; }
@@ -1872,12 +1894,8 @@
             if (el) el.style.display = 'block';
         });
         // Restaurar botones de capa y su etiqueta
-        ['capas-section-label'].forEach(function(id){
-            var el = document.getElementById(id); if (el) el.style.display = '';
-        });
-        ['btn-capa-cruces','btn-capa-usuarios','btn-capa-acometidas','btn-capa-polivalvulas'].forEach(function(id){
-            var el = document.getElementById(id); if (el) el.style.display = '';
-        });
+        document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='');
+        document.querySelectorAll('.btn-capa-wrap').forEach(function(el){ el.style.display=''; });
         var pp = document.getElementById('panel-puntos-barrio');
         if (pp) { pp.style.visibility = ''; pp.style.pointerEvents = ''; }
     }
@@ -2052,6 +2070,15 @@
     
 
     var _capaReporteActual = null;
+
+    function _abrirReporteCapa(tipo) {
+        _capaReporteActual = tipo;
+        _generarReporteCapa(tipo);
+        var panel = document.getElementById('reporte-overlay');
+        var backdrop = document.getElementById('reporte-backdrop');
+        panel.classList.add('visible');
+        backdrop.classList.add('visible');
+    }
 
     function toggleReporte() {
         var panel = document.getElementById('reporte-overlay');
