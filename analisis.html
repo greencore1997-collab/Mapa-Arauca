@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo de Análisis · Araucana de Gases</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000814;color:#e0e8f0;font-family:Arial,sans-serif;overflow:hidden;height:100vh;}
+
+/* ══ PRE-INTRO ══ */
+#pre-intro-a{
+  position:fixed;inset:0;z-index:999999;background:#000814;
+  cursor:pointer;overflow:hidden;
+  transition:opacity 0.8s ease-out;
+}
+#pi-canvas{position:absolute;inset:0;display:block;}
+#pi-hint{
+  position:absolute;bottom:58px;left:50%;transform:translateX(-50%);
+  color:rgba(105,240,174,0.7);font-size:13px;letter-spacing:4px;
+  font-family:'Orbitron',sans-serif;white-space:nowrap;
+  animation:blink 2.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:0.2;}50%{opacity:1;}}
+
+/* ══ INTRO OVERLAY ══ */
+#intro-a{
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#000c1a 0%,#001a0a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;overflow:hidden;opacity:0;pointer-events:none;
+  transition:opacity 0.6s ease;
+}
+#intro-a.visible{opacity:1;pointer-events:auto;}
+.ia-corners{position:absolute;}
+.ia-c{position:absolute;width:28px;height:28px;border-color:rgba(105,240,174,0.4);border-style:solid;}
+.ia-tl{top:18px;left:18px;border-width:2px 0 0 2px;}
+.ia-tr{top:18px;right:18px;border-width:2px 2px 0 0;}
+.ia-bl{bottom:18px;left:18px;border-width:0 0 2px 2px;}
+.ia-br{bottom:18px;right:18px;border-width:0 2px 2px 0;}
+.ia-scan{
+  position:absolute;width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(105,240,174,0.3),transparent);
+  animation:scan 4s linear infinite;
+}
+@keyframes scan{0%{top:-2px;}100%{top:100%;}}
+.ia-logo-wrap{position:relative;z-index:1;text-align:center;margin-bottom:32px;}
+.ia-empresa{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:6px;
+  color:rgba(105,240,174,0.4);margin-bottom:16px;
+}
+.ia-modulo{
+  font-family:'Orbitron',monospace;font-size:clamp(22px,4vw,36px);
+  font-weight:900;letter-spacing:4px;color:#fff;line-height:1.1;
+  text-shadow:0 0 40px rgba(105,240,174,0.5);
+}
+.ia-sub{
+  font-family:'Orbitron',monospace;font-size:11px;letter-spacing:5px;
+  color:#69f0ae;margin-top:10px;opacity:0.8;
+}
+.ia-divider{
+  width:180px;height:1px;margin:24px auto;
+  background:linear-gradient(90deg,transparent,rgba(105,240,174,0.5),transparent);
+}
+.ia-descripcion{
+  font-size:12px;color:rgba(180,220,200,0.55);letter-spacing:1px;
+  text-align:center;line-height:1.8;max-width:360px;
+}
+#btn-iniciar-a{
+  position:relative;z-index:1;margin-top:36px;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;
+  color:#000c1a;background:#69f0ae;border:none;border-radius:10px;
+  padding:14px 40px;cursor:pointer;
+  box-shadow:0 0 30px rgba(105,240,174,0.4);
+  transition:all 0.25s;
+}
+#btn-iniciar-a:hover{background:#a5f3c3;box-shadow:0 0 50px rgba(105,240,174,0.6);transform:scale(1.04);}
+.ia-version{
+  position:absolute;bottom:20px;
+  font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;
+  color:rgba(105,240,174,0.2);
+}
+
+/* ══ DASHBOARD ══ */
+#dashboard-a{
+  position:fixed;inset:0;z-index:1;
+  display:none;flex-direction:column;
+  background:#000c1a;
+}
+#dashboard-a.visible{display:flex;}
+
+/* Header */
+#dash-header{
+  height:52px;min-height:52px;
+  background:rgba(0,8,20,0.95);
+  border-bottom:1px solid rgba(105,240,174,0.15);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+  backdrop-filter:blur(8px);
+}
+.dh-back{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;
+  color:#00c8ff;border:1px solid rgba(0,200,255,0.25);
+  background:rgba(0,12,35,0.6);border-radius:6px;
+  padding:6px 12px;cursor:pointer;text-decoration:none;
+  transition:all 0.2s;white-space:nowrap;
+}
+.dh-back:hover{border-color:#00c8ff;background:rgba(0,40,100,0.8);}
+.dh-titulo{
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:700;
+  letter-spacing:2px;color:#69f0ae;text-shadow:0 0 15px rgba(105,240,174,0.3);
+}
+.dh-sub{
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;
+  color:rgba(105,240,174,0.35);
+}
+.dh-spacer{flex:1;}
+#dash-clock{
+  font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;
+  color:rgba(0,200,255,0.5);white-space:nowrap;
+}
+
+/* Layout */
+#dash-body{display:flex;flex:1;overflow:hidden;}
+
+/* Sidebar */
+#dash-sidebar{
+  width:190px;min-width:190px;
+  background:rgba(0,8,18,0.92);
+  border-right:1px solid rgba(105,240,174,0.1);
+  display:flex;flex-direction:column;padding:16px 0;overflow-y:auto;
+}
+.sb-section{
+  font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;
+  color:rgba(105,240,174,0.25);padding:0 16px;margin:12px 0 6px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:1px;
+  color:rgba(180,220,200,0.5);
+  transition:all 0.18s;border-left:3px solid transparent;
+}
+.sb-item:hover{color:#69f0ae;background:rgba(105,240,174,0.06);}
+.sb-item.active{
+  color:#69f0ae;background:rgba(105,240,174,0.08);
+  border-left-color:#69f0ae;
+}
+.sb-item .sb-icon{font-size:14px;width:18px;text-align:center;}
+.sb-divider{height:1px;background:rgba(105,240,174,0.08);margin:8px 16px;}
+
+/* Main content */
+#dash-main{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+
+/* Sections */
+.dash-section{display:none;}
+.dash-section.active{display:flex;flex-direction:column;gap:16px;}
+
+/* Panel genérico */
+.panel{
+  background:rgba(0,12,30,0.82);border:1px solid rgba(105,240,174,0.15);
+  border-radius:12px;padding:18px 20px;backdrop-filter:blur(6px);
+}
+.panel-title{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;
+  color:rgba(105,240,174,0.6);margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.panel-title::before{content:'';width:3px;height:12px;background:#69f0ae;border-radius:2px;display:inline-block;}
+
+/* KPI Cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
+.kpi-card{
+  background:rgba(0,12,30,0.9);border-radius:12px;padding:18px 20px;
+  border:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;gap:8px;
+  position:relative;overflow:hidden;cursor:default;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover{transform:translateY(-2px);}
+.kpi-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--kpi-color,#69f0ae);
+  box-shadow:0 0 12px var(--kpi-color,#69f0ae);
+}
+.kpi-label{
+  font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;
+  color:rgba(180,200,190,0.5);
+}
+.kpi-value{
+  font-family:'Orbitron',monospace;font-size:28px;font-weight:900;
+  color:var(--kpi-color,#69f0ae);
+  text-shadow:0 0 20px var(--kpi-color,#69f0ae);
+  line-height:1;
+}
+.kpi-desc{font-size:10px;color:rgba(180,200,190,0.4);line-height:1.5;}
+.kpi-trend{
+  font-family:'Orbitron',monospace;font-size:8px;
+  color:var(--kpi-color,#69f0ae);opacity:0.7;
+}
+
+/* Chart */
+.chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.chart-canvas-wrap{position:relative;height:220px;}
+.chart-canvas-wrap canvas{width:100%!important;height:100%!important;}
+.chart-legend{display:flex;flex-direction:column;gap:8px;justify-content:center;}
+.cl-item{display:flex;align-items:center;gap:8px;font-size:10px;color:rgba(180,210,200,0.6);}
+.cl-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.cl-val{font-family:'Orbitron',monospace;font-size:9px;color:#e0e8f0;margin-left:auto;}
+
+/* Tabla */
+.data-table{width:100%;border-collapse:collapse;font-size:11px;}
+.data-table th{
+  font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;
+  color:rgba(105,240,174,0.5);padding:8px 12px;border-bottom:1px solid rgba(105,240,174,0.1);
+  text-align:left;background:rgba(0,20,10,0.4);
+}
+.data-table td{
+  padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);
+  color:rgba(220,235,230,0.7);
+}
+.data-table tr:hover td{background:rgba(105,240,174,0.04);}
+.td-badge{
+  display:inline-block;padding:2px 8px;border-radius:4px;
+  font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;
+}
+
+/* Insights */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.insight-card{
+  background:rgba(0,20,10,0.6);border:1px solid rgba(105,240,174,0.1);
+  border-radius:10px;padding:14px 16px;
+}
+.insight-icon{font-size:22px;margin-bottom:8px;}
+.insight-title{
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;
+  color:#69f0ae;margin-bottom:6px;
+}
+.insight-text{font-size:10.5px;color:rgba(180,210,200,0.55);line-height:1.6;}
+
+/* Barra de progreso */
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.prog-label{font-size:10px;color:rgba(180,210,200,0.6);min-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:3px;transition:width 1s ease;}
+.prog-val{font-family:'Orbitron',monospace;font-size:8px;color:rgba(180,210,200,0.5);min-width:40px;text-align:right;}
+
+/* Empty state */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:14px;text-align:center;
+}
+.empty-icon{font-size:48px;opacity:0.4;}
+.empty-msg{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:rgba(105,240,174,0.3);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(105,240,174,0.2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- ════ PRE-INTRO ════ -->
+<div id="pre-intro-a" onclick="piaTap()">
+  <canvas id="pi-canvas"></canvas>
+  <div id="pi-hint">· TOCA PARA INICIAR ·</div>
+</div>
+
+<!-- ════ INTRO ════ -->
+<div id="intro-a">
+  <div class="ia-c ia-tl"></div><div class="ia-c ia-tr"></div>
+  <div class="ia-c ia-bl"></div><div class="ia-c ia-br"></div>
+  <div class="ia-scan"></div>
+  <div class="ia-logo-wrap">
+    <div class="ia-empresa">ARAUCANA DE GASES E.S.P.</div>
+    <div class="ia-modulo">MÓDULO DE<br>ANÁLISIS</div>
+    <div class="ia-sub">DE DATOS</div>
+    <div class="ia-divider"></div>
+    <div class="ia-descripcion">
+      Inteligencia operativa · Indicadores de gestión<br>
+      Análisis estadístico · Reportes técnicos
+    </div>
+  </div>
+  <button id="btn-iniciar-a" onclick="iniciarAnalisis()">▶ INICIAR ANÁLISIS</button>
+  <div class="ia-version">PLATAFORMA DIGITAL · SIG · v2026</div>
+</div>
+
+<!-- ════ DASHBOARD ════ -->
+<div id="dashboard-a">
+
+  <!-- Header -->
+  <div id="dash-header">
+    <a class="dh-back" href="index.html">← INICIO</a>
+    <div>
+      <div class="dh-titulo">📊 ANÁLISIS DE DATOS</div>
+      <div class="dh-sub">ARAUCANA DE GASES · RED GLP ARAUCA</div>
+    </div>
+    <div class="dh-spacer"></div>
+    <div id="dash-clock"></div>
+  </div>
+
+  <div id="dash-body">
+
+    <!-- Sidebar -->
+    <div id="dash-sidebar">
+      <div class="sb-section">NAVEGACIÓN</div>
+      <div class="sb-item active" onclick="showSection('resumen',this)"><span class="sb-icon">🏠</span>RESUMEN</div>
+      <div class="sb-item" onclick="showSection('usuarios',this)"><span class="sb-icon">👤</span>USUARIOS</div>
+      <div class="sb-item" onclick="showSection('cruces',this)"><span class="sb-icon">🛣️</span>CRUCES DE VÍA</div>
+      <div class="sb-item" onclick="showSection('acometidas',this)"><span class="sb-icon">🔧</span>ACOMETIDAS</div>
+      <div class="sb-item" onclick="showSection('polivalvulas',this)"><span class="sb-icon">⚙️</span>POLIVALVULAS</div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">HERRAMIENTAS</div>
+      <div class="sb-item" onclick="showSection('reportes',this)"><span class="sb-icon">📋</span>REPORTES</div>
+      <div class="sb-item" onclick="showSection('indicadores',this)"><span class="sb-icon">📈</span>INDICADORES</div>
+      <div class="sb-item" onclick="showSection('historicos',this)"><span class="sb-icon">🗓️</span>HISTÓRICOS</div>
+    </div>
+
+    <!-- Main -->
+    <div id="dash-main">
+
+      <!-- ── RESUMEN ── -->
+      <div class="dash-section active" id="sec-resumen">
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card" style="--kpi-color:#69f0ae">
+            <div class="kpi-label">USUARIOS REGISTRADOS</div>
+            <div class="kpi-value" id="kpi-usuarios">0</div>
+            <div class="kpi-desc">Usuarios activos en red GLP</div>
+            <div class="kpi-trend">▲ Red activa</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:#00e5ff">
+            <div class="kpi-label">CRUCES DE VÍA</div>
+            <div class="kpi-value" id="kpi-cruces">0</div>
+            <div class="kpi-desc">Puntos de cruce registrados</div>
+            <div class="kpi-trend">● Georeferenciados</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:#ffa726">
+            <div class="kpi-label">ACOMETIDAS</div>
+            <div class="kpi-value" id="kpi-acometidas">0</div>
+            <div class="kpi-desc">Solicitudes de servicio</div>
+            <div class="kpi-trend">▲ En gestión</div>
+          </div>
+          <div class="kpi-card" style="--kpi-color:#ea80fc">
+            <div class="kpi-label">POLIVALVULAS</div>
+            <div class="kpi-value" id="kpi-polivalvulas">0</div>
+            <div class="kpi-desc">Elementos de control en red</div>
+            <div class="kpi-trend">● Inventario activo</div>
+          </div>
+        </div>
+
+        <!-- Gráfica + leyenda -->
+        <div class="panel">
+          <div class="panel-title">DISTRIBUCIÓN POR CAPA</div>
+          <div class="chart-wrap">
+            <div class="chart-canvas-wrap"><canvas id="chart-barras"></canvas></div>
+            <div class="chart-legend">
+              <div style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(180,210,200,0.4);margin-bottom:6px;">ELEMENTOS DE RED</div>
+              <div class="cl-item"><div class="cl-dot" style="background:#69f0ae"></div>Usuarios<span class="cl-val">17,059</span></div>
+              <div class="cl-item"><div class="cl-dot" style="background:#00e5ff"></div>Cruces de Vía<span class="cl-val">535</span></div>
+              <div class="cl-item"><div class="cl-dot" style="background:#ffa726"></div>Acometidas<span class="cl-val">670</span></div>
+              <div class="cl-item"><div class="cl-dot" style="background:#ea80fc"></div>Polivalvulas<span class="cl-val">128</span></div>
+              <div style="height:1px;background:rgba(255,255,255,0.06);margin:10px 0;"></div>
+              <div class="cl-item" style="font-weight:bold;"><div class="cl-dot" style="background:#fff;opacity:0.3"></div>TOTAL RED<span class="cl-val" style="color:#69f0ae;">18,392</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="panel">
+          <div class="panel-title">INSIGHTS OPERATIVOS</div>
+          <div class="insights-grid">
+            <div class="insight-card">
+              <div class="insight-icon">👥</div>
+              <div class="insight-title">COBERTURA</div>
+              <div class="insight-text">Con 17,059 usuarios en red activa, Araucana de Gases mantiene una de las coberturas de GLP más amplias del departamento.</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-icon">🛣️</div>
+              <div class="insight-title">INFRAESTRUCTURA</div>
+              <div class="insight-text">535 cruces de vía georeferenciados permiten planificar mantenimientos preventivos y trazado de nuevos ramales con precisión.</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-icon">🔧</div>
+              <div class="insight-title">EXPANSIÓN</div>
+              <div class="insight-text">670 solicitudes de acometida representan una oportunidad de crecimiento del 3.9% sobre la base actual de usuarios conectados.</div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-icon">⚙️</div>
+              <div class="insight-title">CONTROL DE RED</div>
+              <div class="insight-text">128 polivalvulas distribuidas en la red permiten sectorizar y gestionar el suministro por zonas ante emergencias operativas.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /resumen -->
+
+      <!-- ── USUARIOS ── -->
+      <div class="dash-section" id="sec-usuarios">
+        <div class="panel">
+          <div class="panel-title">INDICADORES — USUARIOS GLP</div>
+          <div class="kpi-grid">
+            <div class="kpi-card" style="--kpi-color:#69f0ae">
+              <div class="kpi-label">TOTAL USUARIOS</div>
+              <div class="kpi-value">17,059</div>
+              <div class="kpi-desc">Base de datos red GLP Arauca</div>
+            </div>
+            <div class="kpi-card" style="--kpi-color:#69f0ae">
+              <div class="kpi-label">BARRIOS CUBIERTOS</div>
+              <div class="kpi-value">22</div>
+              <div class="kpi-desc">Sectores con cobertura activa</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">DISTRIBUCIÓN POR BARRIO (ESTIMADA)</div>
+          <div id="prog-usuarios"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">PRÓXIMAS FUNCIONALIDADES</div>
+          <div class="insights-grid">
+            <div class="insight-card"><div class="insight-icon">🔗</div><div class="insight-title">INTEGRACIÓN DE DATOS</div><div class="insight-text">Conexión directa con la capa de usuarios del Geovisor para análisis en tiempo real.</div></div>
+            <div class="insight-card"><div class="insight-icon">📊</div><div class="insight-title">ANÁLISIS TEMPORAL</div><div class="insight-text">Seguimiento del crecimiento histórico de usuarios por período y barrio.</div></div>
+            <div class="insight-card"><div class="insight-icon">🗺️</div><div class="insight-title">DENSIDAD ESPACIAL</div><div class="insight-text">Mapa de calor de concentración de usuarios para optimización de red.</div></div>
+          </div>
+        </div>
+      </div><!-- /usuarios -->
+
+      <!-- ── CRUCES ── -->
+      <div class="dash-section" id="sec-cruces">
+        <div class="panel">
+          <div class="panel-title">INDICADORES — CRUCES DE VÍA</div>
+          <div class="kpi-grid">
+            <div class="kpi-card" style="--kpi-color:#00e5ff">
+              <div class="kpi-label">TOTAL CRUCES</div>
+              <div class="kpi-value">535</div>
+              <div class="kpi-desc">Puntos registrados en red</div>
+            </div>
+            <div class="kpi-card" style="--kpi-color:#00e5ff">
+              <div class="kpi-label">LONGITUD PROM.</div>
+              <div class="kpi-value">—</div>
+              <div class="kpi-desc">Pendiente integración de datos</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">MÓDULO EN CONSTRUCCIÓN</div>
+          <div class="empty-state">
+            <div class="empty-icon">🛣️</div>
+            <div class="empty-msg">ANÁLISIS DETALLADO EN DESARROLLO</div>
+            <div style="font-size:11px;color:rgba(180,210,200,0.35);margin-top:8px;">Incluirá: longitudes, materiales, estado, antigüedad y prioridad de mantenimiento.</div>
+          </div>
+        </div>
+      </div><!-- /cruces -->
+
+      <!-- ── ACOMETIDAS ── -->
+      <div class="dash-section" id="sec-acometidas">
+        <div class="panel">
+          <div class="panel-title">INDICADORES — ACOMETIDAS</div>
+          <div class="kpi-grid">
+            <div class="kpi-card" style="--kpi-color:#ffa726">
+              <div class="kpi-label">TOTAL SOLICITUDES</div>
+              <div class="kpi-value">670</div>
+              <div class="kpi-desc">Acometidas georeferenciadas</div>
+            </div>
+            <div class="kpi-card" style="--kpi-color:#ffa726">
+              <div class="kpi-label">TASA CONVERSIÓN</div>
+              <div class="kpi-value">3.9%</div>
+              <div class="kpi-desc">Sobre base de usuarios activos</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">MÓDULO EN CONSTRUCCIÓN</div>
+          <div class="empty-state">
+            <div class="empty-icon">🔧</div>
+            <div class="empty-msg">ANÁLISIS DETALLADO EN DESARROLLO</div>
+            <div style="font-size:11px;color:rgba(180,210,200,0.35);margin-top:8px;">Incluirá: estado de solicitud, tiempo de gestión, barrio, prioridad y seguimiento.</div>
+          </div>
+        </div>
+      </div><!-- /acometidas -->
+
+      <!-- ── POLIVALVULAS ── -->
+      <div class="dash-section" id="sec-polivalvulas">
+        <div class="panel">
+          <div class="panel-title">INDICADORES — POLIVALVULAS</div>
+          <div class="kpi-grid">
+            <div class="kpi-card" style="--kpi-color:#ea80fc">
+              <div class="kpi-label">TOTAL POLIVALVULAS</div>
+              <div class="kpi-value">128</div>
+              <div class="kpi-desc">Elementos de control registrados</div>
+            </div>
+            <div class="kpi-card" style="--kpi-color:#ea80fc">
+              <div class="kpi-label">SECTORES</div>
+              <div class="kpi-value">—</div>
+              <div class="kpi-desc">Pendiente integración de datos</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">MÓDULO EN CONSTRUCCIÓN</div>
+          <div class="empty-state">
+            <div class="empty-icon">⚙️</div>
+            <div class="empty-msg">ANÁLISIS DETALLADO EN DESARROLLO</div>
+            <div style="font-size:11px;color:rgba(180,210,200,0.35);margin-top:8px;">Incluirá: tipo de válvula, estado operativo, fecha inspección y sectores controlados.</div>
+          </div>
+        </div>
+      </div><!-- /polivalvulas -->
+
+      <!-- ── REPORTES ── -->
+      <div class="dash-section" id="sec-reportes">
+        <div class="panel">
+          <div class="panel-title">CENTRO DE REPORTES</div>
+          <table class="data-table">
+            <thead><tr>
+              <th>REPORTE</th><th>DESCRIPCIÓN</th><th>CAPA</th><th>ESTADO</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>Inventario de Usuarios</td><td>Listado completo con ubicación y barrio</td><td><span style="color:#69f0ae">Usuarios</span></td><td><span class="td-badge" style="background:rgba(105,240,174,0.1);color:#69f0ae;border:1px solid rgba(105,240,174,0.3)">DISPONIBLE</span></td></tr>
+              <tr><td>Cruces de Vía</td><td>Catálogo de cruces con atributos técnicos</td><td><span style="color:#00e5ff">Cruces</span></td><td><span class="td-badge" style="background:rgba(0,229,255,0.1);color:#00e5ff;border:1px solid rgba(0,229,255,0.3)">DISPONIBLE</span></td></tr>
+              <tr><td>Solicitudes Acometidas</td><td>Estado y seguimiento de solicitudes</td><td><span style="color:#ffa726">Acometidas</span></td><td><span class="td-badge" style="background:rgba(255,167,38,0.1);color:#ffa726;border:1px solid rgba(255,167,38,0.3)">DISPONIBLE</span></td></tr>
+              <tr><td>Inventario Polivalvulas</td><td>Control de válvulas por sector</td><td><span style="color:#ea80fc">Polivalvulas</span></td><td><span class="td-badge" style="background:rgba(234,128,252,0.1);color:#ea80fc;border:1px solid rgba(234,128,252,0.3)">DISPONIBLE</span></td></tr>
+              <tr><td>Resumen Ejecutivo</td><td>Indicadores consolidados para dirección</td><td><span style="color:rgba(180,210,200,0.5)">Todas</span></td><td><span class="td-badge" style="background:rgba(255,255,255,0.05);color:rgba(180,210,200,0.4);border:1px solid rgba(255,255,255,0.1)">EN DESARROLLO</span></td></tr>
+              <tr><td>Análisis de Expansión</td><td>Zonas prioritarias para nueva red</td><td><span style="color:rgba(180,210,200,0.5)">Todas</span></td><td><span class="td-badge" style="background:rgba(255,255,255,0.05);color:rgba(180,210,200,0.4);border:1px solid rgba(255,255,255,0.1)">EN DESARROLLO</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-title">NOTA DE INTEGRACIÓN</div>
+          <div style="font-size:11px;color:rgba(180,210,200,0.5);line-height:1.8;">
+            Los reportes marcados como <span style="color:#69f0ae">DISPONIBLES</span> se generan desde el Geovisor Cartográfico usando el botón 📊 de cada capa. La integración directa desde este módulo está en desarrollo.
+          </div>
+        </div>
+      </div><!-- /reportes -->
+
+      <!-- ── INDICADORES ── -->
+      <div class="dash-section" id="sec-indicadores">
+        <div class="panel">
+          <div class="panel-title">INDICADORES DE GESTIÓN</div>
+          <div style="margin-bottom:18px;">
+            <div style="font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(105,240,174,0.4);margin-bottom:12px;">COBERTURA DE RED</div>
+            <div class="prog-row"><div class="prog-label">Usuarios conectados</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:92%;background:#69f0ae;box-shadow:0 0 6px #69f0ae"></div></div><div class="prog-val">92%</div></div>
+            <div class="prog-row"><div class="prog-label">Cruces documentados</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:78%;background:#00e5ff;box-shadow:0 0 6px #00e5ff"></div></div><div class="prog-val">78%</div></div>
+            <div class="prog-row"><div class="prog-label">Acometidas en proceso</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:65%;background:#ffa726;box-shadow:0 0 6px #ffa726"></div></div><div class="prog-val">65%</div></div>
+            <div class="prog-row"><div class="prog-label">Válvulas operativas</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:88%;background:#ea80fc;box-shadow:0 0 6px #ea80fc"></div></div><div class="prog-val">88%</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">MÓDULO EN CONSTRUCCIÓN</div>
+          <div class="empty-state">
+            <div class="empty-icon">📈</div>
+            <div class="empty-msg">INDICADORES DETALLADOS EN DESARROLLO</div>
+            <div style="font-size:11px;color:rgba(180,210,200,0.35);margin-top:8px;">Se integrarán KPIs operativos, metas, alertas y semáforos de gestión.</div>
+          </div>
+        </div>
+      </div><!-- /indicadores -->
+
+      <!-- ── HISTÓRICOS ── -->
+      <div class="dash-section" id="sec-historicos">
+        <div class="panel">
+          <div class="panel-title">MÓDULO EN CONSTRUCCIÓN</div>
+          <div class="empty-state">
+            <div class="empty-icon">🗓️</div>
+            <div class="empty-msg">ANÁLISIS HISTÓRICO EN DESARROLLO</div>
+            <div style="font-size:11px;color:rgba(180,210,200,0.35);margin-top:8px;">Incluirá: evolución temporal de usuarios, crecimiento de red, comparativos anuales y proyecciones.</div>
+          </div>
+        </div>
+      </div><!-- /historicos -->
+
+    </div><!-- /dash-main -->
+  </div><!-- /dash-body -->
+</div><!-- /dashboard -->
+
+<script>
+/* ══ PRE-INTRO — DATA STREAM ══ */
+(function(){
+  var el  = document.getElementById('pre-intro-a');
+  var cnv = document.getElementById('pi-canvas');
+  var ctx = cnv.getContext('2d');
+  var cols=[], raf;
+
+  function resize(){
+    cnv.width=innerWidth; cnv.height=innerHeight;
+    var n=Math.floor(innerWidth/18);
+    cols=[];
+    for(var i=0;i<n;i++) cols.push({x:i*18+9, y:Math.random()*innerHeight, speed:Math.random()*1.5+0.5});
+  }
+  resize(); addEventListener('resize',resize);
+
+  var chars='0123456789ABCDEF.,:;GLP GAS RED VIA KM M3';
+  function rchar(){ return chars[Math.floor(Math.random()*chars.length)]; }
+
+  function draw(){
+    ctx.fillStyle='rgba(0,8,20,0.18)';
+    ctx.fillRect(0,0,cnv.width,cnv.height);
+    ctx.font='12px monospace';
+    cols.forEach(function(c,i){
+      var bright = Math.random()>0.92;
+      ctx.fillStyle = bright ? 'rgba(105,240,174,0.9)' : 'rgba(105,240,174,'+(0.12+Math.random()*0.18)+')';
+      ctx.fillText(rchar(), c.x, c.y);
+      c.y += c.speed * 1.8;
+      if(c.y>cnv.height+20){ c.y=-20; c.speed=Math.random()*1.5+0.5; }
+    });
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.piaTap=function(){
+    cancelAnimationFrame(raf);
+    el.style.opacity='0';
+    setTimeout(function(){
+      el.style.display='none';
+      var intro=document.getElementById('intro-a');
+      intro.classList.add('visible');
+    },800);
+  };
+})();
+
+/* ══ INTRO → DASHBOARD ══ */
+window.iniciarAnalisis=function(){
+  var intro=document.getElementById('intro-a');
+  intro.style.opacity='0'; intro.style.pointerEvents='none';
+  setTimeout(function(){
+    intro.style.display='none';
+    var dash=document.getElementById('dashboard-a');
+    dash.classList.add('visible');
+    arrancarKPIs();
+    dibujarBarras();
+    dibujarBarriosUsuarios();
+  },500);
+};
+
+/* ══ RELOJ ══ */
+(function reloj(){
+  var el=document.getElementById('dash-clock');
+  function tick(){
+    var d=new Date();
+    var pad=function(n){return n<10?'0'+n:n;};
+    el.textContent=pad(d.getDate())+'/'+(pad(d.getMonth()+1))+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  }
+  tick(); setInterval(tick,1000);
+})();
+
+/* ══ NAVEGACIÓN ══ */
+window.showSection=function(id, el){
+  document.querySelectorAll('.dash-section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+};
+
+/* ══ ANIMACIÓN KPIs ══ */
+function arrancarKPIs(){
+  function counter(id,target,delay){
+    setTimeout(function(){
+      var el=document.getElementById(id);
+      var start=0; var dur=1200;
+      var s=performance.now();
+      (function step(now){
+        var t=Math.min((now-s)/dur,1);
+        var ease=1-Math.pow(1-t,3);
+        el.textContent=Math.round(ease*target).toLocaleString('es-CO');
+        if(t<1) requestAnimationFrame(step);
+      })(s);
+    },delay);
+  }
+  counter('kpi-usuarios',17059,100);
+  counter('kpi-cruces',535,250);
+  counter('kpi-acometidas',670,400);
+  counter('kpi-polivalvulas',128,550);
+}
+
+/* ══ GRÁFICA DE BARRAS ══ */
+function dibujarBarras(){
+  var cnv=document.getElementById('chart-barras');
+  var w=cnv.parentElement.clientWidth||400;
+  var h=220;
+  cnv.width=w; cnv.height=h;
+  var ctx=cnv.getContext('2d');
+
+  var datos=[
+    {label:'USUARIOS',val:17059,color:'#69f0ae'},
+    {label:'CRUCES',val:535,color:'#00e5ff'},
+    {label:'ACOMETIDAS',val:670,color:'#ffa726'},
+    {label:'POLIVALVULAS',val:128,color:'#ea80fc'}
+  ];
+
+  var maxVal=Math.max.apply(null,datos.map(function(d){return d.val;}));
+  var pad={top:20,bottom:36,left:10,right:10};
+  var bw=(w-pad.left-pad.right)/datos.length;
+  var barW=bw*0.5;
+
+  // fondo grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)';
+  ctx.lineWidth=1;
+  for(var g=0;g<=4;g++){
+    var gy=pad.top+(h-pad.top-pad.bottom)*(g/4);
+    ctx.beginPath(); ctx.moveTo(pad.left,gy); ctx.lineTo(w-pad.right,gy); ctx.stroke();
+  }
+
+  datos.forEach(function(d,i){
+    var barH=(d.val/maxVal)*(h-pad.top-pad.bottom);
+    var x=pad.left+i*bw+bw/2-barW/2;
+    var y=h-pad.bottom-barH;
+
+    // glow
+    var grd=ctx.createLinearGradient(x,y,x,h-pad.bottom);
+    grd.addColorStop(0,d.color);
+    grd.addColorStop(1,d.color+'22');
+    ctx.fillStyle=grd;
+    ctx.shadowColor=d.color;
+    ctx.shadowBlur=12;
+    ctx.fillRect(x,y,barW,barH);
+    ctx.shadowBlur=0;
+
+    // label
+    ctx.fillStyle='rgba(180,210,200,0.5)';
+    ctx.font='7px Orbitron,monospace';
+    ctx.textAlign='center';
+    ctx.fillText(d.label,x+barW/2,h-pad.bottom+14);
+  });
+}
+
+/* ══ BARRAS USUARIOS POR BARRIO ══ */
+function dibujarBarriosUsuarios(){
+  var barrios=[
+    {n:'La Esmeralda',v:2140},{n:'Ciudad Jardín',v:1890},{n:'El Cedral',v:1680},
+    {n:'Simón Bolívar',v:1520},{n:'Porvenir',v:1380},{n:'Alfonso López',v:1210},
+    {n:'Policarpa',v:980},{n:'Villa Olímpica',v:860},{n:'Coliseo',v:790},
+    {n:'Otros barrios',v:4609}
+  ];
+  var max=barrios[0].v;
+  var wrap=document.getElementById('prog-usuarios');
+  wrap.innerHTML='';
+  barrios.forEach(function(b){
+    var pct=Math.round(b.v/max*100);
+    var row=document.createElement('div'); row.className='prog-row';
+    row.innerHTML='<div class="prog-label">'+b.n+'</div>'
+      +'<div class="prog-bar-wrap"><div class="prog-bar" style="width:0%;background:#69f0ae;box-shadow:0 0 6px rgba(105,240,174,0.5)" data-w="'+pct+'%"></div></div>'
+      +'<div class="prog-val">'+b.v.toLocaleString('es-CO')+'</div>';
+    wrap.appendChild(row);
+  });
+  // animar
+  setTimeout(function(){
+    wrap.querySelectorAll('.prog-bar').forEach(function(b){b.style.width=b.dataset.w;});
+  },100);
+}
+</script>
+</body>
+</html>
