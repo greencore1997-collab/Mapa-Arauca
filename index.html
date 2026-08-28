@@ -14,14 +14,15 @@
         body { font-family: Arial, sans-serif; }
         #map { height:100vh; }
         .info-panel {
-            position:absolute; bottom:10px; right:10px;
-            background:white; padding:15px; border-radius:8px;
-            box-shadow:0 0 15px rgba(0,0,0,0.3); z-index:500;
-            max-width:320px; font-size:12px;
+            position:absolute; bottom:10px; left:10px; right:auto;
+            background:rgba(15,20,30,0.88); color:#e0e8f0; padding:9px 12px; border-radius:8px;
+            box-shadow:0 0 12px rgba(0,0,0,0.5); z-index:500;
+            max-width:220px; font-size:10.5px; backdrop-filter:blur(4px);
+            border:1px solid rgba(100,160,220,0.25);
         }
-        .info-panel h3 { margin-bottom:10px; color:#333; font-size:14px; }
-        .info-panel p { margin:5px 0; }
-        .info-panel img { max-width:100%; margin-top:10px; border-radius:4px; max-height:200px; cursor:pointer; border:2px solid #1a73e8; }
+        .info-panel h3 { margin-bottom:6px; color:#80cfff; font-size:11px; font-weight:700; }
+        .info-panel p { margin:3px 0; color:#cde; }
+        .info-panel img { max-width:100%; margin-top:7px; border-radius:4px; max-height:120px; cursor:pointer; border:1px solid #1a73e8; }
         .info-panel img:hover { opacity:0.85; }
         .legend {
             position:absolute; top:203px; right:10px;
@@ -272,9 +273,9 @@
             max-width:85vw; overflow:hidden; text-overflow:ellipsis;
         }
         body.mobile-mode .info-panel {
-            bottom:12px; right:10px; left:auto; top:auto;
-            max-width:200px; width:200px; font-size:10px;
-            padding:8px 10px; border-radius:8px;
+            bottom:12px; left:10px; right:auto; top:auto;
+            max-width:190px; width:190px; font-size:9.5px;
+            padding:7px 9px; border-radius:8px;
         }
         body.mobile-mode .info-panel h3 {
             font-size:11px; margin-bottom:4px;
@@ -3454,14 +3455,14 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
         if (tipo === 'cruces') {
             datCruces.forEach(function(p) {
+                var _col0 = colores[p.barrio]||'#00e5ff';
                 var m = L.circleMarker([p.a, p.o], {
                     renderer:_cnvRend, radius:7,
-                    fillColor:'#00e5ff', color:'#004a6e', weight:1.5, fillOpacity:0.82
+                    fillColor:_col0, color:'#004a6e', weight:1.5, fillOpacity:0.82
                 });
                 var h = '<div style="font-family:Roboto,sans-serif;font-size:12px;min-width:200px;line-height:1.55">'
                     + '<b style="color:#00e5ff;font-size:13px">🛣️ CRUCE DE VÍA</b><br>'
                     + (p.barrio ? '<span style="color:#80cfff">🏘️ <b>'+p.barrio+'</b></span><br>' : '')
-                    + (p.f ? '<span style="opacity:.8">👷 <b>'+p.f+'</b></span><br>' : '')
                     + (p.l ? '📏 Longitud: <b>'+p.l+' m</b><br>' : '')
                     + (p.u ? '🧱 '+p.u+'<br>' : '')
                     + (p.b ? '📝 <em>'+p.b+'</em><br>' : '')
@@ -3473,9 +3474,10 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
         else if (tipo === 'usuarios') {
             datUsuarios.forEach(function(p) {
+                var _col1 = colores[p[4]]||'#69f0ae';
                 var m = L.circleMarker([p[0], p[1]], {
                     renderer:_cnvRend, radius:3.5,
-                    fillColor:'#69f0ae', color:'#1b5e20', weight:1, fillOpacity:0.72
+                    fillColor:_col1, color:'#1b5e20', weight:1, fillOpacity:0.72
                 });
                 var h = '<div style="font-family:Roboto,sans-serif;font-size:12px;min-width:170px;line-height:1.55">'
                     + '<b style="color:#69f0ae;font-size:13px">👤 USUARIO GLP</b><br>'
@@ -3490,9 +3492,10 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
         else if (tipo === 'acometidas') {
             datAcometidas.forEach(function(p) {
+                var _col2 = colores[p.barrio]||'#ffa726';
                 var m = L.circleMarker([p.a, p.o], {
                     renderer:_cnvRend, radius:6,
-                    fillColor:'#ffa726', color:'#7a3d00', weight:1.5, fillOpacity:0.85
+                    fillColor:_col2, color:'#7a3d00', weight:1.5, fillOpacity:0.85
                 });
                 var des = p.e==='SI'  ? '<span style="color:#69f0ae">✅ SÍ desea el servicio</span>'
                         : p.e==='NO' ? '<span style="color:#ef5350">❌ NO desea el servicio</span>'
@@ -3500,7 +3503,6 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
                 var h = '<div style="font-family:Roboto,sans-serif;font-size:12px;min-width:200px;line-height:1.55">'
                     + '<b style="color:#ffa726;font-size:13px">🔧 ACOMETIDA</b><br>'
                     + (p.barrio ? '<span style="color:#ffcc80">🏘️ <b>'+p.barrio+'</b></span><br>' : '')
-                    + (p.d  ? '<span style="opacity:.8">👷 <b>'+p.d+'</b></span><br>' : '')
                     + (des  ? des+'<br>' : '')
                     + (p.b  ? '📝 <em>'+p.b+'</em><br>' : '')
                     + _popupFoto(p.p,'Foto 1') + _popupFoto(p.q,'Foto 2') + '</div>';
@@ -3511,14 +3513,14 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
         else if (tipo === 'polivalvulas') {
             datPolivalvulas.forEach(function(p) {
+                var _col3 = colores[p.barrio]||'#ea80fc';
                 var m = L.circleMarker([p.a, p.o], {
                     renderer:_cnvRend, radius:8,
-                    fillColor:'#ea80fc', color:'#4a0070', weight:2, fillOpacity:0.88
+                    fillColor:_col3, color:'#4a0070', weight:2, fillOpacity:0.88
                 });
                 var h = '<div style="font-family:Roboto,sans-serif;font-size:12px;min-width:200px;line-height:1.55">'
                     + '<b style="color:#ea80fc;font-size:13px">⚙️ POLIVALVULA</b><br>'
                     + (p.barrio ? '<span style="color:#ce93d8">🏘️ <b>'+p.barrio+'</b></span><br>' : '')
-                    + (p.f ? '<span style="opacity:.8">👷 <b>'+p.f+'</b></span><br>' : '')
                     + (p.l ? '📏 Longitud: <b>'+p.l+' m</b><br>' : '')
                     + (p.u ? '🧱 '+p.u+'<br>' : '')
                     + (p.b ? '📝 <em>'+p.b+'</em><br>' : '')
