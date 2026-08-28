@@ -754,6 +754,16 @@
         #btn-capa-usuarios    { top:347px; }
         #btn-capa-acometidas  { top:386px; }
         #btn-capa-polivalvulas{ top:425px; }
+        #btn-rep-usuarios {
+            position:absolute; top:347px; right:199px; z-index:404;
+            width:28px; height:28px;
+            background:rgba(0,12,35,0.78); border:1px solid rgba(105,240,174,0.35);
+            color:#69f0ae; border-radius:6px; cursor:pointer; font-size:12px;
+            display:flex; align-items:center; justify-content:center;
+            transition:background 0.2s;
+        }
+        #btn-rep-usuarios:hover { background:rgba(0,60,40,0.9); border-color:#69f0ae; }
+        body.mobile-mode #btn-rep-usuarios { display:none !important; }
         #btn-capa-cruces.capa-activa      { background:rgba(0,140,190,0.4);  border-color:#00e5ff; color:#00e5ff; box-shadow:0 0 14px rgba(0,229,255,0.45); }
         #btn-capa-usuarios.capa-activa    { background:rgba(0,130,70,0.4);   border-color:#69f0ae; color:#69f0ae; box-shadow:0 0 14px rgba(105,240,174,0.45); }
         #btn-capa-acometidas.capa-activa  { background:rgba(190,90,0,0.4);   border-color:#ffa726; color:#ffa726; box-shadow:0 0 14px rgba(255,167,38,0.45); }
@@ -821,6 +831,7 @@
         <span><span class="capa-dot" style="background:#69f0ae;box-shadow:0 0 4px #69f0ae"></span>👤 USUARIOS</span>
         <span class="capa-badge">17,059</span>
     </button>
+    <button id="btn-rep-usuarios" onclick="_abrirReporteUsuarios()" title="Reporte de Usuarios">📊</button>
     <button id="btn-capa-acometidas" class="btn-capa" onclick="toggleCapa('acometidas')">
         <span><span class="capa-dot" style="background:#ffa726;box-shadow:0 0 4px #ffa726"></span>🔧 ACOMETIDAS</span>
         <span class="capa-badge">670</span>
@@ -1860,6 +1871,7 @@
         // Ocultar botones de capa y su etiqueta
         document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='none');
         document.querySelectorAll('.btn-capa').forEach(function(el){ el.style.display='none'; });
+        var bru = document.getElementById('btn-rep-usuarios'); if(bru) bru.style.display='none';
         var pp = document.getElementById('panel-puntos-barrio');
         _pblVisiblePreTab = pp && pp.classList.contains('visible');
         if (pp) { pp.style.visibility = 'hidden'; pp.style.pointerEvents = 'none'; }
@@ -1873,6 +1885,7 @@
         // Restaurar botones de capa y su etiqueta
         document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='');
         document.querySelectorAll('.btn-capa').forEach(function(el){ el.style.display=''; });
+        var bru = document.getElementById('btn-rep-usuarios'); if(bru) bru.style.display='';
         var pp = document.getElementById('panel-puntos-barrio');
         if (pp) { pp.style.visibility = ''; pp.style.pointerEvents = ''; }
     }
@@ -2047,6 +2060,15 @@
     
 
     var _capaReporteActual = null;
+
+    function _abrirReporteUsuarios() {
+        _capaReporteActual = 'usuarios';
+        _generarReporteCapa('usuarios');
+        var panel = document.getElementById('reporte-overlay');
+        var backdrop = document.getElementById('reporte-backdrop');
+        panel.classList.add('visible');
+        backdrop.classList.add('visible');
+    }
 
     function toggleReporte() {
         var panel = document.getElementById('reporte-overlay');
