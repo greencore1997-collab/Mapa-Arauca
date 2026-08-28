@@ -2084,13 +2084,20 @@
         var panel = document.getElementById('reporte-overlay');
         var backdrop = document.getElementById('reporte-backdrop');
         var isOpen = panel.classList.contains('visible');
+        if (!isOpen) {
+            var capasOn = Object.keys(capaActiva).filter(function(k){ return capaActiva[k]; });
+            if (capasOn.length > 0) {
+                _generarReporteCapa(capasOn[0]);
+            } else {
+                generarReporte();
+            }
+            panel.classList.add('visible');
+            backdrop.classList.add('visible');
+            return;
+        }
         if (isOpen) {
             panel.classList.remove('visible');
             backdrop.classList.remove('visible');
-        } else {
-            generarReporte();
-            panel.classList.add('visible');
-            backdrop.classList.add('visible');
         }
     }
 
@@ -3208,6 +3215,254 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         return '<br><a href="' + url + '" target="_blank" style="display:block;margin-top:5px">'
              + '<img src="' + url + '" style="max-width:220px;max-height:150px;border-radius:6px;border:1px solid rgba(0,200,255,0.35)" onerror="_piHide(this)" loading="lazy"></a>'
              + '<span style="font-size:9px;opacity:0.55">' + lbl + '</span>';
+    }
+
+    /* ══════════════════════════════════════════════
+       REPORTES POR CAPA CARTOGRÁFICA
+    ══════════════════════════════════════════════ */
+    var _repPaleta = ['#26c6da','#ab47bc','#ef5350','#66bb6a','#ffa726','#ec407a','#42a5f5','#d4e157','#26a69a','#ff7043'];
+    function _repColor(dist, key) { var i=Object.keys(dist).indexOf(key); return _repPaleta[i%_repPaleta.length]; }
+
+    function _repSetHeader(titulo, subtitulo) {
+        var h2 = document.querySelector('#reporte-overlay .rep-header h2');
+        if (h2) h2.innerHTML = titulo;
+        var sub = document.getElementById('rep-subtitulo');
+        if (sub) sub.innerHTML = subtitulo;
+    }
+
+    function _repKpi(num, lbl, color) {
+        return '<div class="rep-kpi"><span class="num" style="color:'+(color||'#00c8ff')+'">'+num+'</span><span class="lbl">'+lbl+'</span></div>';
+    }
+
+    function _repBarras(dist, total, colorFn) {
+        var entries = Object.entries(dist).sort(function(a,b){return b[1]-a[1];});
+        var maxV = entries[0][1];
+        var html = '';
+        entries.forEach(function(e) {
+            var col = colorFn ? colorFn(e[0], dist) : _repColor(dist, e[0]);
+            var pct = (e[1]/maxV*100); var pctT = ((e[1]/total)*100).toFixed(1);
+            html += '<div class="rep-bar-row">';
+            html += '<div class="rep-bar-label" title="'+e[0]+'">'+e[0]+'</div>';
+            html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:'+pct+'%;background:'+col+'"><span>'+pctT+'% ('+e[1]+')</span></div></div>';
+            html += '<div class="rep-bar-count">'+e[1]+'</div></div>';
+        });
+        return html;
+    }
+
+    function _repGeo(datos, getFn) {
+        var latMin=999,latMax=-999,lonMin=999,lonMax=-999;
+        datos.forEach(function(p){ var r=getFn(p); if(r.lat<latMin) latMin=r.lat; if(r.lat>latMax) latMax=r.lat; if(r.lon<lonMin) lonMin=r.lon; if(r.lon>lonMax) lonMax=r.lon; });
+        if(latMin>=999) return '';
+        return '<div class="rep-section"><h3>🗺️ Cobertura Geográfica</h3><table class="rep-table">'
+            +'<tr><th>Parámetro</th><th>Coordenada (WGS84)</th></tr>'
+            +'<tr><td>Latitud mínima</td><td>'+latMin.toFixed(6)+'°</td></tr>'
+            +'<tr><td>Latitud máxima</td><td>'+latMax.toFixed(6)+'°</td></tr>'
+            +'<tr><td>Longitud mínima</td><td>'+lonMin.toFixed(6)+'°</td></tr>'
+            +'<tr><td>Longitud máxima</td><td>'+lonMax.toFixed(6)+'°</td></tr>'
+            +'</table></div>';
+    }
+
+    function _generarReporteCapa(tipo) {
+        if (tipo==='cruces')       _repCruces();
+        else if (tipo==='usuarios')    _repUsuarios();
+        else if (tipo==='acometidas')  _repAcometidas();
+        else if (tipo==='polivalvulas') _repPolivalvulas();
+    }
+
+    /* ── CRUCES DE VÍA ── */
+    function _repCruces() {
+        _repSetHeader('📊 Reporte — 🛣️ Cruces de Vía', 'Georreferenciación de Cruces — Red GLP Arauca');
+        var body = document.getElementById('reporte-body');
+        var datos = datCruces; var total = datos.length;
+        if (!total) { body.innerHTML='<p style="text-align:center;padding:40px;opacity:.6">Sin datos de cruces.</p>'; return; }
+
+        var funcDist={}, unidadDist={}, obsDist={};
+        var lSum=0,lCnt=0,lMin=Infinity,lMax=-Infinity;
+        var conFoto=0,sinFoto=0;
+
+        datos.forEach(function(p){
+            if(p.f) funcDist[p.f]=(funcDist[p.f]||0)+1;
+            if(p.u) unidadDist[p.u]=(unidadDist[p.u]||0)+1;
+            if(p.b) obsDist[p.b]=(obsDist[p.b]||0)+1;
+            var l=parseFloat(p.l); if(!isNaN(l)){lSum+=l;lCnt++;if(l<lMin)lMin=l;if(l>lMax)lMax=l;}
+            (p.p||p.q)?conFoto++:sinFoto++;
+        });
+
+        var html='<div class="rep-kpi-grid">'
+            +_repKpi(total,'Total cruces georreferenciados','#00e5ff')
+            +_repKpi(Object.keys(funcDist).length,'Técnicos de campo involucrados','#ab47bc')
+            +_repKpi(lCnt>0?lSum.toFixed(0)+' m':'—','Metros lineales totales registrados','#66bb6a')
+            +_repKpi(conFoto,'Cruces con registro fotográfico','#ffa726')
+            +'</div>';
+
+        if(Object.keys(funcDist).length){
+            html+='<div class="rep-section"><h3>👷 Técnico de Campo Responsable del Registro</h3>'+_repBarras(funcDist,total)+'</div>';
+        }
+        if(Object.keys(unidadDist).length){
+            html+='<div class="rep-section"><h3>🧱 Tipo de Superficie Cruzada (Unidad)</h3>'+_repBarras(unidadDist,total)+'</div>';
+        }
+        if(lCnt>0){
+            var avg=(lSum/lCnt).toFixed(2);
+            html+='<div class="rep-section"><h3>📏 Longitud del Cruce (metros lineales)</h3>'
+                +'<div class="rep-kpi-grid" style="grid-template-columns:repeat(4,1fr)">'
+                +_repKpi(lSum.toFixed(1)+' m','Total metros georreferenciados','#26c6da')
+                +_repKpi(avg+' m','Longitud promedio por cruce','#66bb6a')
+                +_repKpi(lMin.toFixed(1)+' m','Cruce más corto registrado','#ef5350')
+                +_repKpi(lMax.toFixed(1)+' m','Cruce más largo registrado','#ffa726')
+                +'</div></div>';
+        }
+        html+='<div class="rep-section"><h3>📷 Registro Fotográfico</h3><div class="rep-kpi-grid" style="grid-template-columns:1fr 1fr">'
+            +_repKpi(conFoto,'Con registro fotográfico','#4caf50')
+            +_repKpi(sinFoto,'Sin registro fotográfico','#ef5350')
+            +'</div></div>';
+        html+=_repGeo(datos,function(p){return{lat:p.a,lon:p.o};});
+        body.innerHTML=html;
+    }
+
+    /* ── POLIVALVULAS ── */
+    function _repPolivalvulas() {
+        _repSetHeader('📊 Reporte — ⚙️ Polivalvulas', 'Georreferenciación de Polivalvulas — Red GLP Arauca');
+        var body = document.getElementById('reporte-body');
+        var datos = datPolivalvulas; var total = datos.length;
+        if (!total) { body.innerHTML='<p style="text-align:center;padding:40px;opacity:.6">Sin datos de polivalvulas.</p>'; return; }
+
+        var funcDist={}, unidadDist={};
+        var lSum=0,lCnt=0,lMin=Infinity,lMax=-Infinity;
+        var conFoto=0,sinFoto=0;
+
+        datos.forEach(function(p){
+            if(p.f) funcDist[p.f]=(funcDist[p.f]||0)+1;
+            if(p.u) unidadDist[p.u]=(unidadDist[p.u]||0)+1;
+            var l=parseFloat(p.l); if(!isNaN(l)){lSum+=l;lCnt++;if(l<lMin)lMin=l;if(l>lMax)lMax=l;}
+            (p.p||p.q)?conFoto++:sinFoto++;
+        });
+
+        var html='<div class="rep-kpi-grid">'
+            +_repKpi(total,'Total polivalvulas georreferenciadas','#ea80fc')
+            +_repKpi(Object.keys(funcDist).length,'Técnicos de campo involucrados','#ab47bc')
+            +_repKpi(lCnt>0?lSum.toFixed(0)+' m':'—','Metros lineales totales','#66bb6a')
+            +_repKpi(conFoto,'Con registro fotográfico','#ffa726')
+            +'</div>';
+
+        if(Object.keys(funcDist).length){
+            html+='<div class="rep-section"><h3>👷 Técnico de Campo Responsable del Registro</h3>'+_repBarras(funcDist,total)+'</div>';
+        }
+        if(Object.keys(unidadDist).length){
+            html+='<div class="rep-section"><h3>🧱 Tipo de Superficie (Unidad)</h3>'+_repBarras(unidadDist,total)+'</div>';
+        }
+        if(lCnt>0){
+            html+='<div class="rep-section"><h3>📏 Longitud registrada (metros lineales)</h3>'
+                +'<div class="rep-kpi-grid" style="grid-template-columns:repeat(4,1fr)">'
+                +_repKpi(lSum.toFixed(1)+' m','Total metros','#26c6da')
+                +_repKpi((lSum/lCnt).toFixed(2)+' m','Promedio por polivalvula','#66bb6a')
+                +_repKpi(lMin.toFixed(1)+' m','Mínimo registrado','#ef5350')
+                +_repKpi(lMax.toFixed(1)+' m','Máximo registrado','#ffa726')
+                +'</div></div>';
+        }
+        html+='<div class="rep-section"><h3>📷 Registro Fotográfico</h3><div class="rep-kpi-grid" style="grid-template-columns:1fr 1fr">'
+            +_repKpi(conFoto,'Con registro fotográfico','#4caf50')
+            +_repKpi(sinFoto,'Sin registro fotográfico','#ef5350')
+            +'</div></div>';
+        html+=_repGeo(datos,function(p){return{lat:p.a,lon:p.o};});
+        body.innerHTML=html;
+    }
+
+    /* ── ACOMETIDAS ── */
+    function _repAcometidas() {
+        _repSetHeader('📊 Reporte — 🔧 Acometidas', 'Registro de Acometidas — Red GLP Arauca');
+        var body = document.getElementById('reporte-body');
+        var datos = datAcometidas; var total = datos.length;
+        if (!total) { body.innerHTML='<p style="text-align:center;padding:40px;opacity:.6">Sin datos de acometidas.</p>'; return; }
+
+        var digDist={}, servDist={};
+        var conFoto=0,sinFoto=0;
+
+        datos.forEach(function(p){
+            if(p.d) digDist[p.d]=(digDist[p.d]||0)+1;
+            var sv=p.e||'Sin dato'; servDist[sv]=(servDist[sv]||0)+1;
+            (p.p||p.q)?conFoto++:sinFoto++;
+        });
+
+        var si=servDist['SI']||0, no=servDist['NO']||0;
+
+        var html='<div class="rep-kpi-grid">'
+            +_repKpi(total,'Total acometidas registradas','#ffa726')
+            +_repKpi(Object.keys(digDist).length,'Técnicos digitadores involucrados','#ab47bc')
+            +_repKpi(si,'Usuarios que SÍ desean el servicio','#69f0ae')
+            +_repKpi(no,'Usuarios que NO desean el servicio','#ef5350')
+            +'</div>';
+
+        html+='<div class="rep-section"><h3>✅ Desea el Servicio de Gas</h3>'
+            +'<div class="rep-kpi-grid" style="grid-template-columns:repeat(3,1fr)">'
+            +'<div class="rep-kpi" style="background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.3)">'
+            +'<span class="num" style="color:#69f0ae">'+si+'</span><span class="lbl">SÍ desea el servicio<br><em>'+(si?((si/total)*100).toFixed(1):0)+'% del total</em></span></div>'
+            +'<div class="rep-kpi" style="background:rgba(239,83,80,0.1);border:1px solid rgba(239,83,80,0.3)">'
+            +'<span class="num" style="color:#ef5350">'+no+'</span><span class="lbl">NO desea el servicio<br><em>'+(no?((no/total)*100).toFixed(1):0)+'% del total</em></span></div>'
+            +'<div class="rep-kpi"><span class="num" style="color:#80cfff">'+(servDist['Sin dato']||0)+'</span><span class="lbl">Sin respuesta registrada</span></div>'
+            +'</div></div>';
+
+        if(Object.keys(digDist).length){
+            html+='<div class="rep-section"><h3>👷 Técnico Digitador por Registro</h3>'+_repBarras(digDist,total)+'</div>';
+        }
+        html+='<div class="rep-section"><h3>📷 Registro Fotográfico</h3><div class="rep-kpi-grid" style="grid-template-columns:1fr 1fr">'
+            +_repKpi(conFoto,'Con registro fotográfico','#4caf50')
+            +_repKpi(sinFoto,'Sin registro fotográfico','#ef5350')
+            +'</div></div>';
+        html+=_repGeo(datos,function(p){return{lat:p.a,lon:p.o};});
+        body.innerHTML=html;
+    }
+
+    /* ── USUARIOS ── */
+    function _repUsuarios() {
+        _repSetHeader('📊 Reporte — 👤 Usuarios GLP', 'Distribución de Usuarios — Red GLP Arauca');
+        var body = document.getElementById('reporte-body');
+        var datos = datUsuarios; var total = datos.length;
+        if (!total) { body.innerHTML='<p style="text-align:center;padding:40px;opacity:.6">Sin datos de usuarios.</p>'; return; }
+
+        var barrDist={};
+        datos.forEach(function(p){ var b=p[4]||'Sin barrio'; barrDist[b]=(barrDist[b]||0)+1; });
+        var numBarrios=Object.keys(barrDist).length;
+        var avg=(total/numBarrios).toFixed(1);
+        var sortedB=Object.entries(barrDist).sort(function(a,b){return b[1]-a[1];});
+
+        var html='<div class="rep-kpi-grid">'
+            +_repKpi(total.toLocaleString(),'Total usuarios georreferenciados','#69f0ae')
+            +_repKpi(numBarrios,'Barrios con usuarios registrados','#26c6da')
+            +_repKpi(avg,'Promedio de usuarios por barrio','#ffa726')
+            +_repKpi(sortedB[0][0],'Barrio con mayor cobertura','#ab47bc')
+            +'</div>';
+
+        html+='<div class="rep-section"><h3>🏘️ Distribución por Barrio</h3>'+_repBarras(barrDist,total,function(v){return colores[v]||_repColor(barrDist,v);})+'</div>';
+
+        // Top 5 y Bottom 5
+        if(sortedB.length>=4){
+            var top5=sortedB.slice(0,5); var bot5=sortedB.slice(-5).reverse();
+            html+='<div class="rep-section"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+            html+='<div><h4 style="color:#2e7d32;font-size:12px;margin-bottom:6px">▲ Mayor concentración</h4>';
+            top5.forEach(function(e,i){
+                html+='<div style="padding:6px 10px;background:rgba(46,125,50,0.15);border-radius:6px;margin:3px 0;font-size:11px"><strong>#'+(i+1)+'</strong> '+e[0]+' — <strong>'+e[1]+' usuarios</strong> ('+(e[1]/total*100).toFixed(1)+'%)</div>';
+            });
+            html+='</div><div><h4 style="color:#c62828;font-size:12px;margin-bottom:6px">▼ Menor concentración</h4>';
+            bot5.forEach(function(e,i){
+                html+='<div style="padding:6px 10px;background:rgba(198,40,40,0.12);border-radius:6px;margin:3px 0;font-size:11px"><strong>#'+(sortedB.length-bot5.length+i+1)+'</strong> '+e[0]+' — <strong>'+e[1]+' usuarios</strong></div>';
+            });
+            html+='</div></div></div>';
+        }
+
+        // Tabla completa por barrio
+        html+='<div class="rep-section"><h3>📋 Tabla Resumen por Barrio</h3><table class="rep-table">'
+            +'<tr><th>#</th><th>Barrio</th><th>Usuarios</th><th>%</th><th>% Acum.</th></tr>';
+        var acum=0;
+        sortedB.forEach(function(e,i){
+            acum+=e[1];
+            var dot='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+(colores[e[0]]||'#999')+';margin-right:6px"></span>';
+            html+='<tr><td>'+(i+1)+'</td><td>'+dot+e[0]+'</td><td style="text-align:center;font-weight:bold">'+e[1]+'</td>'
+                +'<td style="text-align:center">'+((e[1]/total)*100).toFixed(1)+'%</td>'
+                +'<td style="text-align:center">'+((acum/total)*100).toFixed(1)+'%</td></tr>';
+        });
+        html+='</table></div>';
+        html+=_repGeo(datos,function(p){return{lat:p[0],lon:p[1]};});
+        body.innerHTML=html;
     }
 
     function _buildCapa(tipo) {
