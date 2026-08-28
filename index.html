@@ -630,16 +630,17 @@
         /* screen 1 content */
         #intro-s1 { display:flex; flex-direction:column; align-items:center; z-index:1; }
         #intro-geovisor {
-            font-family:'Orbitron',monospace; font-weight:900;
-            font-size:clamp(32px,9vw,92px); color:#00c8ff;
-            text-shadow:0 0 22px rgba(0,200,255,0.75),0 0 55px rgba(0,200,255,0.3);
+            font-family:'Orbitron',monospace; font-weight:400;
+            font-size:clamp(16px,3.8vw,38px); color:#b0ddf5;
+            text-shadow:0 0 14px rgba(0,200,255,0.5);
             letter-spacing:-0.05em; opacity:0; text-align:center; white-space:nowrap;
-            animation:intro-geo 0.85s cubic-bezier(0.15,0,0.35,1) 0.1s forwards;
+            margin-bottom:6px;
+            animation:intro-geo 0.75s cubic-bezier(0.15,0,0.35,1) 0.1s forwards;
         }
         @keyframes intro-geo {
             0%   { letter-spacing:-0.05em; opacity:0; }
-            35%  { opacity:1; }
-            100% { letter-spacing:0.48em; opacity:1; }
+            40%  { opacity:0.85; }
+            100% { letter-spacing:0.70em; opacity:0.85; }
         }
         #intro-araucana {
             font-family:'Orbitron',monospace; font-weight:700;
@@ -819,6 +820,7 @@
   <div class="ic bl"></div><div class="ic br"></div>
   <img id="intro-shield" src="" alt="">
   <div id="intro-s1">
+    <div id="intro-geovisor">GEOVISOR</div>
     <div id="intro-araucana">ARAUCANA DE GASES</div>
     <button id="intro-entrar" onclick="introEntrar()">
       <svg id="intro-globe-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32" fill="none">
