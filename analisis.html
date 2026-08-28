@@ -93,6 +93,55 @@ body{background:#000814;color:#e0e8f0;font-family:Arial,sans-serif;overflow:hidd
 #carga-wrap{display:none;text-align:center;padding:20px;}
 .carga-msg{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:#69f0ae;margin-bottom:10px;}
 .carga-bar{width:200px;height:4px;background:rgba(105,240,174,0.15);border-radius:2px;margin:0 auto;overflow:hidden;}
+
+/* ══ FILTRO DE ATRIBUTOS ══ */
+#filtro-wrap{display:none;}
+.filtro-header-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.filtro-filemeta{font-size:10px;color:rgba(180,210,200,0.45);flex:1;}
+.filtro-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-filtro-accion{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;padding:6px 12px;border-radius:6px;cursor:pointer;border:1px solid;transition:all 0.2s;}
+.btn-sel-all{color:#69f0ae;border-color:rgba(105,240,174,0.35);background:rgba(105,240,174,0.07);}
+.btn-sel-all:hover{background:rgba(105,240,174,0.16);}
+.btn-desel-all{color:rgba(180,200,190,0.6);border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);}
+.btn-desel-all:hover{background:rgba(255,255,255,0.08);}
+.btn-volver-drop{color:#00c8ff;border-color:rgba(0,200,255,0.25);background:rgba(0,12,35,0.6);}
+.btn-volver-drop:hover{background:rgba(0,40,100,0.8);}
+.filtro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;max-height:380px;overflow-y:auto;padding-right:4px;margin-bottom:16px;}
+.filtro-col-card{
+  background:rgba(0,20,10,0.5);border:1px solid rgba(105,240,174,0.12);
+  border-radius:9px;padding:11px 13px;cursor:pointer;
+  transition:all 0.18s;display:flex;align-items:flex-start;gap:10px;
+}
+.filtro-col-card:hover{border-color:rgba(105,240,174,0.35);background:rgba(0,30,15,0.7);}
+.filtro-col-card.selected{border-color:rgba(105,240,174,0.55);background:rgba(0,40,20,0.6);box-shadow:0 0 12px rgba(105,240,174,0.08);}
+.filtro-col-card.selected-num{border-color:rgba(0,229,255,0.45);background:rgba(0,20,40,0.6);box-shadow:0 0 10px rgba(0,229,255,0.06);}
+.fcc-check{
+  width:16px;height:16px;border-radius:4px;flex-shrink:0;margin-top:1px;
+  border:1.5px solid rgba(105,240,174,0.3);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.filtro-col-card.selected .fcc-check,.filtro-col-card.selected-num .fcc-check{
+  background:#69f0ae;border-color:#69f0ae;
+}
+.filtro-col-card.selected-num .fcc-check{background:#00e5ff;border-color:#00e5ff;}
+.fcc-check::after{content:'✓';font-size:10px;color:#000c1a;font-weight:900;display:none;}
+.filtro-col-card.selected .fcc-check::after,.filtro-col-card.selected-num .fcc-check::after{display:block;}
+.fcc-body{flex:1;min-width:0;}
+.fcc-name{font-size:11px;color:#e0e8f0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.fcc-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.fcc-preview{font-size:9px;color:rgba(180,200,190,0.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fcc-count{font-family:'Orbitron',monospace;font-size:7.5px;color:rgba(180,200,190,0.35);margin-top:2px;}
+.filtro-footer{display:flex;align-items:center;gap:14px;padding-top:14px;border-top:1px solid rgba(105,240,174,0.1);}
+.filtro-counter{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px;color:rgba(105,240,174,0.5);flex:1;}
+.btn-generar{
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;
+  color:#000c1a;background:#69f0ae;border:none;border-radius:9px;
+  padding:11px 28px;cursor:pointer;
+  box-shadow:0 0 20px rgba(105,240,174,0.3);transition:all 0.2s;
+}
+.btn-generar:hover{background:#a5f3c3;box-shadow:0 0 35px rgba(105,240,174,0.5);transform:scale(1.03);}
+.btn-generar:disabled{background:rgba(105,240,174,0.2);color:rgba(0,12,7,0.4);cursor:not-allowed;transform:none;box-shadow:none;}
 .carga-prog{height:100%;background:#69f0ae;border-radius:2px;animation:cargaAnim 1.2s ease-in-out infinite;}
 @keyframes cargaAnim{0%{width:0%;margin-left:0;}50%{width:60%;}100%{width:0%;margin-left:100%;}};
 
@@ -243,6 +292,26 @@ canvas.rapido-chart{width:100%!important;display:block;}
           <div id="carga-wrap">
             <div class="carga-msg">PROCESANDO DATOS...</div>
             <div class="carga-bar"><div class="carga-prog"></div></div>
+          </div>
+        </div>
+
+        <!-- Panel de filtro de atributos -->
+        <div id="filtro-wrap">
+          <div class="panel">
+            <div class="panel-title">SELECCIONAR ATRIBUTOS A ANALIZAR</div>
+            <div class="filtro-header-row">
+              <div class="filtro-filemeta" id="filtro-filemeta">—</div>
+              <div class="filtro-actions">
+                <button class="btn-filtro-accion btn-sel-all" onclick="filtroSelAll(true)">☑ SELECCIONAR TODO</button>
+                <button class="btn-filtro-accion btn-desel-all" onclick="filtroSelAll(false)">☐ DESELECCIONAR TODO</button>
+                <button class="btn-filtro-accion btn-volver-drop" onclick="nuevoAnalisis()">↩ NUEVO ARCHIVO</button>
+              </div>
+            </div>
+            <div class="filtro-grid" id="filtro-grid"></div>
+            <div class="filtro-footer">
+              <div class="filtro-counter" id="filtro-counter">0 columnas seleccionadas</div>
+              <button class="btn-generar" id="btn-generar" onclick="aplicarFiltro()" disabled>▶ GENERAR ANÁLISIS</button>
+            </div>
           </div>
         </div>
 
@@ -413,17 +482,110 @@ window.cargarArchivo=function(file){
       var sheetName=wb.SheetNames[0];
       var ws=wb.Sheets[sheetName];
       var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      // Limpiar filas vacías
       var headers=raw[0]||[];
       var rows=raw.slice(1).filter(function(r){return r.some(function(c){return c!=='';});});
       _datosAnalisis={headers:headers,rows:rows,sheetName:sheetName,fileName:file.name,wb:wb};
-      setTimeout(function(){generarDashboard(_datosAnalisis);},400);
+      setTimeout(function(){
+        document.getElementById('carga-wrap').style.display='none';
+        mostrarFiltro(_datosAnalisis);
+      },400);
     }catch(ex){
       alert('Error leyendo el archivo: '+ex.message);
       nuevoAnalisis();
     }
   };
   reader.readAsArrayBuffer(file);
+};
+
+/* ══ PANEL DE FILTRO ══ */
+var _colStatsAll = [];
+var _selectedCols = [];
+
+function mostrarFiltro(d){
+  _colStatsAll = analizarColumnas(d.headers, d.rows);
+  _selectedCols = d.headers.map(function(_,i){return i;}); // todas seleccionadas por defecto
+
+  document.getElementById('filtro-filemeta').textContent =
+    '📋 '+d.fileName+'  ·  '+d.rows.length.toLocaleString('es-CO')+' filas  ·  '+d.headers.length+' columnas  ·  Hoja: '+d.sheetName;
+
+  var grid = document.getElementById('filtro-grid');
+  grid.innerHTML = '';
+
+  _colStatsAll.forEach(function(c, i){
+    // Preview de valores únicos
+    var preview = '';
+    if(c.type==='TXT' && c.freq && c.freq.length>0){
+      preview = c.freq.slice(0,3).map(function(f){return f.val;}).join(' · ');
+    } else if(c.type==='NUM'){
+      preview = 'Min: '+c.min.toLocaleString('es-CO',{maximumFractionDigits:1})+
+                ' · Máx: '+c.max.toLocaleString('es-CO',{maximumFractionDigits:1})+
+                ' · Prom: '+c.avg.toLocaleString('es-CO',{maximumFractionDigits:1});
+    }
+
+    var card = document.createElement('div');
+    card.className = 'filtro-col-card '+(c.type==='NUM'?'selected-num':'selected');
+    card.dataset.idx = i;
+    card.onclick = function(){ toggleFiltroCol(i, card, c.type); };
+    card.innerHTML =
+      '<div class="fcc-check"></div>'+
+      '<div class="fcc-body">'+
+        '<div class="fcc-name">'+c.name+'</div>'+
+        '<div class="fcc-row">'+
+          '<span class="type-badge '+(c.type==='NUM'?'type-num':'type-txt')+'">'+c.type+'</span>'+
+          (c.type==='TXT'?'<span style="font-size:9px;color:rgba(180,200,190,0.4)">'+c.unique+' únicos</span>':'')+''+
+        '</div>'+
+        '<div class="fcc-preview">'+preview+'</div>'+
+        '<div class="fcc-count">'+c.count.toLocaleString('es-CO')+' registros · '+c.nulls+' vacíos</div>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  actualizarContadorFiltro();
+  document.getElementById('filtro-wrap').style.display='block';
+}
+
+function toggleFiltroCol(idx, card, tipo){
+  var pos = _selectedCols.indexOf(idx);
+  if(pos>=0){
+    _selectedCols.splice(pos,1);
+    card.className='filtro-col-card';
+  } else {
+    _selectedCols.push(idx);
+    card.className='filtro-col-card '+(tipo==='NUM'?'selected-num':'selected');
+  }
+  actualizarContadorFiltro();
+}
+
+window.filtroSelAll=function(sel){
+  _selectedCols = sel ? _datosAnalisis.headers.map(function(_,i){return i;}) : [];
+  document.querySelectorAll('.filtro-col-card').forEach(function(card, i){
+    var c = _colStatsAll[i];
+    card.className = 'filtro-col-card'+(sel?(c&&c.type==='NUM'?' selected-num':' selected'):'');
+  });
+  actualizarContadorFiltro();
+};
+
+function actualizarContadorFiltro(){
+  var n = _selectedCols.length;
+  document.getElementById('filtro-counter').textContent = n+' columna'+(n!==1?'s':'')+' seleccionada'+(n!==1?'s':'');
+  document.getElementById('btn-generar').disabled = n===0;
+}
+
+window.aplicarFiltro=function(){
+  if(!_datosAnalisis||_selectedCols.length===0)return;
+  // Filtrar headers y rows a las columnas seleccionadas
+  var idxs = _selectedCols.slice().sort(function(a,b){return a-b;});
+  var filtHeaders = idxs.map(function(i){return _datosAnalisis.headers[i];});
+  var filtRows = _datosAnalisis.rows.map(function(r){return idxs.map(function(i){return r[i];});});
+  var filtDatos = {
+    headers: filtHeaders,
+    rows: filtRows,
+    sheetName: _datosAnalisis.sheetName,
+    fileName: _datosAnalisis.fileName,
+    wb: _datosAnalisis.wb
+  };
+  document.getElementById('filtro-wrap').style.display='none';
+  generarDashboard(filtDatos);
 };
 
 function generarDashboard(d){
@@ -642,8 +804,11 @@ function generarPreview(headers,rows){
 /* Nuevo análisis */
 window.nuevoAnalisis=function(){
   _datosAnalisis=null;
+  _colStatsAll=[];
+  _selectedCols=[];
   document.getElementById('rapido-resultado').style.display='none';
   document.getElementById('carga-wrap').style.display='none';
+  document.getElementById('filtro-wrap').style.display='none';
   document.getElementById('dropzone-wrap').style.display='block';
   document.getElementById('file-input-rapido').value='';
 };
