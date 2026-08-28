@@ -3465,7 +3465,7 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         var lg = L.layerGroup();
 
         if (tipo === 'cruces') {
-            datCruces.forEach(function(p) {
+            datCruces.filter(function(p){ return p.u && p.u.trim().toUpperCase()==='CRUCE DE VIA'; }).forEach(function(p) {
                 var _col0 = colores[p.barrio]||'#00e5ff';
                 var m = L.circleMarker([p.a, p.o], {
                     renderer:_cnvRend, radius:7,
