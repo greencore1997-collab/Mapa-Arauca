@@ -1857,6 +1857,10 @@
                 if (el) el.style.display = 'none';
             }
         });
+        // Ocultar botones de capa y su etiqueta
+        ['capas-section-label','btn-capa-cruces','btn-capa-usuarios','btn-capa-acometidas','btn-capa-polivalvulas'].forEach(function(id){
+            var el = document.getElementById(id); if (el) el.style.display = 'none';
+        });
         var pp = document.getElementById('panel-puntos-barrio');
         _pblVisiblePreTab = pp && pp.classList.contains('visible');
         if (pp) { pp.style.visibility = 'hidden'; pp.style.pointerEvents = 'none'; }
@@ -1866,6 +1870,13 @@
         ['btn-barrios-desktop','btn-atributo-desktop','btn-restricciones-desktop'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'block';
+        });
+        // Restaurar botones de capa y su etiqueta
+        ['capas-section-label'].forEach(function(id){
+            var el = document.getElementById(id); if (el) el.style.display = '';
+        });
+        ['btn-capa-cruces','btn-capa-usuarios','btn-capa-acometidas','btn-capa-polivalvulas'].forEach(function(id){
+            var el = document.getElementById(id); if (el) el.style.display = '';
         });
         var pp = document.getElementById('panel-puntos-barrio');
         if (pp) { pp.style.visibility = ''; pp.style.pointerEvents = ''; }
