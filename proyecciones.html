@@ -129,6 +129,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .rv.trunk{color:#e53935;} .rv.sec{color:#ff9800;} .rv.dist{color:#69f0ae;} .rv.inv{color:#ffd600;}
 
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(124,77,255,0.28);border-radius:3px;}
+/* CAD UPLOAD */
+.cad-drop{border:1.5px dashed rgba(0,200,255,0.3);border-radius:8px;padding:12px 10px;text-align:center;cursor:pointer;transition:all 0.25s;background:rgba(0,200,255,0.03);position:relative;}
+.cad-drop:hover,.cad-drop.dragover{border-color:rgba(0,200,255,0.65);background:rgba(0,200,255,0.08);box-shadow:0 0 14px rgba(0,200,255,0.12);}
+.cad-icon{font-size:20px;margin-bottom:5px;display:block;}
+.cad-drop-lbl{font-size:9px;color:rgba(0,200,255,0.55);line-height:1.5;}
+.cad-drop-sub{font-size:7.5px;color:rgba(0,200,255,0.3);margin-top:2px;}
+.cad-status{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;margin-top:6px;padding:5px 9px;border-radius:5px;display:none;line-height:1.6;}
+.cad-ok{background:rgba(0,200,255,0.08);color:#00c8ff;border:1px solid rgba(0,200,255,0.22);}
+.cad-err{background:rgba(229,57,53,0.08);color:#e53935;border:1px solid rgba(229,57,53,0.22);}
+.cad-clear{font-size:7px;color:rgba(229,57,53,0.55);cursor:pointer;display:inline-block;margin-top:3px;letter-spacing:0.5px;}
+.cad-clear:hover{color:#e53935;}
+.anillo-badge{display:inline-flex;align-items:center;gap:5px;font-size:7.5px;padding:2px 7px;border-radius:4px;margin:2px 2px;font-family:'Orbitron',monospace;letter-spacing:0.5px;border-width:1px;border-style:solid;}
+.a0{color:#e53935;border-color:rgba(229,57,53,0.3);background:rgba(229,57,53,0.07);}
+.a1{color:#ff9800;border-color:rgba(255,152,0,0.3);background:rgba(255,152,0,0.07);}
+.a2{color:#00c8ff;border-color:rgba(0,200,255,0.3);background:rgba(0,200,255,0.07);}
+.a3{color:#69f0ae;border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.07);}
+.a4{color:#ffd600;border-color:rgba(255,214,0,0.3);background:rgba(255,214,0,0.07);}
+.a5{color:#e040fb;border-color:rgba(224,64,251,0.3);background:rgba(224,64,251,0.07);}
+.pv-diamond{width:10px;height:10px;background:#fff;transform:rotate(45deg);flex-shrink:0;border:1px solid rgba(255,255,255,0.5);}
+
 
 /* TOGGLE VISTA */
 #vista-toggle{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:none;background:rgba(0,8,24,0.9);border:1px solid rgba(124,77,255,0.25);border-radius:8px;padding:3px;gap:2px;display:none;flex-direction:row;}
@@ -255,6 +275,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
         </div>
       </div>
 
+      <!-- ══ RESPALDO CAD ══ -->
+      <div class="cp-sec">
+        <div class="cp-sec-title">RESPALDO CAD (OPCIONAL)</div>
+        <div class="cp-f">
+          <label class="cp-lbl">PLANO DXF DEL ÁREA URBANA</label>
+          <div class="cad-drop" id="cad-drop"
+               onclick="document.getElementById('cad-input').click()"
+               ondragover="cadDragOver(event)"
+               ondragleave="document.getElementById('cad-drop').classList.remove('dragover')"
+               ondrop="cadDrop(event)">
+            <input type="file" id="cad-input" accept=".dxf,.DXF" style="display:none"
+                   onchange="cadCargado(this.files[0])">
+            <span class="cad-icon">📐</span>
+            <div class="cad-drop-lbl">Arrastra un archivo <b>.DXF</b> aquí</div>
+            <div class="cad-drop-sub">o haz clic para seleccionar</div>
+          </div>
+          <div class="cad-status" id="cad-status"></div>
+        </div>
+        <div class="cp-f" id="f-anillos" style="display:none">
+          <label class="cp-lbl">ANILLOS DE DISTRIBUCIÓN</label>
+          <select class="cp-sel" id="sel-anillos">
+            <option value="2">2 anillos</option>
+            <option value="3" selected>3 anillos</option>
+            <option value="4">4 anillos</option>
+            <option value="5">5 anillos</option>
+            <option value="6">6 anillos</option>
+          </select>
+        </div>
+      </div>
+
       <button class="btn-proy" id="btn-proy" onclick="generarProyeccion()" disabled>
         ⚡ GENERAR PROYECCIÓN
       </button>
@@ -378,6 +428,211 @@ var CIUDADES=[
 var _proy=null;
 var _lmap=null;          // Leaflet map instance
 var _vistaMode='esquema'; // 'esquema' | 'satelital'
+var _cadData=null;
+var _cadRaw=null;
+var ANILLO_COLORS=['#e53935','#ff9800','#00c8ff','#69f0ae','#ffd600','#e040fb'];
+var ANILLO_NAMES =['Anillo 1','Anillo 2','Anillo 3','Anillo 4','Anillo 5','Anillo 6'];
+
+function cadDragOver(e){e.preventDefault();document.getElementById('cad-drop').classList.add('dragover');}
+function cadDrop(e){
+  e.preventDefault();
+  document.getElementById('cad-drop').classList.remove('dragover');
+  var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(f)cadCargado(f);
+}
+function cadCargado(file){
+  if(!file)return;
+  var st=document.getElementById('cad-status');
+  st.style.display='block'; st.className='cad-status'; st.textContent='Leyendo archivo...';
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var ents=parseDXF(ev.target.result);
+      if(ents.length===0)throw new Error('Sin entidades geométricas');
+      _cadRaw=ents;
+      st.className='cad-status cad-ok';
+      var tipos={};
+      ents.forEach(function(e){tipos[e.type]=(tipos[e.type]||0)+1;});
+      var res=Object.keys(tipos).map(function(k){return tipos[k]+' '+k;}).join(' · ');
+      st.innerHTML='✔ '+file.name+'<br>'+ents.length+' entidades · '+res
+        +'<br><span class="cad-clear" onclick="cadLimpiar()">✕ Quitar</span>';
+      document.getElementById('f-anillos').style.display='block';
+    }catch(err){_cadRaw=null;st.className='cad-status cad-err';st.textContent='✕ '+err.message;}
+  };
+  r.onerror=function(){st.className='cad-status cad-err';st.textContent='✕ No se pudo leer el archivo';};
+  r.readAsText(file,'utf-8');
+}
+function cadLimpiar(){
+  _cadRaw=null;_cadData=null;
+  document.getElementById('cad-status').style.display='none';
+  document.getElementById('f-anillos').style.display='none';
+  document.getElementById('cad-input').value='';
+}
+function parseDXF(text){
+  var lines=text.split(/
+?
+/); var entities=[]; var inEntities=false; var i=0;
+  while(i<lines.length){
+    var code=lines[i]?lines[i].trim():''; var val=lines[i+1]?lines[i+1].trim():'';
+    if(code==='2'&&val==='ENTITIES'){inEntities=true;i+=2;continue;}
+    if(code==='0'&&val==='ENDSEC'&&inEntities){break;}
+    if(inEntities&&code==='0'){
+      if(val==='LINE'){i=parseDXFLine(lines,i+2,entities);}
+      else if(val==='LWPOLYLINE'){i=parseDXFLWPoly(lines,i+2,entities);}
+      else if(val==='POLYLINE'){i=parseDXFPoly(lines,i+2,entities);}
+      else{i+=2;}
+    } else{i+=2;}
+  }
+  return entities;
+}
+function parseDXFLine(lines,i,out){
+  var x0=0,y0=0,x1=0,y1=0;
+  while(i<lines.length){
+    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?parseFloat(lines[i+1]):0;
+    if(c==='0')break;
+    if(c==='10')x0=v; else if(c==='20')y0=v; else if(c==='11')x1=v; else if(c==='21')y1=v;
+    i+=2;
+  }
+  if(Math.abs(x1-x0)>0||Math.abs(y1-y0)>0)out.push({type:'LINE',coords:[{x:x0,y:y0},{x:x1,y:y1}]});
+  return i;
+}
+function parseDXFLWPoly(lines,i,out){
+  var coords=[]; var cx=null,cy=null,closed=false;
+  while(i<lines.length){
+    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?lines[i+1].trim():'';
+    if(c==='0')break;
+    if(c==='70')closed=((parseInt(v)&1)===1);
+    if(c==='10'){if(cx!==null&&cy!==null)coords.push({x:cx,y:cy});cx=parseFloat(v);}
+    if(c==='20')cy=parseFloat(v);
+    i+=2;
+  }
+  if(cx!==null&&cy!==null)coords.push({x:cx,y:cy});
+  if(closed&&coords.length>0)coords.push(coords[0]);
+  if(coords.length>=2)out.push({type:'LWPOLYLINE',coords:coords,closed:closed});
+  return i;
+}
+function parseDXFPoly(lines,i,out){
+  var coords=[];
+  while(i<lines.length){
+    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?lines[i+1].trim():'';
+    if(c==='0'&&v==='SEQEND'){i+=2;break;}
+    if(c==='0'&&v==='VERTEX'){
+      var vx=0,vy=0; i+=2;
+      while(i<lines.length){
+        var vc=lines[i]?lines[i].trim():''; var vv=lines[i+1]?lines[i+1].trim():'';
+        if(vc==='0')break;
+        if(vc==='10')vx=parseFloat(vv); if(vc==='20')vy=parseFloat(vv); i+=2;
+      }
+      coords.push({x:vx,y:vy});
+    } else{i+=2;}
+  }
+  if(coords.length>=2)out.push({type:'POLYLINE',coords:coords});
+  return i;
+}
+function georeferirCAD(rawEnts,bbox){
+  var mnX=1e18,mxX=-1e18,mnY=1e18,mxY=-1e18;
+  rawEnts.forEach(function(e){e.coords.forEach(function(c){
+    if(c.x<mnX)mnX=c.x; if(c.x>mxX)mxX=c.x; if(c.y<mnY)mnY=c.y; if(c.y>mxY)mxY=c.y;
+  })
+function diseñarAnillosCAD(pr,cadGeo,map,bbox){
+  var nAnillos=parseInt(document.getElementById('sel-anillos').value)||3;
+  var ents=cadGeo.map(function(e){
+    var len=0;
+    for(var i=1;i<e.coords.length;i++){
+      var dLa=e.coords[i][0]-e.coords[i-1][0]; var dLn=e.coords[i][1]-e.coords[i-1][1];
+      len+=Math.sqrt(dLa*dLa+dLn*dLn);
+    }
+    return {e:e,len:len};
+  }).sort(function(a,b){return b.len-a.len;});
+  var total=ents.length; if(total===0)return;
+  var nTrunk=Math.max(1,Math.round(total*0.10));
+  var nDist =Math.max(1,Math.round(total*0.30));
+  var nAnillosEnt=total-nTrunk-nDist;
+  var trunkEnts=ents.slice(0,nTrunk);
+  var anillosEnts=ents.slice(nTrunk,nTrunk+nAnillosEnt);
+  var distEnts=ents.slice(nTrunk+nAnillosEnt);
+
+  distEnts.forEach(function(it){L.polyline(it.e.coords,{color:'#69f0ae',weight:1.2,opacity:0.5,dashArray:'4,3'}).addTo(map);});
+
+  var grpSize=Math.max(1,Math.ceil(anillosEnts.length/nAnillos));
+  var anilloInfo=[];
+  for(var a=0;a<nAnillos;a++){
+    var grp=anillosEnts.slice(a*grpSize,(a+1)*grpSize);
+    if(grp.length===0)continue;
+    var col=ANILLO_COLORS[a%ANILLO_COLORS.length];
+    grp.forEach(function(it){
+      L.polyline(it.e.coords,{color:col,weight:2.5,opacity:0.88}).addTo(map)
+       .bindPopup('<b style="color:'+col+'">'+ANILLO_NAMES[a]+'</b><br>Material: '+pr.p.mat+'<br>Presión: '+pr.p.pres);
+    });
+    anilloInfo.push({nombre:ANILLO_NAMES[a],color:col,segmentos:grp.length});
+  }
+  trunkEnts.forEach(function(it){
+    L.polyline(it.e.coords,{color:'#ffffff',weight:4,opacity:0.92}).addTo(map)
+     .bindPopup('<b>Red Troncal GLP</b><br>DN: '+pr.dn_t+' mm · '+pr.p.mat);
+  });
+
+  var pvIcon=function(color){return L.divIcon({className:'',html:
+    '<div style="width:14px;height:14px;background:'+color+';transform:rotate(45deg);border:2px solid #fff;box-shadow:0 0 8px rgba(255,255,255,0.5);"></div>',
+    iconSize:[14,14],iconAnchor:[7,7]});};
+  var pvCount=0;
+  for(var a2=0;a2<nAnillos;a2++){
+    var grp2=anillosEnts.slice(a2*grpSize,(a2+1)*grpSize);
+    if(grp2.length===0)continue;
+    var col2=ANILLO_COLORS[a2%ANILLO_COLORS.length];
+    var p1=grp2[0].e.coords[0];
+    L.marker(p1,{icon:pvIcon(col2)}).bindPopup('<b>Polivalvula — '+ANILLO_NAMES[a2]+'</b><br>Seccionamiento de anillo<br>DN: '+pr.dn_s+' mm').addTo(map);
+    pvCount++;
+    var last=grp2[grp2.length-1].e.coords;
+    var p2=last[last.length-1];
+    L.marker(p2,{icon:pvIcon(col2)}).bindPopup('<b>Polivalvula — '+ANILLO_NAMES[a2]+'</b><br>Cierre de anillo').addTo(map);
+    pvCount++;
+  }
+
+  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.1;
+  var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.1;
+  if(trunkEnts.length>0){
+    L.polyline([[pLat,pLng],trunkEnts[0].e.coords[0]],{color:'#fff',weight:3,dashArray:'10,6',opacity:0.75}).addTo(map);
+  }
+  var stIcon=L.divIcon({className:'',html:'<div style="width:28px;height:28px;background:#ffd600;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 16px rgba(255,214,0,0.95);">⭐</div>',iconSize:[28,28],iconAnchor:[14,14]});
+  L.marker([pLat,pLng],{icon:stIcon}).bindPopup('<b>Estación GLP</b><br>'+pr.n_pla+' tanque(s)<br>Q: '+fmt(pr.Q_tot,1)+' m³/h').addTo(map);
+
+  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],
+    {color:'rgba(124,77,255,0.5)',weight:1.5,fillColor:'rgba(124,77,255,0.02)',dashArray:'8,4'}).addTo(map);
+
+  var leyenda=L.control({position:'bottomleft'});
+  leyenda.onAdd=function(){
+    var div=L.DomUtil.create('div','sat-legend');
+    var h='<div class="sat-legend-title">RED GLP · DISEÑO CAD</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#fff;height:3px;"></div>Troncal principal</div>';
+    anilloInfo.forEach(function(ai){h+='<div class="sat-leg-row"><div class="sat-leg-line" style="background:'+ai.color+';height:2px;"></div>'+ai.nombre+' ('+ai.segmentos+' seg.)</div>';});
+    h+='<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'
+      +'<div class="sat-leg-row"><div style="width:10px;height:10px;background:#ff9800;transform:rotate(45deg);border:1.5px solid #fff;flex-shrink:0;"></div>Polivalvula</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Estación GLP</div>'
+      +'<div style="margin-top:6px;font-size:7px;color:rgba(0,200,255,0.5);font-family:Orbitron,monospace;">CAD · '+total+' entidades</div>';
+    div.innerHTML=h; return div;
+  };
+  leyenda.addTo(map);
+
+  var info=L.control({position:'topright'});
+  info.onAdd=function(){
+    var div=L.DomUtil.create('div','sat-legend');
+    div.innerHTML='<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+' · CAD</div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Usuarios</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.u_tot)+'</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Anillos</span><b style="color:#00c8ff;font-family:Orbitron,monospace;font-size:9px;">'+nAnillos+' ud.</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Polivalvulas</span><b style="color:#ff9800;font-family:Orbitron,monospace;font-size:9px;">'+pvCount+' ud.</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Red total</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.L_tot,1)+' km</b></div>';
+    return div;
+  };
+  info.addTo(map);
+  map.invalidateSize();
+}
+;});
+  var rX=mxX-mnX||1, rY=mxY-mnY||1;
+  var rLng=bbox.maxLng-bbox.minLng, rLat=bbox.maxLat-bbox.minLat;
+  return rawEnts.map(function(e){return {type:e.type,closed:e.closed,
+    coords:e.coords.map(function(c){return[bbox.minLat+(c.y-mnY)/rY*rLat, bbox.minLng+(c.x-mnX)/rX*rLng];})
+  };});
+}
 
 window.onload=function(){
   iniciarPreIntro();
@@ -832,13 +1087,15 @@ function mostrarReporte(pr){
   ]);
 
   // Elementos
-  html+=sec('⚙️ ELEMENTOS DE RED',[
+  html+=sec('⚙️ sec('ELEMENTOS DE RED',[
     rw('Plantas almacenamiento',pr.n_pla+' ud(s).'),
     rw('Estaciones ERM',fmt(pr.n_erm)+' ud(s).'),
     rw('Válvulas seccionamiento',fmt(pr.n_val)+' ud(s).'),
+    (_cadRaw&&_cadRaw.length>0)?'<div class="rp-row"><span class="rk">Anillos de distribución</span><span class="rv" style="color:#00c8ff;font-family:Orbitron,monospace;font-size:8.5px;">'+(parseInt(document.getElementById('sel-anillos').value)||3)+' anillos</span></div>':'',
+    (_cadRaw&&_cadRaw.length>0)?'<div class="rp-row"><span class="rk">Polivalvulas de anillo</span><span class="rv" style="color:#ff9800;font-family:Orbitron,monospace;font-size:8.5px;">'+((parseInt(document.getElementById('sel-anillos').value)||3)*2)+' ud(s).</span></div>':'',
     rw('Acometidas domiciliarias',fmt(pr.n_aco)+' ud(s).'),
-    rw('Medidores (contadores)',fmt(pr.n_aco)+' ud(s).'),
-  ]);
+    rw('Medidores',fmt(pr.n_aco)+' ud(s).'),
+  ])
 
   // Cantidades
   html+=sec('📦 CANTIDADES MATERIAL',[
@@ -914,6 +1171,14 @@ function dibujarSatelital(pr){
   var dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
   var half=lado_km*0.58;
   var bbox={minLat:lat0-half*dLat,maxLat:lat0+half*dLat,minLng:lng0-half*dLng,maxLng:lng0+half*dLng};
+
+  // Si hay CAD cargado, usar diseño sobre geometría real del plano
+  if(_cadRaw&&_cadRaw.length>0){
+    _cadData=georeferirCAD(_cadRaw,bbox);
+    diseñarAnillosCAD(pr,_cadData,_lmap,bbox);
+    return;
+  }
+
   var loadDiv=document.createElement('div');
   loadDiv.id='sat-osm-load';
   loadDiv.style.cssText='position:absolute;inset:0;z-index:1000;background:rgba(0,8,24,0.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;';
