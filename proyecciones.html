@@ -385,1078 +385,1132 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 </div>
 
 <script>
-/* ═══ DATOS CIUDADES ═══ */
+/* âââ DATOS CIUDADES âââ */
 var CIUDADES=[
   {id:'arauca',     nombre:'Arauca',               dpto:'Arauca',             pop:96000,   area_urb:12,  ppv:3.2,crec:2.2, lat:7.0852,  lng:-70.7516},
   {id:'saravena',   nombre:'Saravena',              dpto:'Arauca',             pop:48000,   area_urb:5,   ppv:3.3,crec:2.5, lat:6.9522,  lng:-71.8611},
   {id:'arauquita',  nombre:'Arauquita',             dpto:'Arauca',             pop:20000,   area_urb:2.5, ppv:3.4,crec:1.8, lat:7.0256,  lng:-71.4325},
-  {id:'tame',       nombre:'Tame',                  dpto:'Arauca',             pop:28000,   area_urb:3.5, ppv:3.5,crec:1.6, lat:6.4666,  lng:-71.7294},
-  {id:'fortul',     nombre:'Fortul',                dpto:'Arauca',             pop:16000,   area_urb:1.8, ppv:3.5,crec:1.5, lat:6.7742,  lng:-71.7654},
-  {id:'rondon',     nombre:'Puerto Rondón',         dpto:'Arauca',             pop:5500,    area_urb:0.7, ppv:3.6,crec:1.2, lat:6.2883,  lng:-70.9597},
-  {id:'cravo',      nombre:'Cravo Norte',           dpto:'Arauca',             pop:4000,    area_urb:0.5, ppv:3.7,crec:1.0, lat:6.3162,  lng:-70.2083},
-  {id:'bogota',     nombre:'Bogotá D.C.',           dpto:'Cundinamarca',       pop:7412566, area_urb:307, ppv:2.8,crec:1.1, lat:4.7110,  lng:-74.0721},
-  {id:'medellin',   nombre:'Medellín',              dpto:'Antioquia',          pop:2533424, area_urb:105, ppv:2.6,crec:0.9, lat:6.2476,  lng:-75.5659},
-  {id:'cali',       nombre:'Cali',                  dpto:'Valle del Cauca',    pop:2471474, area_urb:120, ppv:2.9,crec:1.0, lat:3.4516,  lng:-76.5320},
-  {id:'barranquilla',nombre:'Barranquilla',         dpto:'Atlántico',          pop:1232766, area_urb:154, ppv:3.1,crec:1.3, lat:10.9685, lng:-74.7813},
-  {id:'cartagena',  nombre:'Cartagena',             dpto:'Bolívar',            pop:1028736, area_urb:98,  ppv:3.3,crec:1.5, lat:10.3910, lng:-75.4794},
-  {id:'cucuta',     nombre:'Cúcuta',                dpto:'Norte de Santander', pop:764254,  area_urb:170, ppv:3.2,crec:1.2, lat:7.8939,  lng:-72.5078},
-  {id:'bucaramanga',nombre:'Bucaramanga',           dpto:'Santander',          pop:582652,  area_urb:165, ppv:2.8,crec:0.8, lat:7.1293,  lng:-73.1227},
-  {id:'ibague',     nombre:'Ibagué',                dpto:'Tolima',             pop:563012,  area_urb:140, ppv:3.0,crec:1.1, lat:4.4389,  lng:-75.2322},
-  {id:'pereira',    nombre:'Pereira',               dpto:'Risaralda',          pop:474335,  area_urb:120, ppv:2.9,crec:1.0, lat:4.8143,  lng:-75.6960},
-  {id:'manizales',  nombre:'Manizales',             dpto:'Caldas',             pop:432224,  area_urb:90,  ppv:2.7,crec:0.7, lat:5.0689,  lng:-75.5174},
-  {id:'armenia',    nombre:'Armenia',               dpto:'Quindío',            pop:302564,  area_urb:58,  ppv:2.8,crec:0.9, lat:4.5339,  lng:-75.6811},
+ í¥èÑµ°¹½µÉèQµ°ÁÑ¼èÉÕ°Á½ÀèÈàÀÀÀ°É}ÕÉèÌ¸Ô°ÁÁØèÌ¸Ô±ÉèÄ¸Ø°±ÐèØ¸ÐØØØ°±¹è´ÜÄ¸ÜÈäÑô°(í¥è½ÉÑÕ°°¹½µÉè½ÉÑÕ°°ÁÑ¼èÉÕ°Á½ÀèÄØÀÀÀ°É}ÕÉèÄ¸à°ÁÁØèÌ¸Ô±ÉèÄ¸Ô°±ÐèØ¸ÜÜÐÈ°±¹è´ÜÄ¸ÜØÔÑô°('¶C¢w&öæFöârÂæöÖ'&S¢uVW'Fò&öæL;6ârÂGFó¢t&V6rÂ÷£SSÂ&V÷W&#£ãrÂc£2ãbÆ7&V3£ã"ÂÆC£bã#2ÂÆæs¢ÓsãSwÒÀ¢¶C¢v7&fòrÂæöÖ'&S¢t7&fòæ÷'FRrÂGFó¢t&V6rÂ÷£CÂ&V÷W&#£ãRÂc£2ãrÆ7&V3£ãÂÆC£bã3c"ÂÆæs¢Ósã#7ÒÀ¢¶C¢v&öv÷FrÂæöÖ'&S¢t&öv÷L:Bä2ârÂGFó¢t7VæFæÖ&6rÂ÷£sC#ScbÂ&V÷W&#£3rÂc£"ãÆ7&V3£ãÂÆC£BãsÂÆæs¢ÓsBãs#ÒÀ¢¶C¢vÖVFVÆÆârÂæöÖ'&S¢tÖVFVÆÌ:ÖârÂGFó¢tçF÷VrÂ÷£#S33C#BÂ&V÷W&#£RÂc£"ãbÆ7&V3£ãÂÆC£bã#CsbÂÆæs¢ÓsRãScSÒÀ¢¶C¢v6ÆrÂæöÖ'&S¢t6ÆrÂGFó¢ufÆÆRFVÂ6V6rÂ÷£#CsCsBÂ&V÷W&#£#Âc£"ãÆ7&V3£ãÂÆC£2ãCSbÂÆæs¢ÓsbãS3#ÒÀ¢ÚYØ\[]Z[IËÛXNÐ\[]Z[IËÎÐ]0è[XÛÉËÜLÌÍ\XWÝ\MMËKÜXÎKË]LM
+KÎMÍÎLßKÚYØØ\YÙ[IËÛXNÐØ\YÙ[IËÎÐÛ0ë]\ËÜL
+ÌÍ\XWÝ\NËËÜXÎKK]LÎLLÎMÍK
+ÎMKÚYØÝXÝ]IËÛXNÐðîÝ]IËÎÓÜHHØ[[\ËÜÍM\XWÝ\MÌËÜXÎK]ËLÎKÎMÌL
+ÎKÚYØXØ\[X[ØIËÛXNÐXØ\[X[ØIËÎÔØ[[\ËÜNL\XWÝ\MKÜXÎ]ËLLËÎMÌËLßKÚYÚXYÝYIËÛXNÒXYÝpêIËÎÕÛ[XIËÜMÌL\XWÝ\MËÜXÎKK]ÎKÎMÍKÌKÚYÜ\Z\IËÛXNÔ\Z\IËÎÔ\Ø\[IËÜ
+ÍÌÍK\XWÝ\LKÜXÎK]MËÎMÍKMK"{id:'manizales',  nombre:'Manizales',             dpto:'Caldas',             pop:432224,  area_urb:90,  ppv:2.7,crec:0.7, lat:5.0689,  lng:-75.5174},
+  {id:'armenia',    nombre:'Armenia',               dpto:'QuindÃ­o',            pop:302564,  area_urb:58,  ppv:2.8,crec:0.9, lat:4.5339,  lng:-75.6811},
   {id:'villavicencio',nombre:'Villavicencio',       dpto:'Meta',               pop:493364,  area_urb:110, ppv:3.1,crec:2.1, lat:4.1420,  lng:-73.6266},
-  {id:'pasto',      nombre:'San Juan de Pasto',     dpto:'Nariño',             pop:444886,  area_urb:88,  ppv:3.2,crec:1.4, lat:1.2136,  lng:-77.2811},
-  {id:'monteria',   nombre:'Montería',              dpto:'Córdoba',            pop:421056,  area_urb:80,  ppv:3.5,crec:1.8, lat:8.7479,  lng:-75.8814},
-  {id:'valledupar', nombre:'Valledupar',            dpto:'Cesar',              pop:462064,  area_urb:95,  ppv:3.4,crec:1.7, lat:10.4631, lng:-73.2532},
-  {id:'santa_marta',nombre:'Santa Marta',           dpto:'Magdalena',          pop:523326,  area_urb:115, ppv:3.2,crec:1.6, lat:11.2408, lng:-74.1990},
-  {id:'neiva',      nombre:'Neiva',                 dpto:'Huila',              pop:344033,  area_urb:78,  ppv:3.1,crec:1.3, lat:2.9273,  lng:-75.2819},
-  {id:'popayan',    nombre:'Popayán',               dpto:'Cauca',              pop:280121,  area_urb:62,  ppv:3.0,crec:1.2, lat:2.4419,  lng:-76.6060},
-  {id:'tunja',      nombre:'Tunja',                 dpto:'Boyacá',             pop:180807,  area_urb:38,  ppv:2.8,crec:0.9, lat:5.5353,  lng:-73.3678},
-  {id:'sincelejo',  nombre:'Sincelejo',             dpto:'Sucre',              pop:288886,  area_urb:68,  ppv:3.5,crec:1.5, lat:9.3047,  lng:-75.3978},
-  {id:'yopal',      nombre:'Yopal',                 dpto:'Casanare',           pop:160000,  area_urb:32,  ppv:3.2,crec:2.8, lat:5.3378,  lng:-72.3959},
-  {id:'florencia',  nombre:'Florencia',             dpto:'Caquetá',            pop:172000,  area_urb:36,  ppv:3.3,crec:1.6, lat:1.6144,  lng:-75.6063},
-  {id:'riohacha',   nombre:'Riohacha',              dpto:'La Guajira',         pop:272621,  area_urb:60,  ppv:3.8,crec:2.0, lat:11.5444, lng:-72.9072},
-  {id:'quibdo',     nombre:'Quibdó',                dpto:'Chocó',              pop:122071,  area_urb:28,  ppv:4.0,crec:1.4, lat:5.6919,  lng:-76.6583},
-  {id:'mocoa',      nombre:'Mocoa',                 dpto:'Putumayo',           pop:46000,   area_urb:10,  ppv:3.4,crec:1.8, lat:1.1522,  lng:-76.6483},
-  {id:'leticia',    nombre:'Leticia',               dpto:'Amazonas',           pop:42000,   area_urb:8,   ppv:3.5,crec:1.5, lat:-4.2153, lng:-69.9405},
-  {id:'san_jose',   nombre:'San José del Guaviare', dpto:'Guaviare',           pop:62000,   area_urb:12,  ppv:3.5,crec:1.8, lat:2.5647,  lng:-72.6408},
-  {id:'mitu',       nombre:'Mitú',                  dpto:'Vaupés',             pop:18000,   area_urb:3,   ppv:4.0,crec:1.2, lat:1.2516,  lng:-70.2339},
-  {id:'inirida',    nombre:'Puerto Inírida',        dpto:'Guainía',            pop:16000,   area_urb:2.5, ppv:4.1,crec:1.0, lat:3.8653,  lng:-67.9239},
-];
-
-var _proy=null;
-var _lmap=null;          // Leaflet map instance
-var _vistaMode='esquema'; // 'esquema' | 'satelital'
-var _cadData=null;
-var _cadRaw=null;
-var ANILLO_COLORS=['#e53935','#ff9800','#00c8ff','#69f0ae','#ffd600','#e040fb'];
-var ANILLO_NAMES =['Anillo 1','Anillo 2','Anillo 3','Anillo 4','Anillo 5','Anillo 6'];
-
-function cadDragOver(e){e.preventDefault();document.getElementById('cad-drop').classList.add('dragover');}
-function cadDrop(e){
-  e.preventDefault();
-  document.getElementById('cad-drop').classList.remove('dragover');
-  var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
-  if(f)cadCargado(f);
-}
-function cadCargado(file){
-  if(!file)return;
-  var ext=file.name.split('.').pop().toLowerCase();
-  var isDWG=(ext==='dwg');
-  function onEnts(ents,fname){
-    if(!ents||!ents.length){cadDrop.textContent='Sin entidades en '+fname;return;}
-    cadEntidades=ents;
-    cadDrop.innerHTML='<b>'+fname+'</b> — '+ents.length+' entidades cargadas';
-    cadDrop.style.color='#00e5ff';
-    if(window._cadAutoRef)georeferirCAD();
-  }
-  var r=new FileReader();
-  if(isDWG){
-    r.onload=function(ev){
-      var buf=ev.target.result;
-      var ents;
-      try{
-        ents=parseDWG(buf);
-      }catch(dwgErr){
-        try{
-          var txt=new TextDecoder('utf-8').decode(new Uint8Array(buf));
-          ents=parseDXF(txt);
-        }catch(e2){
-          cadDrop.textContent=dwgErr.message||'Error leyendo DWG';
-          cadDrop.style.color='#ff5252';
-          return;
-        }
-      }
-      onEnts(ents,file.name);
-    };
-    r.readAsArrayBuffer(file);
-  }else{
-    r.onload=function(ev){var ents;try{ents=parseDXF(ev.target.result);}catch(e){cadDrop.textContent='Error: '+e.message;cadDrop.style.color='#ff5252';return;}onEnts(ents,file.name);};
-    r.readAsText(file,'utf-8');
-  }
-}
-function cadLimpiar(){
-  _cadRaw=null;_cadData=null;
-  document.getElementById('cad-status').style.display='none';
-  document.getElementById('f-anillos').style.display='none';
-  document.getElementById('cad-input').value='';
-}
-/* ════════════════════════════════════════════════════════
-   PARSER DWG — Soporte AutoCAD R12 → R2018
-   ════════════════════════════════════════════════════════ */
-function parseDWG(buffer){
-  var b=new Uint8Array(buffer);
-  if(b.length<6)throw new Error('Archivo DWG corrupto o incompleto');
-  var ver='';
-  for(var i=0;i<6;i++)ver+=String.fromCharCode(b[i]);
-  var VERS={'AC1009':'R12','AC1012':'R13','AC1014':'R14','AC1015':'R2000',
-            'AC1018':'R2004','AC1021':'R2007','AC1024':'R2010',
-            'AC1027':'R2013','AC1032':'R2018'};
-  if(!ver.startsWith('AC'))throw new Error('No es un archivo DWG válido');
-  var vn=VERS[ver]||ver;
-  var ents=[];
-  try{ if(ver==='AC1009')ents=_parseDWG_R12(b); }catch(e){}
-  if(!ents.length)try{ ents=_parseDWG_scan(b); }catch(e){}
-  if(!ents.length)throw new Error(
-    'AutoCAD DWG '+vn+' ('+ver+') detectado.\n'+
-    'Exporta como DXF desde AutoCAD, BricsCAD o ZWCAD,\n'+
-    'o convierte en: convertio.co/dwg-dxf'
-  );
-  return ents;
-}
-function _dwgD(b,o){var dv=new DataView(b.buffer,b.byteOffset);return dv.getFloat64(o,true);}
-function _dwgU32(b,o){return b[o]|(b[o+1]<<8)|(b[o+2]<<16)|(b[o+3]<<24);}
-function _parseDWG_R12(b){
-  var base=0x0B,entOff=_dwgU32(b,base+32),entSz=_dwgU32(b,base+36);
-  if(!entOff||entOff+entSz>b.length)return [];
-  var ents=[],i=entOff,end=entOff+entSz;
-  while(i<end-40){
-    var t=b[i]|(b[i+1]<<8);
-    if(t===1&&i+40<=end){
-      var x1=_dwgD(b,i+8),y1=_dwgD(b,i+16),x2=_dwgD(b,i+24),y2=_dwgD(b,i+32);
-      if(isFinite(x1)&&isFinite(y1))ents.push({type:'LINE',coords:[{x:x1,y:y1},{x:x2,y:y2}],closed:false});
-      i+=40;
-    }else i+=2;
-  }
-  return ents;
-}
-function _parseDWG_scan(b){
-  var ents=[],len=b.length;
-  function rd(o){return _dwgD(b,o);}
-  function ok(v){return isFinite(v)&&Math.abs(v)<1e9&&Math.abs(v)>1e-9;}
-  var i=100;
-  while(i<len-64){
-    var x1=rd(i),y1=rd(i+8);
-    if(ok(x1)&&ok(y1)){
-      var coords=[{x:x1,y:y1}],j=i+16;
-      while(j<len-8){var xj=rd(j),yj=rd(j+8);if(ok(xj)&&ok(yj)&&Math.abs(xj-x1)<1e6&&Math.abs(yj-y1)<1e6){coords.push({x:xj,y:yj});j+=16;}else break;}
-      if(coords.length>=2){ents.push({type:coords.length===2?'LINE':'POLYLINE',coords:coords,closed:false});i=j;continue;}
-    }
-    i++;
-  }
-  return ents;
-}
-
-function parseDXF(text){
-  var lines=text.split(String.fromCharCode(10)); var entities=[]; var inEntities=false; var i=0;
-  while(i<lines.length){
-    var code=lines[i]?lines[i].trim():''; var val=lines[i+1]?lines[i+1].trim():'';
-    if(code==='2'&&val==='ENTITIES'){inEntities=true;i+=2;continue;}
-    if(code==='0'&&val==='ENDSEC'&&inEntities){break;}
-    if(inEntities&&code==='0'){
-      if(val==='LINE'){i=parseDXFLine(lines,i+2,entities);}
-      else if(val==='LWPOLYLINE'){i=parseDXFLWPoly(lines,i+2,entities);}
-      else if(val==='POLYLINE'){i=parseDXFPoly(lines,i+2,entities);}
-      else{i+=2;}
-    } else{i+=2;}
-  }
-  return entities;
-}
-function parseDXFLine(lines,i,out){
-  var x0=0,y0=0,x1=0,y1=0;
-  while(i<lines.length){
-    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?parseFloat(lines[i+1]):0;
-    if(c==='0')break;
-    if(c==='10')x0=v; else if(c==='20')y0=v; else if(c==='11')x1=v; else if(c==='21')y1=v;
-    i+=2;
-  }
-  if(Math.abs(x1-x0)>0||Math.abs(y1-y0)>0)out.push({type:'LINE',coords:[{x:x0,y:y0},{x:x1,y:y1}]});
-  return i;
-}
-function parseDXFLWPoly(lines,i,out){
-  var coords=[]; var cx=null,cy=null,closed=false;
-  while(i<lines.length){
-    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?lines[i+1].trim():'';
-    if(c==='0')break;
-    if(c==='70')closed=((parseInt(v)&1)===1);
-    if(c==='10'){if(cx!==null&&cy!==null)coords.push({x:cx,y:cy});cx=parseFloat(v);}
-    if(c==='20')cy=parseFloat(v);
-    i+=2;
-  }
-  if(cx!==null&&cy!==null)coords.push({x:cx,y:cy});
-  if(closed&&coords.length>0)coords.push(coords[0]);
-  if(coords.length>=2)out.push({type:'LWPOLYLINE',coords:coords,closed:closed});
-  return i;
-}
-function parseDXFPoly(lines,i,out){
-  var coords=[];
-  while(i<lines.length){
-    var c=lines[i]?lines[i].trim():''; var v=lines[i+1]?lines[i+1].trim():'';
-    if(c==='0'&&v==='SEQEND'){i+=2;break;}
-    if(c==='0'&&v==='VERTEX'){
-      var vx=0,vy=0; i+=2;
-      while(i<lines.length){
-        var vc=lines[i]?lines[i].trim():''; var vv=lines[i+1]?lines[i+1].trim():'';
-        if(vc==='0')break;
-        if(vc==='10')vx=parseFloat(vv); if(vc==='20')vy=parseFloat(vv); i+=2;
-      }
-      coords.push({x:vx,y:vy});
-    } else{i+=2;}
-  }
-  if(coords.length>=2)out.push({type:'POLYLINE',coords:coords});
-  return i;
-}
-function georeferirCAD(rawEnts,bbox){
-  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  rawEnts.forEach(function(e){
-    e.coords.forEach(function(c){
-      if(c.x<minX)minX=c.x; if(c.x>maxX)maxX=c.x;
-      if(c.y<minY)minY=c.y; if(c.y>maxY)maxY=c.y;
-    });
-  });
-  var rngX=maxX-minX||1, rngY=maxY-minY||1;
-  var rngLng=bbox.maxLng-bbox.minLng, rngLat=bbox.maxLat-bbox.minLat;
-  return rawEnts.map(function(e){
-    return {
-      type:e.type,
-      closed:e.closed,
-      coords:e.coords.map(function(c){
-        return [
-          bbox.minLat+(c.y-minY)/rngY*rngLat,
-          bbox.minLng+(c.x-minX)/rngX*rngLng
-        ];
-      })
-    };
-  });
-}
-
-/* ══════════════════════════════════════════
-   MÓDULO ANILLOS: CLASIFICACIÓN Y DISEÑO
-   ══════════════════════════════════════════ */
-
-var ANILLO_COLORS=['#e53935','#ff9800','#00c8ff','#69f0ae','#ffd600','#e040fb'];
-var ANILLO_NAMES =['Anillo 1','Anillo 2','Anillo 3','Anillo 4','Anillo 5','Anillo 6'];
-
-function diseñarAnillosCAD(pr,cadGeo,map,bbox){
-  var nAnillos=parseInt(document.getElementById('sel-anillos').value)||3;
-  var ents=cadGeo.map(function(e){
-    var len=0;
-    for(var i=1;i<e.coords.length;i++){
-      var dLa=e.coords[i][0]-e.coords[i-1][0]; var dLn=e.coords[i][1]-e.coords[i-1][1];
-      len+=Math.sqrt(dLa*dLa+dLn*dLn);
-    }
-    return {e:e,len:len};
-  }).sort(function(a,b){return b.len-a.len;});
-  var total=ents.length; if(total===0)return;
-  var nTrunk=Math.max(1,Math.round(total*0.10));
-  var nDist =Math.max(1,Math.round(total*0.30));
-  var nAnillosEnt=total-nTrunk-nDist;
-  var trunkEnts=ents.slice(0,nTrunk);
-  var anillosEnts=ents.slice(nTrunk,nTrunk+nAnillosEnt);
-  var distEnts=ents.slice(nTrunk+nAnillosEnt);
-
-  distEnts.forEach(function(it){L.polyline(it.e.coords,{color:'#69f0ae',weight:1.2,opacity:0.5,dashArray:'4,3'}).addTo(map);});
-
-  var grpSize=Math.max(1,Math.ceil(anillosEnts.length/nAnillos));
-  var anilloInfo=[];
-  for(var a=0;a<nAnillos;a++){
-    var grp=anillosEnts.slice(a*grpSize,(a+1)*grpSize);
-    if(grp.length===0)continue;
-    var col=ANILLO_COLORS[a%ANILLO_COLORS.length];
-    grp.forEach(function(it){
-      L.polyline(it.e.coords,{color:col,weight:2.5,opacity:0.88}).addTo(map)
-       .bindPopup('<b style="color:'+col+'">'+ANILLO_NAMES[a]+'</b><br>Material: '+pr.p.mat+'<br>Presión: '+pr.p.pres);
-    });
-    anilloInfo.push({nombre:ANILLO_NAMES[a],color:col,segmentos:grp.length});
-  }
-  trunkEnts.forEach(function(it){
-    L.polyline(it.e.coords,{color:'#ffffff',weight:4,opacity:0.92}).addTo(map)
-     .bindPopup('<b>Red Troncal GLP</b><br>DN: '+pr.dn_t+' mm · '+pr.p.mat);
-  });
-
-  var pvIcon=function(color){return L.divIcon({className:'',html:
-    '<div style="width:14px;height:14px;background:'+color+';transform:rotate(45deg);border:2px solid #fff;box-shadow:0 0 8px rgba(255,255,255,0.5);"></div>',
-    iconSize:[14,14],iconAnchor:[7,7]});};
-  var pvCount=0;
-  for(var a2=0;a2<nAnillos;a2++){
-    var grp2=anillosEnts.slice(a2*grpSize,(a2+1)*grpSize);
-    if(grp2.length===0)continue;
-    var col2=ANILLO_COLORS[a2%ANILLO_COLORS.length];
-    var p1=grp2[0].e.coords[0];
-    L.marker(p1,{icon:pvIcon(col2)}).bindPopup('<b>Polivalvula — '+ANILLO_NAMES[a2]+'</b><br>Seccionamiento de anillo<br>DN: '+pr.dn_s+' mm').addTo(map);
-    pvCount++;
-    var last=grp2[grp2.length-1].e.coords;
-    var p2=last[last.length-1];
-    L.marker(p2,{icon:pvIcon(col2)}).bindPopup('<b>Polivalvula — '+ANILLO_NAMES[a2]+'</b><br>Cierre de anillo').addTo(map);
-    pvCount++;
-  }
-
-  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.1;
-  var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.1;
-  if(trunkEnts.length>0){
-    L.polyline([[pLat,pLng],trunkEnts[0].e.coords[0]],{color:'#fff',weight:3,dashArray:'10,6',opacity:0.75}).addTo(map);
-  }
-  var stIcon=L.divIcon({className:'',html:'<div style="width:28px;height:28px;background:#ffd600;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 16px rgba(255,214,0,0.95);">⭐</div>',iconSize:[28,28],iconAnchor:[14,14]});
-  L.marker([pLat,pLng],{icon:stIcon}).bindPopup('<b>Estación GLP</b><br>'+pr.n_pla+' tanque(s)<br>Q: '+fmt(pr.Q_tot,1)+' m³/h').addTo(map);
-
-  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],
-    {color:'rgba(124,77,255,0.5)',weight:1.5,fillColor:'rgba(124,77,255,0.02)',dashArray:'8,4'}).addTo(map);
-
-  var leyenda=L.control({position:'bottomleft'});
-  leyenda.onAdd=function(){
-    var div=L.DomUtil.create('div','sat-legend');
-    var h='<div class="sat-legend-title">RED GLP · DISEÑO CAD</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#fff;height:3px;"></div>Troncal principal</div>';
-    anilloInfo.forEach(function(ai){h+='<div class="sat-leg-row"><div class="sat-leg-line" style="background:'+ai.color+';height:2px;"></div>'+ai.nombre+' ('+ai.segmentos+' seg.)</div>';});
-    h+='<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'
-      +'<div class="sat-leg-row"><div style="width:10px;height:10px;background:#ff9800;transform:rotate(45deg);border:1.5px solid #fff;flex-shrink:0;"></div>Polivalvula</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Estación GLP</div>'
-      +'<div style="margin-top:6px;font-size:7px;color:rgba(0,200,255,0.5);font-family:Orbitron,monospace;">CAD · '+total+' entidades</div>';
-    div.innerHTML=h; return div;
-  };
-  leyenda.addTo(map);
-
-  var info=L.control({position:'topright'});
-  info.onAdd=function(){
-    var div=L.DomUtil.create('div','sat-legend');
-    div.innerHTML='<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+' · CAD</div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Usuarios</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.u_tot)+'</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Anillos</span><b style="color:#00c8ff;font-family:Orbitron,monospace;font-size:9px;">'+nAnillos+' ud.</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Polivalvulas</span><b style="color:#ff9800;font-family:Orbitron,monospace;font-size:9px;">'+pvCount+' ud.</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="opacity:0.5">Red total</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.L_tot,1)+' km</b></div>';
-    return div;
-  };
-  info.addTo(map);
-  map.invalidateSize();
-});
-  var rX=mxX-mnX||1, rY=mxY-mnY||1;
-  var rLng=bbox.maxLng-bbox.minLng, rLat=bbox.maxLat-bbox.minLat;
-  return rawEnts.map(function(e){return {type:e.type,closed:e.closed,
-    coords:e.coords.map(function(c){return[bbox.minLat+(c.y-mnY)/rY*rLat, bbox.minLng+(c.x-mnX)/rX*rLng];})
-  };});
-}
-
-window.onload=function(){
-  iniciarPreIntro();
-  poblarDptos();
-};
-
-/* ═══ SELECTORES ═══ */
-function poblarDptos(){
-  var dptos=[...new Set(CIUDADES.map(function(c){return c.dpto;}))].sort();
-  var sel=document.getElementById('sel-dpto');
-  dptos.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
-  poblarCiudades('');
-}
-function filtrarCiudades(){poblarCiudades(document.getElementById('sel-dpto').value);}
-function poblarCiudades(dpto){
-  var sel=document.getElementById('sel-ciudad');
-  sel.innerHTML='<option value="">— Seleccione municipio —</option>';
-  var lista=dpto?CIUDADES.filter(function(c){return c.dpto===dpto;}):CIUDADES.slice();
-  // dedup
-  var seen={};
-  lista=lista.filter(function(c){if(seen[c.id])return false;seen[c.id]=true;return true;});
-  lista.sort(function(a,b){return a.nombre.localeCompare(b.nombre);});
-  lista.forEach(function(c){
-    var o=document.createElement('option');o.value=c.id;
-    o.textContent=c.nombre+(dpto?'':' · '+c.dpto);
-    sel.appendChild(o);
-  });
-}
-function onCiudadChange(){
-  var id=document.getElementById('sel-ciudad').value;
-  var c=CIUDADES.find(function(x){return x.id===id;});
-  document.getElementById('btn-proy').disabled=!c;
-  var res=document.getElementById('ciudad-res');
-  if(!c){res.style.display='none';return;}
-  res.style.display='block';
-  // Auto-fill crecimiento
-  var inp=document.getElementById('inp-crec');
-  if(!inp.value||inp._auto) {inp.value=c.crec.toFixed(1);inp._auto=true;}
-  document.getElementById('res-content').innerHTML=
-    crR('Población actual',fmt(c.pop)+' hab.')+
-    crR('Área urbana aprox.',c.area_urb+' km²')+
-    crR('Pers./vivienda promedio',c.ppv.toFixed(1))+
-    crR('Crecimiento hist.',c.crec.toFixed(1)+'% anual')+
-    crR('Departamento',c.dpto);
-}
-function crR(k,v){return '<div class="cr-row"><span class="cr-key">'+k+'</span><span class="cr-val">'+v+'</span></div>';}
-
-/* ═══ PRE-INTRO ═══ */
-var _piRaf;
-function iniciarPreIntro(){
-  var cv=document.getElementById('pi-canvas');
-  cv.width=window.innerWidth;cv.height=window.innerHeight;
-  var ctx=cv.getContext('2d');
-  var cols=Math.floor(cv.width/14);
-  var drops=Array(cols).fill(0).map(function(){return (Math.random()*cv.height/14)|0;});
-  var chars='GLP·CH₄·C₃H₈·DN·PE100·BAR·MPa·KM·M³·GAS·RED·VIA·ARAUCA·0123456789ABCDEF';
-  function draw(){
-    ctx.fillStyle='rgba(0,8,20,0.08)';ctx.fillRect(0,0,cv.width,cv.height);
-    ctx.font='13px monospace';
-    for(var i=0;i<drops.length;i++){
-      var ch=chars[Math.floor(Math.random()*chars.length)];
-      var x=i*14,y=drops[i]*14;
-      var prog=y/cv.height;
-      ctx.fillStyle=prog<0.5
-        ?'rgba(124,77,255,'+(0.4+prog).toFixed(2)+')'
-        :'rgba(105,240,174,'+((prog-0.5)*1.4+0.35).toFixed(2)+')';
-      ctx.fillText(ch,x,y);
-      if(y>cv.height&&Math.random()>0.975)drops[i]=0; else drops[i]++;
-    }
-    _piRaf=requestAnimationFrame(draw);
-  }
-  draw();
-  setTimeout(mostrarIntro,2800);
-}
-function mostrarIntro(){
-  cancelAnimationFrame(_piRaf);
-  var pi=document.getElementById('pre-intro');
-  pi.style.transition='opacity 0.6s';pi.style.opacity='0';
-  setTimeout(function(){pi.style.display='none';var in2=document.getElementById('intro');in2.style.display='flex';},600);
-}
-function iniciarDash(){
-  var in2=document.getElementById('intro');
-  in2.style.transition='opacity 0.5s';in2.style.opacity='0';
-  setTimeout(function(){in2.style.display='none';document.getElementById('dashboard').style.display='flex';},500);
-}
-
-/* ═══ CÁLCULOS ═══ */
-function calcular(c,p){
-  var hor=parseInt(p.hor);
-  var cob=parseInt(p.cob)/100;
-  var tipo=p.tipo;
-  var den=p.den;
-  var crecAnual=(parseFloat(p.crec)||c.crec)/100;
-
-  var pop_fut=Math.round(c.pop*Math.pow(1+crecAnual,hor));
-  var pop_cob=Math.round(pop_fut*cob);
-  var viviendas=Math.round(pop_cob/c.ppv);
-
-  var mix={res:0,com:0,ind:0};
-  if(tipo==='residencial'){mix.res=0.85;mix.com=0.12;mix.ind=0.03;}
-  else if(tipo==='mixto'){mix.res=0.65;mix.com=0.28;mix.ind=0.07;}
-  else{mix.res=0.30;mix.com=0.52;mix.ind=0.18;}
-
-  var dpx=den==='alta'?0.85:den==='media'?1.0:1.1;
-  var u_res=Math.round(viviendas*mix.res*dpx);
-  var u_com=Math.round(viviendas*mix.com*0.6);
-  var u_ind=Math.round(viviendas*mix.ind*0.15);
-  var u_tot=u_res+u_com+u_ind;
-
-  // Caudales m³/h GLP (propano)
-  var Q_res=u_res*0.075*0.25;
-  var Q_com=u_com*0.35*0.35;
-  var Q_ind=u_ind*2.5*0.55;
-  var Q_tot=Q_res+Q_com+Q_ind;
-  var Q_kgh=Q_tot*1.97; // 1.97 kg/m³ propano
-
-  // Área cobertura
-  var area_cob=c.area_urb*cob;
-  var lado=Math.sqrt(area_cob);
-
-  // Longitudes red (km)
-  var L_trunk=lado*4*1.2;
-  var spc=den==='alta'?0.25:den==='media'?0.40:0.60;
-  var L_sec=(area_cob/spc)*1.25;
-  var dpu=den==='alta'?0.012:den==='media'?0.018:0.026;
-  var L_dist=u_tot*dpu;
-  var L_tot=L_trunk+L_sec+L_dist;
-
-  // Diámetros nominales
-  var dn_t=Q_tot>2000?250:Q_tot>1000?200:Q_tot>500?150:Q_tot>200?100:80;
-  var dn_s=Q_tot>500?63:Q_tot>200?50:40;
-  var dn_d=32;
-
-  // Elementos
-  var n_pla=Math.max(1,Math.ceil(Q_tot/500));
-  var n_erm=Math.ceil(u_tot/1200);
-  var n_val=Math.ceil(L_trunk/0.5)+Math.ceil(L_sec/1.0);
-  var n_aco=u_tot;
-
-  // Cantidades material (m)
-  var m_t=Math.round(L_trunk*1000);
-  var m_s=Math.round(L_sec*1000);
-  var m_d=Math.round(L_dist*1000);
-
-  // Inversión (COP millones)
-  var u_t_cop=p.mat==='acero'?850000:p.mat==='PE100'?280000:240000;
-  var u_s_cop=p.mat==='acero'?600000:180000;
-  var u_d_cop=95000;
-  var I_red=(m_t*u_t_cop+m_s*u_s_cop+m_d*u_d_cop)/1e6;
-  var I_pla=(n_pla*(Q_tot>500?2500000000:1200000000))/1e6;
-  var I_erm=(n_erm*180000000)/1e6;
-  var I_val=(n_val*8500000)/1e6;
-  var I_aco=(n_aco*1200000)/1e6;
-  var I_sub=I_red+I_pla+I_erm+I_val+I_aco;
-  var I_ing=I_sub*0.18;
-  var I_tot=I_sub+I_ing;
-
-  // Presión mbar
-  var presion_txt=p.pres==='baja'?'< 50 mbar':p.pres==='media'?'50 – 400 mbar':'> 400 mbar';
-
-  return {
-    c:c,p:p,
-    pop_act:c.pop,pop_fut:pop_fut,pop_cob:pop_cob,viviendas:viviendas,
-    u_res:u_res,u_com:u_com,u_ind:u_ind,u_tot:u_tot,
-    Q_tot:Q_tot,Q_kgh:Q_kgh,Q_res:Q_res,Q_com:Q_com,Q_ind:Q_ind,
-    n_pla:n_pla,Q_pla:(Q_tot/n_pla),
-    n_erm:n_erm,n_val:n_val,n_aco:n_aco,
-    area_cob:area_cob,
-    L_trunk:L_trunk,L_sec:L_sec,L_dist:L_dist,L_tot:L_tot,
-    dn_t:dn_t,dn_s:dn_s,dn_d:dn_d,
-    m_t:m_t,m_s:m_s,m_d:m_d,
-    I_red:I_red,I_pla:I_pla,I_erm:I_erm,I_val:I_val,I_aco:I_aco,I_ing:I_ing,I_tot:I_tot,
-    presion_txt:presion_txt,
-  };
-}
-
-/* ═══ GENERAR ═══ */
-function generarProyeccion(){
-  var id=document.getElementById('sel-ciudad').value;
-  var c=CIUDADES.find(function(x){return x.id===id;});
-  if(!c)return;
-  var params={
-    tipo:document.getElementById('sel-tipo').value,
-    cob:document.getElementById('rng-cob').value,
-    hor:document.getElementById('sel-hor').value,
-    pres:document.getElementById('sel-pres').value,
-    mat:document.getElementById('sel-mat').value,
-    den:document.getElementById('sel-den').value,
-    crec:document.getElementById('inp-crec').value||c.crec,
-  };
-
-  document.getElementById('proy-load').style.display='flex';
-  document.getElementById('mapa-canvas').style.display='none';
-  document.getElementById('canvas-ph').style.display='none';
-  document.getElementById('legend-box').style.display='none';
-  document.getElementById('scale-box').style.display='none';
-
-  setTimeout(function(){
-    _proy=calcular(c,params);
-    dibujarMapa(_proy);
-    mostrarReporte(_proy);
-    document.getElementById('proy-load').style.display='none';
-    // Mostrar toggle
-    var tog=document.getElementById('vista-toggle');
-    tog.style.display='flex';
-    // Mostrar vista activa
-    if(_vistaMode==='esquema'){
-      document.getElementById('mapa-canvas').style.display='block';
-      document.getElementById('sat-map').style.display='none';
-      document.getElementById('legend-box').style.display='block';
-      document.getElementById('scale-box').style.display='block';
-    } else {
-      document.getElementById('mapa-canvas').style.display='none';
-      document.getElementById('sat-map').style.display='block';
-      document.getElementById('legend-box').style.display='none';
-      document.getElementById('scale-box').style.display='none';
-      setTimeout(function(){dibujarSatelital(_proy);},150);
-    }
-    ['b-xl','b-pdf','b-jpg'].forEach(function(bid){document.getElementById(bid).disabled=false;});
-  },900);
-}
-
-/* ═══ DIBUJO MAPA ═══ */
-function dibujarMapa(pr){
-  var wrap=document.getElementById('canvas-wrap');
-  var W=wrap.clientWidth-32,H=wrap.clientHeight-32;
-  var cv=document.getElementById('mapa-canvas');
-  cv.width=W;cv.height=H;
-  var ctx=cv.getContext('2d');
-
-  // Fondo
-  ctx.fillStyle='#000c1e';ctx.fillRect(0,0,W,H);
-
-  // Definir área de mapa con margen
-  var mx=42,my=28,mw=W-mx-16,mh=H-my-22;
-
-  // Escala visual
-  var lado_km=Math.sqrt(pr.area_cob);
-  var px_km=Math.min(mw,mh)/(lado_km*1.2);
-  var map_w=Math.min(mw,lado_km*1.2*px_km);
-  var map_h=map_w; // cuadrado
-  var ox=mx+(mw-map_w)/2,oy=my+(mh-map_h)/2;
-
-  // Borde zona urbana
-  ctx.fillStyle='rgba(8,18,40,0.95)';
-  roundRect(ctx,ox,oy,map_w,map_h,5,true,false);
-  ctx.strokeStyle='rgba(124,77,255,0.35)';ctx.lineWidth=1.5;
-  roundRect(ctx,ox,oy,map_w,map_h,5,false,true);
-
-  // Cuadrícula
-  var den=pr.p.den;
-  var bpx=den==='alta'?16:den==='media'?24:38;
-  var av=den==='alta'?4:3;
-  var nc=Math.floor(map_w/bpx),nr=Math.floor(map_h/bpx);
-  var bw=map_w/nc,bh=map_h/nr;
-
-  // Manzanas rellenas
-  for(var i=0;i<nc;i++)for(var j=0;j<nr;j++){
-    if(Math.random()<0.94){
-      ctx.fillStyle='rgba(12,22,46,0.85)';
-      ctx.fillRect(ox+i*bw+1.5,oy+j*bh+1.5,bw-3,bh-3);
-    }else{
-      // parque
-      ctx.fillStyle='rgba(0,40,20,0.4)';
-      ctx.fillRect(ox+i*bw+1.5,oy+j*bh+1.5,bw-3,bh-3);
-    }
-  }
-
-  // Calles
-  for(var i=0;i<=nc;i++){
-    var x=ox+i*bw,esAv=(i%av===0);
-    ctx.strokeStyle=esAv?'rgba(28,45,75,0.9)':'rgba(14,26,52,0.75)';
-    ctx.lineWidth=esAv?1.4:0.5;
-    line(ctx,x,oy,x,oy+map_h);
-  }
-  for(var j=0;j<=nr;j++){
-    var y=oy+j*bh,esAv=(j%av===0);
-    ctx.strokeStyle=esAv?'rgba(28,45,75,0.9)':'rgba(14,26,52,0.75)';
-    ctx.lineWidth=esAv?1.4:0.5;
-    line(ctx,ox,y,ox+map_w,y);
-  }
-
-  // Avenidas principales
-  var avH=[],avV=[];
-  for(var i=0;i<=nr;i+=av)avH.push(oy+i*bh);
-  for(var i=0;i<=nc;i+=av)avV.push(ox+i*bw);
-
-  // Eje troncal (cruce central)
-  var tH=avH[Math.floor(avH.length/2)]||avH[0];
-  var tV=avV[Math.floor(avV.length/2)]||avV[0];
-
-  // Glow helper
-  function glowLine(color,blur,lw,x1,y1,x2,y2){
-    ctx.save();ctx.shadowColor=color;ctx.shadowBlur=blur;
-    ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.setLineDash([]);
-    line(ctx,x1,y1,x2,y2);ctx.restore();
-  }
-
-  // Red troncal
-  glowLine('#e53935',10,3.5,ox,tH,ox+map_w,tH);
-  glowLine('#e53935',10,3.5,tV,oy,tV,oy+map_h);
-  // Conexión desde exterior (planta)
-  ctx.save();ctx.strokeStyle='#e53935';ctx.lineWidth=2.5;ctx.setLineDash([7,4]);ctx.shadowColor='#e53935';ctx.shadowBlur=6;
-  line(ctx,ox-mx+4,tH,ox,tH);ctx.restore();
-
-  // Red secundaria (otras avenidas)
-  avH.forEach(function(y,i){
-    if(i===Math.floor(avH.length/2))return;
-    glowLine('#ff9800',5,2,ox,y,ox+map_w,y);
-  });
-  avV.forEach(function(x,i){
-    if(i===Math.floor(avV.length/2))return;
-    glowLine('#ff9800',5,2,x,oy,x,oy+map_h);
-  });
-
-  // Red distribución (calles restantes)
-  ctx.save();ctx.strokeStyle='rgba(105,240,174,0.5)';ctx.lineWidth=0.9;ctx.shadowColor='rgba(105,240,174,0.25)';ctx.shadowBlur=3;
-  for(var i=0;i<=nr;i++){if(i%av===0)continue;var y=oy+i*bh;line(ctx,ox,y,ox+map_w,y);}
-  for(var i=0;i<=nc;i++){if(i%av===0)continue;var x=ox+i*bw;line(ctx,x,oy,x,oy+map_h);}
-  ctx.restore();
-
-  // Planta (estrella amarilla, exterior izquierda)
-  drawStar(ctx,ox-24,oy+20,12,5);
-  ctx.fillStyle='#ffd600';ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=1.2;ctx.stroke();
-  ctx.fillStyle='rgba(255,214,0,0.7)';ctx.font='bold 7px sans-serif';ctx.textAlign='center';
-  ctx.fillText('P',ox-24,oy+35);
-
-  // ERMs (círculos púrpura)
-  var ermPts=[];
-  avH.forEach(function(y){avV.forEach(function(x){ermPts.push({x:x,y:y});});});
-  var step=Math.max(1,Math.floor(ermPts.length/pr.n_erm));
-  var cnt=0;
-  ermPts.forEach(function(pt,i){
-    if(i%step===0&&cnt<pr.n_erm){
-      ctx.save();ctx.shadowColor='rgba(124,77,255,0.8)';ctx.shadowBlur=8;
-      ctx.beginPath();ctx.arc(pt.x,pt.y,6.5,0,Math.PI*2);
-      ctx.fillStyle='rgba(124,77,255,0.95)';ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;ctx.stroke();
-      ctx.restore();
-      ctx.fillStyle='#fff';ctx.font='bold 6.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('R',pt.x,pt.y);
-      cnt++;
-    }
-  });
-
-  // Válvulas (cuadrados cyan)
-  var valPts=[];
-  avH.forEach(function(y,i){
-    for(var vi=0;vi<avV.length-1;vi+=2)valPts.push({x:(avV[vi]+(avV[vi+1]||avV[vi]+bw*av))/2,y:y});
-  });
-  var vstep=Math.max(1,Math.floor(valPts.length/Math.min(pr.n_val,valPts.length)));
-  valPts.forEach(function(pt,i){
-    if(i%vstep===0){
-      ctx.save();ctx.shadowColor='rgba(0,200,255,0.6)';ctx.shadowBlur=5;
-      ctx.fillStyle='#00c8ff';ctx.fillRect(pt.x-4,pt.y-4,8,8);
-      ctx.restore();
-    }
-  });
-
-  // Título del mapa
-  ctx.fillStyle='rgba(124,77,255,0.5)';ctx.font="bold 9px 'Orbitron',monospace";
-  ctx.textAlign='left';ctx.textBaseline='top';
-  ctx.fillText('RED GLP PROYECTADA — '+pr.c.nombre.toUpperCase()+', '+pr.c.dpto.toUpperCase(),ox,oy-20);
-
-  // Escala
-  var m_per_px=(lado_km*1200)/map_w; // metros por pixel
-  document.getElementById('scale-txt').innerHTML=
-    '1 px ≈ '+m_per_px.toFixed(0)+' m<br>Área: '+pr.area_cob.toFixed(1)+' km²';
-}
-
-function roundRect(ctx,x,y,w,h,r,fill,stroke){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
-  if(fill)ctx.fill();if(stroke)ctx.stroke();
-}
-function line(ctx,x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
-function drawStar(ctx,cx,cy,r,pts){
-  var step=Math.PI/pts;ctx.beginPath();
-  for(var i=0;i<pts*2;i++){
-    var ri=i%2===0?r:r*0.42;
-    var a=i*step-Math.PI/2;
-    if(i===0)ctx.moveTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    else ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-  }ctx.closePath();
-}
-
-/* ═══ REPORTE ═══ */
-function fmt(n,d){if(n==null||isNaN(n))return '—';return n.toLocaleString('es-CO',{maximumFractionDigits:d||0});}
-function fmtM(n){return 'COP $'+fmt(n,0)+' M';}
-
-function mostrarReporte(pr){
-  document.getElementById('rp-empty').style.display='none';
-  var c=pr.c,html='';
-
-  // Identificación
-  html+=sec('📍 PROYECTO',[
-    rw('Municipio',c.nombre+', '+c.dpto),
-    rw('Tipo área',pr.p.tipo.charAt(0).toUpperCase()+pr.p.tipo.slice(1)),
-    rw('Horizonte',pr.p.hor+' años'),
-    rw('Presión',pr.presion_txt),
-    rw('Material',pr.p.mat),
-    rw('Fecha',new Date().toLocaleDateString('es-CO')),
-  ]);
-
-  // KPIs
-  html+='<div class="rps"><div class="rps-t">⚡ INDICADORES CLAVE</div><div class="kpi-grid">';
-  html+=kpi(fmt(pr.u_tot),'','Usuarios proyectados');
-  html+=kpi(fmt(pr.Q_tot,1),'m³/h','Caudal de diseño');
-  html+=kpi(fmt(pr.L_tot,1),'km','Long. total red');
-  html+=kpi(fmt(pr.area_cob,1),'km²','Área cobertura');
-  html+='</div></div>';
-
-  // Demografía
-  html+=sec('👥 DEMOGRAFÍA',[
-    rw('Población actual',fmt(pr.pop_act)+' hab.'),
-    rw('Población año +'+pr.p.hor,fmt(pr.pop_fut)+' hab.'),
-    rw('Cobertura',pr.p.cob+'%'),
-    rw('Población beneficiada',fmt(pr.pop_cob)+' hab.'),
-    rw('Viviendas',fmt(pr.viviendas)+' und.'),
-  ]);
-
-  // Usuarios
-  html+=sec('🏘 DESGLOSE USUARIOS',[
-    rwc('dist','Residencial',fmt(pr.u_res)+' uds.'),
-    rwc('sec','Comercial',fmt(pr.u_com)+' uds.'),
-    rwc('trunk','Industrial',fmt(pr.u_ind)+' uds.'),
-    rw('TOTAL',fmt(pr.u_tot)+' uds.'),
-  ]);
-
-  // Demanda
-  html+=sec('💨 DEMANDA GLP',[
-    rw('Q simultáneo residencial',fmt(pr.Q_res,1)+' m³/h'),
-    rw('Q simultáneo comercial',fmt(pr.Q_com,1)+' m³/h'),
-    rw('Q simultáneo industrial',fmt(pr.Q_ind,1)+' m³/h'),
-    rw('Caudal máx. total',fmt(pr.Q_tot,1)+' m³/h'),
-    rw('Caudal en masa',fmt(pr.Q_kgh,1)+' kg/h'),
-    rw('Plantas requeridas',pr.n_pla+' · '+fmt(pr.Q_pla,1)+' m³/h c/u'),
-  ]);
-
-  // Red
-  html+=sec('🔩 RED DE TUBERÍAS',[
-    rwc('trunk','Troncal DN'+pr.dn_t+' mm',fmt(pr.L_trunk,2)+' km'),
-    rwc('sec','Secundaria DN'+pr.dn_s+' mm',fmt(pr.L_sec,2)+' km'),
-    rwc('dist','Distribución DN'+pr.dn_d+' mm',fmt(pr.L_dist,2)+' km'),
-    rw('Longitud total',fmt(pr.L_tot,1)+' km'),
-    rw('Material',pr.p.mat),
-    rw('Presión diseño',pr.presion_txt),
-  ]);
-
-  // Elementos
-  html+=sec('⚙️ ELEMENTOS DE RED',[
-    rw('Plantas almacenamiento',pr.n_pla+' ud(s).'),
-    rw('Estaciones ERM',fmt(pr.n_erm)+' ud(s).'),
-    rw('Válvulas seccionamiento',fmt(pr.n_val)+' ud(s).'),
-    (_cadRaw&&_cadRaw.length>0)?'<div class="rp-row"><span class="rk">Anillos de distribución</span><span class="rv" style="color:#00c8ff;font-family:Orbitron,monospace;font-size:8.5px;">'+(parseInt(document.getElementById('sel-anillos').value)||3)+' anillos</span></div>':'',
-    (_cadRaw&&_cadRaw.length>0)?'<div class="rp-row"><span class="rk">Polivalvulas de anillo</span><span class="rv" style="color:#ff9800;font-family:Orbitron,monospace;font-size:8.5px;">'+((parseInt(document.getElementById('sel-anillos').value)||3)*2)+' ud(s).</span></div>':'',
-    rw('Acometidas domiciliarias',fmt(pr.n_aco)+' ud(s).'),
-    rw('Medidores',fmt(pr.n_aco)+' ud(s).'),
-  ])
-
-  // Cantidades
-  html+=sec('📦 CANTIDADES MATERIAL',[
-    rwc('trunk','Tubería DN'+pr.dn_t,fmt(pr.m_t)+' m'),
-    rwc('sec','Tubería DN'+pr.dn_s,fmt(pr.m_s)+' m'),
-    rwc('dist','Tubería DN'+pr.dn_d,fmt(pr.m_d)+' m'),
-    rw('Tubería total',fmt(pr.m_t+pr.m_s+pr.m_d)+' m'),
-  ]);
-
-  // Inversión
-  html+=sec('💰 INVERSIÓN ESTIMADA',[
-    rw('Red de tuberías',fmtM(pr.I_red)),
-    rw('Plantas almacen.',fmtM(pr.I_pla)),
-    rw('Estaciones ERM',fmtM(pr.I_erm)),
-    rw('Válvulas',fmtM(pr.I_val)),
-    rw('Acometidas',fmtM(pr.I_aco)),
-    rw('Ing. + contingencias (18%)',fmtM(pr.I_ing)),
-    rwc('inv','INVERSIÓN TOTAL',fmtM(pr.I_tot)),
-    rw('Costo / usuario','COP $'+fmt(pr.I_tot*1e6/pr.u_tot)+' '),
-  ]);
-
-  document.getElementById('rp-content').innerHTML=html;
-  document.getElementById('rp-content').style.display='block';
-}
-function sec(t,rows){return '<div class="rps"><div class="rps-t">'+t+'</div>'+rows.join('')+'</div>';}
-function rw(k,v){return rwc('',k,v);}
-function rwc(cls,k,v){return '<div class="rp-row"><span class="rk">'+k+'</span><span class="rv '+cls+'">'+v+'</span></div>';}
-function kpi(v,u,l){return '<div class="kpi-card"><div class="kpi-v">'+v+'</div>'+(u?'<div class="kpi-u">'+u+'</div>':'')+'<div class="kpi-l">'+l+'</div></div>';}
-
-/* ═══ EXPORTS ═══ */
-/* ═══ TOGGLE VISTA ═══ */
-window.toggleVista=function(modo){
-  _vistaMode=modo;
-  var esqBtn=document.getElementById('btn-v-esq');
-  var satBtn=document.getElementById('btn-v-sat');
-  if(modo==='esquema'){
-    esqBtn.classList.add('active'); satBtn.classList.remove('active');
-    document.getElementById('mapa-canvas').style.display='block';
-    document.getElementById('sat-map').style.display='none';
-    document.getElementById('legend-box').style.display='block';
-    document.getElementById('scale-box').style.display='block';
-  } else {
-    satBtn.classList.add('active'); esqBtn.classList.remove('active');
-    document.getElementById('mapa-canvas').style.display='none';
-    document.getElementById('sat-map').style.display='block';
-    document.getElementById('legend-box').style.display='none';
-    document.getElementById('scale-box').style.display='none';
-    if(_proy) setTimeout(function(){dibujarSatelital(_proy);},100);
-  }
-};
-
-/* ═══ VISTA SATELITAL CON DATOS REALES OSM ═══ */
-function calcZoom(lado_km){
-  if(lado_km<0.5)return 17; if(lado_km<1)return 16; if(lado_km<2)return 15;
-  if(lado_km<4)return 14;   if(lado_km<8)return 13; if(lado_km<15)return 12;
-  if(lado_km<30)return 11;  return 10;
-}
-
-function dibujarSatelital(pr){
-  if(!pr.c.lat){alert('Sin coordenadas para este municipio.');return;}
-  var lat0=pr.c.lat, lng0=pr.c.lng;
-  var lado_km=Math.sqrt(pr.area_cob);
-  if(_lmap){_lmap.remove();_lmap=null;}
-  var mapDiv=document.getElementById('sat-map');
-  _lmap=L.map(mapDiv,{center:[lat0,lng0],zoom:calcZoom(lado_km),zoomControl:true,attributionControl:true});
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
-    attribution:'© Esri · Maxar · Earthstar Geographics',maxZoom:20
-  }).addTo(_lmap);
-  L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
-    attribution:'',maxZoom:20,opacity:0.75
-  }).addTo(_lmap);
-  var dLat=1/111.32;
-  var dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
-  var half=lado_km*0.58;
-  var bbox={minLat:lat0-half*dLat,maxLat:lat0+half*dLat,minLng:lng0-half*dLng,maxLng:lng0+half*dLng};
-
-  // Si hay CAD cargado, usar diseño sobre geometría real del plano
-  if(_cadRaw&&_cadRaw.length>0){
-    _cadData=georeferirCAD(_cadRaw,bbox);
-    diseñarAnillosCAD(pr,_cadData,_lmap,bbox);
-    return;
-  }
-
-  var loadDiv=document.createElement('div');
-  loadDiv.id='sat-osm-load';
-  loadDiv.style.cssText='position:absolute;inset:0;z-index:1000;background:rgba(0,8,24,0.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;';
-  loadDiv.innerHTML='<div style="width:34px;height:34px;border:3px solid rgba(124,77,255,0.18);border-top-color:#7c4dff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>'
-    +'<div style="font-family:Orbitron,monospace;font-size:8px;letter-spacing:2px;color:rgba(124,77,255,0.75);" id="osm-load-txt">LEYENDO OCUPACIÓN URBANA (OSM)...</div>'
-    +'<div style="font-size:9px;color:rgba(180,200,190,0.4);">Analizando distribución de construcciones</div>';
-  mapDiv.appendChild(loadDiv);
-  var areaGrande=pr.area_cob>40;
-  var hwFilter=areaGrande?'"highway"~"motorway|trunk|primary|secondary"':'"highway"~"motorway|trunk|primary|secondary|tertiary|residential|unclassified"';
-  var q='[out:json][timeout:30];(way['+hwFilter+']('+bbox.minLat.toFixed(6)+','+bbox.minLng.toFixed(6)+','+bbox.maxLat.toFixed(6)+','+bbox.maxLng.toFixed(6)+'););out geom;';
-  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
-    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(function(osmData){var ld=document.getElementById('sat-osm-load');if(ld)ld.remove();generarRedOSM(osmData,pr,_lmap,bbox);})
-    .catch(function(err){console.warn('Overpass falló:',err);var ld=document.getElementById('sat-osm-load');if(ld){document.getElementById('osm-load-txt').textContent='Sin conexión OSM · usando cuadrícula estimada';setTimeout(function(){if(ld)ld.remove();generarRedGrid(pr,_lmap,bbox);},1500);}});
-}
-
-function generarRedOSM(osmData,pr,map,bbox){
-  var ways=osmData.elements||[];
-  var TRUNK={motorway:1,trunk:1,primary:1};
-  var SEC={secondary:1,tertiary:1};
-  var trunkWays=[],secWays=[],distWays=[];
-  var nodeUsage={};
-  ways.forEach(function(way){
-    if(!way.geometry||!way.tags||way.geometry.length<2)return;
-    var ht=way.tags.highway;
-    var coords=way.geometry.map(function(n){return[n.lat,n.lon];});
-    if(TRUNK[ht]){trunkWays.push(coords);registrarNodos(coords,nodeUsage,2);}
-    else if(SEC[ht]){secWays.push(coords);registrarNodos(coords,nodeUsage,1);}
-    else{distWays.push(coords);}
-  });
-  distWays.forEach(function(c){L.polyline(c,{color:'#69f0ae',weight:1.8,opacity:0.6}).addTo(map);});
-  secWays.forEach(function(c){L.polyline(c,{color:'#ff9800',weight:2.8,opacity:0.88}).addTo(map);});
-  trunkWays.forEach(function(c){L.polyline(c,{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);});
-  var intersecciones=[];
-  Object.keys(nodeUsage).forEach(function(k){if(nodeUsage[k]>=3){var p=k.split(',');intersecciones.push([parseFloat(p[0]),parseFloat(p[1])]);}});
-  if(intersecciones.length<pr.n_erm*2){intersecciones=[];Object.keys(nodeUsage).forEach(function(k){if(nodeUsage[k]>=2){var p=k.split(',');intersecciones.push([parseFloat(p[0]),parseFloat(p[1])]);}});}
-  var ermStep=Math.max(1,Math.floor(intersecciones.length/pr.n_erm));
-  var ermCnt=0;
-  intersecciones.forEach(function(pt,i){if(i%ermStep===0&&ermCnt<pr.n_erm){L.circleMarker(pt,{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(ermCnt+1)+'</b><br>Presión: '+pr.p.pres+'<br>Usuarios ~'+Math.round(pr.u_tot/pr.n_erm)).addTo(map);ermCnt++;}});
-  if(ermCnt<pr.n_erm&&trunkWays.length>0){var eStep=Math.max(1,Math.floor(trunkWays.length/(pr.n_erm-ermCnt)));trunkWays.forEach(function(coords,i){if(ermCnt>=pr.n_erm)return;if(i%eStep===0){var mid=coords[Math.floor(coords.length/2)];L.circleMarker(mid,{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(ermCnt+1)+'</b>').addTo(map);ermCnt++;}});}
-  var maxVal=Math.min(pr.n_val,60);var valStep=Math.max(1,Math.floor(trunkWays.length/maxVal));var valCnt=0;
-  trunkWays.forEach(function(coords,i){if(valCnt>=maxVal)return;if(i%valStep===0){var m=coords[Math.floor(coords.length/2)];L.circleMarker(m,{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.88}).bindPopup('<b>Válvula</b>').addTo(map);valCnt++;}});
-  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.12;var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.12;
-  var entradaTrunk=trunkWays.length>0?trunkWays[0][0]:secWays.length>0?secWays[0][0]:[pr.c.lat,pr.c.lng];
-  L.polyline([[pLat,pLng],entradaTrunk],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(map);
-  var plantIcon=L.divIcon({className:'',html:'<div style="width:26px;height:26px;background:#ffd600;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 14px rgba(255,214,0,0.9);">⭐</div>',iconSize:[26,26],iconAnchor:[13,13]});
-  L.marker([pLat,pLng],{icon:plantIcon}).bindPopup('<b>Planta GLP</b><br>'+pr.n_pla+' unidad(es) · Q: '+fmt(pr.Q_pla,1)+' m³/h c/u').addTo(map);
-  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],{color:'rgba(124,77,255,0.55)',weight:2,fillColor:'rgba(124,77,255,0.03)',dashArray:'8,4'}).addTo(map);
-  agregarLeyendasSat(pr,map,'OSM · '+(trunkWays.length+secWays.length+distWays.length)+' tramos de vía reales');
-  map.invalidateSize();
-}
-
-function registrarNodos(coords,mapa,peso){
-  coords.forEach(function(c){var k=c[0].toFixed(5)+','+c[1].toFixed(5);mapa[k]=(mapa[k]||0)+peso;});
-}
-
-function generarRedGrid(pr,map,bbox){
-  var lat0=(bbox.minLat+bbox.maxLat)/2,lng0=(bbox.minLng+bbox.maxLng)/2;
-  var dLat=1/111.32,dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
-  var den=pr.p.den;
-  var av_km=den==='alta'?0.25:den==='media'?0.40:0.65;
-  var st_km=den==='alta'?0.08:den==='media'?0.13:0.22;
-  var avH=[],avV=[];
-  for(var lt=bbox.minLat;lt<=bbox.maxLat+1e-9;lt+=av_km*dLat)avH.push(+lt.toFixed(7));
-  for(var lg=bbox.minLng;lg<=bbox.maxLng+1e-9;lg+=av_km*dLng)avV.push(+lg.toFixed(7));
-  var midH=avH[Math.floor(avH.length/2)]||lat0;var midV=avV[Math.floor(avV.length/2)]||lng0;
-  for(var lt2=bbox.minLat;lt2<=bbox.maxLat+1e-9;lt2+=st_km*dLat){if(Math.abs(lt2-midH)<st_km*dLat*0.4)continue;L.polyline([[lt2,bbox.minLng],[lt2,bbox.maxLng]],{color:'#69f0ae',weight:1.8,opacity:0.6}).addTo(map);}
-  avH.forEach(function(lt3){if(Math.abs(lt3-midH)<av_km*dLat*0.4)return;L.polyline([[lt3,bbox.minLng],[lt3,bbox.maxLng]],{color:'#ff9800',weight:2.8,opacity:0.88}).addTo(map);});
-  L.polyline([[midH,bbox.minLng],[midH,bbox.maxLng]],{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);
-  L.polyline([[bbox.minLat,midV],[bbox.maxLat,midV]],{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);
-  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.12;var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.12;
-  L.polyline([[pLat,pLng],[midH,bbox.minLng]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.8}).addTo(map);
-  var pIcon=L.divIcon({className:'',html:'<div style="width:24px;height:24px;background:#ffd600;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 12px rgba(255,214,0,0.9);">⭐</div>',iconSize:[24,24],iconAnchor:[12,12]});
-  L.marker([pLat,pLng],{icon:pIcon}).bindPopup('<b>Planta GLP</b>').addTo(map);
-  var eStep=Math.max(1,Math.floor((avH.length*avV.length)/pr.n_erm));var eCnt=0,idx=0;
-  avH.forEach(function(lt4){avV.forEach(function(lg2){if(idx%eStep===0&&eCnt<pr.n_erm){L.circleMarker([lt4,lg2],{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(eCnt+1)+'</b>').addTo(map);eCnt++;}idx++;});});
-  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],{color:'rgba(124,77,255,0.55)',weight:2,fillColor:'rgba(124,77,255,0.03)',dashArray:'8,4'}).addTo(map);
-  agregarLeyendasSat(pr,map,'Cuadrícula estimada (sin conexión OSM)');
-  map.invalidateSize();
-}
-
-function agregarLeyendasSat(pr,map,fuente){
-  var leyenda=L.control({position:'bottomleft'});
-  leyenda.onAdd=function(){
-    var div=L.DomUtil.create('div','sat-legend');
-    div.innerHTML='<div class="sat-legend-title">LEYENDA RED GLP</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#e53935;"></div>Red troncal</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#ff9800;height:2px;"></div>Red secundaria</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Planta almacenamiento</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#7c4dff;"></div>Estación ERM</div>'
-      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#00c8ff;width:8px;height:8px;border-radius:2px;"></div>Válvula</div>'
-      +'<div style="margin-top:6px;font-size:7px;color:rgba(124,77,255,0.4);font-family:Orbitron,monospace;">'+fuente+'</div>';
-    return div;
-  };
-  leyenda.addTo(map);
-  var info=L.control({position:'topright'});
-  info.onAdd=function(){
-    var div=L.DomUtil.create('div','sat-legend');
-    div.innerHTML='<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+' · '+pr.c.dpto.toUpperCase()+'</div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Usuarios</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.u_tot)+'</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Caudal</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.Q_tot,1)+' m³/h</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Red total</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.L_tot,1)+' km</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">ERMs</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+pr.n_erm+' ud.</b></div>'
-      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Cobertura</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+pr.p.cob+'%</b></div>';
-    return div;
-  };
-  info.addTo(map);
-}
-window.expJPEG=function(){
-  if(!_proy)return;
-  var nombre=_proy.c.nombre.replace(/ /g,'_');
-  if(_vistaMode==='esquema'){
-    // Export canvas directo
-    var cv=document.getElementById('mapa-canvas');
-    var a=document.createElement('a');
-    a.download='Mapa_Esquema_GLP_'+nombre+'.jpg';
-    a.href=cv.toDataURL('image/jpeg',0.92);a.click();
-  } else {
-    // Export satelital con html2canvas
-    var satDiv=document.getElementById('sat-map');
-    html2canvas(satDiv,{useCORS:true,allowTaint:true,scale:1.5,backgroundColor:'#000814'}).then(function(cv2){
-      var a=document.createElement('a');
-      a.download='Mapa_Satelital_GLP_'+nombre+'.jpg';
-      a.href=cv2.toDataURL('image/jpeg',0.88);a.click();
-    }).catch(function(){
-      alert('Para exportar la vista satelital, usa la captura de pantalla del sistema (Ctrl+Shift+S).');
-    });
-  }
-};
-
-window.expPDF=function(){
-  if(!_proy)return;
-  if(_vistaMode==='satelital'){
-    // Para satelital: capturar con html2canvas luego generar PDF
-    html2canvas(document.getElementById('sat-map'),{useCORS:true,allowTaint:true,scale:1.2,backgroundColor:'#000814'})
-      .then(function(cv2){_generarPDF(_proy,cv2.toDataURL('image/jpeg',0.82),'Satelital');})
-      .catch(function(){_generarPDF(_proy,document.getElementById('mapa-canvas').toDataURL('image/jpeg',0.85),'Esquema');});
-    return;
-  }
-  _generarPDF(_proy,document.getElementById('mapa-canvas').toDataURL('image/jpeg',0.85),'Esquema');
-};
-
-function _generarPDF(pr,img,vistaLabel){
-  var c=pr.c;
-  var jsPDF=window.jspdf.jsPDF;
-  var doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-  var W=297,H=210;
-  // Fondo
-  doc.setFillColor(0,8,20);doc.rect(0,0,W,H,'F');
-  // Título
-  doc.setTextColor(124,77,255);doc.setFontSize(13);doc.setFont(undefined,'bold');
-  doc.text('PROYECCIÓN RED GLP — '+c.nombre.toUpperCase()+', '+c.dpto.toUpperCase(),14,14);
-  doc.setFontSize(7.5);doc.setTextColor(160,180,170);doc.setFont(undefined,'normal');
-  doc.text('Araucana de Gases S.A. E.S.P.  ·  '+new Date().toLocaleDateString('es-CO')+'  ·  Cobertura: '+pr.p.cob+'%  ·  Horizonte: '+pr.p.hor+' años  ·  '+pr.presion_txt,14,20);
-  // Mapa
-  var mW=155,mH=mW*(cv.height/cv.width);
-  doc.addImage(img,'JPEG',14,24,mW,Math.min(mH,H-28));
-  // Reporte columna derecha
-  var rx=174,ry=26;
-  doc.setFontSize(7);
-  var fields=[
-    ['INDICADORES CLAVE',''],['Usuarios proyect.',fmt(pr.u_tot)],
-    ['Caudal diseño',fmt(pr.Q_tot,1)+' m³/h'],['Long. total red',fmt(pr.L_tot,1)+' km'],
-    ['Área cobertura',fmt(pr.area_cob,1)+' km²'],['',''],
-    ['RED DE TUBERÍAS',''],
-    ['Troncal DN'+pr.dn_t,fmt(pr.L_trunk,2)+' km'],
-    ['Secundaria DN'+pr.dn_s,fmt(pr.L_sec,2)+' km'],
-    ['Distribución DN'+pr.dn_d,fmt(pr.L_dist,2)+' km'],['',''],
-    ['ELEMENTOS',''],['Plantas',pr.n_pla+' ud.'],['ERMs',fmt(pr.n_erm)+' ud.'],
-    ['Válvulas',fmt(pr.n_val)+' ud.'],['Acometidas',fmt(pr.n_aco)+' ud.'],['',''],
-    ['INVERSIÓN TOTAL',''],['',fmtM(pr.I_tot)],['Costo/usuario','COP $'+fmt(pr.I_tot*1e6/pr.u_tot)],
-  ];
-  var cy2=ry;
-  fields.forEach(function(f){
-    if(f[0]&&!f[1]){
-      doc.setTextColor(124,77,255);doc.setFont(undefined,'bold');
-      doc.text(f[0],rx,cy2);cy2+=5;
-    } else if(f[0]&&f[1]){
-      doc.setTextColor(200,220,210);doc.setFont(undefined,'normal');
-      doc.text(f[0],rx,cy2);doc.text(f[1],W-8,cy2,{align:'right'});cy2+=4;
-    } else {cy2+=2;}
-  });
-  doc.save('Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'_'+vistaLabel+'.pdf');
-}
-</script>
+ í¥èÁÍÑ¼°¹½µÉèM¸)Õ¸AÍÑ¼°ÁÑ¼è9É§Å¼°Á½ÀèÐÐÐààØ°É}ÕÉèàà°ÁÁØèÌ¸È±ÉèÄ¸Ð°±ÐèÄ¸ÈÄÌØ°±¹è´ÜÜ¸ÈàÄÅô°(í¥èµ½¹ÑÉ¥°¹½µÉè5½¹ÑËµ°ÁÑ¼èÍÉ½°Á½ÀèÐÈÄÀÔØ°É}ÕÉèàÀ°ÁÁØèÌ¸Ô±ÉèÄ¸à°±Ðèà¸ÜÐÜä°±¹è´ÜÔ¸ààÄÑô°('¶C¢wfÆÆVGW"rÂæöÖ'&S¢ufÆÆVGW"rÂGFó¢t6W6"rÂ÷£Cc#cBÂ&V÷W&#£RÂc£2ãBÆ7&V3£ãrÂÆC£ãCc3ÂÆæs¢Ós2ã#S3'ÒÀ¢¶C¢w6çFöÖ'FrÆæöÖ'&S¢u6çFÖ'FrÂGFó¢tÖvFÆVærÂ÷£S#33#bÂ&V÷W&#£RÂc£2ã"Æ7&V3£ãbÂÆC£ã#CÂÆæs¢ÓsBãÒÀ¢ÚYÛZ]IËÛXNÓZ]IËÎÒZ[IËÜÍ
+ÌË\XWÝ\ÎËKÜXÎKË]LÌËÎMÍKN_KÚYÜÜ^X[ËÛXNÔÜ^pè[ËÎÐØ]XØIËÜLK\XWÝ\ËÜXÎK]
+NKÎMÍ
+KÚYÝ[IËÛXNÕ[IËÎÐÞXXðèIËÜN
+Ë\XWÝ\ÎÜXÎK]KLÍLËÎMÌËÍÎKÚYÜÚ[Ù[ZÉËÛXNÔÚ[Ù[ZÉËÎÔÝXÜIËÜ
+\XWÝ\ËKÜXÎKK]KÌ
+
+ËÎMÍKÎMÎKÚYÞ[Ü[	ËÛXNÖ[Ü[	ËÎÐØ\Ø[\IËÜM\XWÝ\ÌËÜXÎ]KÌÍÎÎMÌÎMN_KÚYÙÜ[ÚXIËÛXNÑÜ[ÚXIËÎÐØ\]Y]0èIËÜMÌ\XWÝ\ÍËËÜXÎK]KM
+ÎMÍK
+ßKÚYÜ[ÚXÚIËÛXNÔ[ÚXÚIËÎÓHÝXZ\IËÜÌK\XWÝ\ËÜXÎ]LKM
+
+ÎMÌL
+ÌKÚYÜ]ZXÉËÛXNÔ]ZX0ìÉËÎÐÚØðìÉËÜL
+ÌK\XWÝ\ÜXÎK]KLNKÎMÍNßKÚYÛ[ØÛØIËÛXNÓ[ØÛØIËÎÔ][X^[ÉËÜ
+\XWÝ\LËÜXÎK]KMLÎMÍßKÚYÛ]XÚXIËÛXNÓ]XÚXIËÎÐ[X^Û\ÉËÜ\XWÝ\ËKÜXÎKK]MMLËÎMKM
+_KÚYÜØ[ÚÜÙIËÛXNÔØ[ÜðêH[ÝX]X\IËÎÑÝX]X\IËÜ\XWÝ\LËKÜXÎK]M
+ËÎMÌKÚYÛZ]IËÛXNÓZ]0îËÎÕ]\0ê\ÉËÜN\XWÝ\ËÜXÎK]KLMÎMÌÌÎ_KÚYÚ[\YIËÛXNÔY\È[°ë\YIËÎÑÝXZ[°ëXIËÜM\XWÝ\KKÜXÎK]Ë
+LËÎMËLÎ_KNÂ\ÜÞO[[Â\ÛX\[[ÈËÈXY]X\[Ý[ÙB\Ý\ÝS[ÙOIÙ\Ü]Y[XIÎÈËÈ	Ù\Ü]Y[XIÈ	ÜØ][][	Â\ØØY]O[[ÈËÈ\ÙYÐQ[]Y\È
+Ù[ÜY\[ÚXY\ÊB\ØØY]Ï[[ÈËÈ]È[]Y\È[\ÈHÙ[ÜYÊ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dpäÑSÈÐQÐTÐKTÑSÈHÑSÔQTSÒPPÒpäÓ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d
+Â[Ý[ÛØYYÓÝ\J^ÂK][Y][
+
+NÂØÝ[Y[Ù][[Y[RY
+	ØØYYÜ	ÊKÛ\ÜÓ\ÝY
+	ÙYÛÝ\ÊNÂB[Ý[ÛØYÜ
+J^ÂK][Y][
+
+NÂØÝ[Y[Ù][[Y[RY
+	ØØYYÜ	ÊKÛ\ÜÓ\Ý[[ÝJ	ÙYÛÝ\ÊNÂ\YK]U[Ù\K]U[Ù\[\ÉK]U[Ù\[\ÖÌNÂYXØYØ\ØYÊNÂB[Ý[ÛØYØ\ØYÊ[J^ÂYY[J\]\Â\ÝYØÝ[Y[Ù][[Y[RY
+	ØØY\Ý]\ÉÊNÂÝÝ[K\Ü^OIØØÚÉÎÂÝÛ\ÜÓ[YOIØØY\Ý]\ÉÎÂÝ^ÛÛ[IÓ^Y[È\Ú]ËÎÂ\^Y[K[YKÜ]
+	ËÊKÜ
+
+KÓÝÙ\Ø\ÙJ
+NÂ\\ÑÑÏJ^OOIÙÙÉÊNÂ[Ý[ÛÛ[Ê[Ë[YJ^ÂY[Ë[ÝOOL
+]ÝÈ]È\Ü	ÔÚ[[YY\ÈÙ[Ûpê]XØ\È[ÛÛY\ÉÊNÂØØY]ÏY[ÎÂÝÛ\ÜÓ[YOIØØY\Ý]\ÈØY[ÚÉÎÂ\\ÜÏ^ßNÂ[ËÜXXÚ
+[Ý[ÛJ^Ý\ÜÖÙK\WOJ\ÜÖÙK\W_
+JÌNßJNÂ\\Ý[Y[SØXÝÙ^\Ê\ÜÊKX\
+[Ý[ÛÊ^Ü]\\ÜÖÚ×JÉÈ	ÊÚÎßJKÚ[	È0­È	ÊNÂÝ[\SIø§%	ÊÙ[YJÉÏÂ
+Ù[Ë[Ý
+ÉÈ[YY\È0­È	ÊÜ\Ý[Y[
+ÉÏÜ[Û\ÜÏHØYXÛX\ÛÛXÚÏHØY[\X\
+H¸§%H]Z]\\Ú]ÏÜÜ[ÎÂØÝ[Y[Ù][[Y[RY
+	ÙX[[ÜÉÊKÝ[K\Ü^OIØØÚÉÎÂBY\ÑÑÊ^Â\[]È[TXY\
+NÂÛØYY[Ý[Û]^Â^Â\YY]\Ù]\Ý[ÂËÈ[[H\ÙX\ÑÎÈÚH[K[[HÛÛ[È^È\[ÎÂ^È[Ï\\ÙQÑÊYNÈBØ]Ú
+ÙÑ\^ÂËÈ[Ý[ÜÈ\Ú]ÜÈÙÈÛÛ[X[YY[ÛXYÜÈ8 %[[\ÛÛ[È^Â^Â\[]È^XÛÙ\	Ý]N	ÊKXÛÙJ]ÈZ[\^JYJNÂ[Ï\\ÙQ
+NÂY[Ë[ÝOOL
+]ÝÈ]È\Ü	ÝXðë[ÉÊNÂXØ]Ú
+J^ÂÝÈÙÑ\ÈËÈ[[\\ÜÜYÚ[[HÑÂBBÛ[Ê[Ë[K[YJNÂXØ]Ú
+\^ÂØØY]Ï[[ÂÝÛ\ÜÓ[YOIØØY\Ý]\ÈØYY\ÎÂÝ[\SIø§%H	ÊÙ\Y\ÜØYÙK\XÙJ×ÙË	ÏÊNÂBNÂÛ\ÜY[Ý[Û
+^ÈÝÛ\ÜÓ[YOIØØY\Ý]\ÈØYY\ÎÈÝ^ÛÛ[Iø§%HÈÙHYÈY\[\Ú]ÉÎÈNÂXY\Ð\^PY\[JNÂY[Ù^Â\[]È[TXY\
+NÂÛØYY[Ý[Û]^Â^Â\[Ï\\ÙQ]\Ù]\Ý[
+NÂÛ[Ê[Ë[K[YJNÂXØ]Ú
+\^ÂØØY]Ï[[ÂÝÛ\ÜÓ[YOIØØY\Ý]\ÈØYY\ÎÂÝ^ÛÛ[Iø§%H\Ü	ÊÙ\Y\ÜØYÙNÂBNÂÛ\ÜY[Ý[Û
+^ÈÝÛ\ÜÓ[YOIØØY\Ý]\ÈØYY\ÎÈÝ^ÛÛ[Iø§%HÈÙHYÈY\[\Ú]ÉÎÈNÂXY\Õ^
+[K	Ý]N	ÊNÂBB[Ý[ÛØY[\X\
+^ÂØØY]Ï[[ÈØØY]O[[ÂØÝ[Y[Ù][[Y[RY
+	ØØY\Ý]\ÉÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÙX[[ÜÉÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ØØYZ[]	ÊK[YOIÉÎÂBÊ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dTÑTÑÈ8 %ÛÜÜH]]ÐÐQL8¡¤N8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d
+Â[Ý[Û\ÙQÑÊY\^Â\[]ÈZ[\^JY\NÂY[Ý
+HÝÈ]È\Ü	Ð\Ú]ÈÑÈ[X\ÚXYÈ\]Ypì[ÈÈÛÜ\ÉÊNÂËÈY\\ÚpìÛ
+]\ÈMJB\\IÉÎÂÜ\OLÚO
+ÚJÊÊH\ÏTÝ[ËÛPÚ\ÛÙJÚWJNÂ\ÑÕT^Â	ÐPÌL
+ÎÔL	Ë	ÐPÌLIÎÔLË	ÐPÌLLÎÔLÉË	ÐPÌLM	ÎÔM	Ë	ÐPÌLMIÎÔ	Ë	ÐPÌLN	ÎÔ
+	Ë	ÐPÌLIÎÔ
+ÉË	ÐPÌL	ÎÔL	Ë	ÐPÌLÉÎÔLÉË	ÐPÌLÌÎÔN	ÂNÂY]\Ý\ÕÚ]
+	ÐPÉÊJBÝÈ]È\Ü	ÓÈ\È[\Ú]ÈÑÈ°è[YÈ8 %\YXØH[ÜX]ÉÊNÂ\[YOQÑÕTÝ\_\Â\[ÏV×NÂËÈ8¥ 8¥ [[ÈNL
+PÌLJH8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ Y\OOIÐPÌLIÊ^Â^È[ÏWÜ\ÙQÑ×ÔLNÈXØ]Ú
+J^ßBBËÈ8¥ 8¥ [[È8 $ÔN8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ Y[Ë[ÝOOL	\IÐPÌLMIÊ^Â^È[ÏWÜ\ÙQÑ×Ô
+NÈXØ]Ú
+J^ßBBËÈ8¥ 8¥ [XÚÈ[ÜX]]È8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ Y[Ë[ÝOOL
+^ÂÝÈ]È\Ü	Ð]]ÐÐQÑÈ	ÊÝ[YJÉÈ
+	ÊÝ\ÉÊH]XÝYËÊÂ	Ô\HØ\Ø\[[Ë^ÜHÛÛ[È\ÙH]]ÐÐQÊÂ	ÐXÜÐÐQÈÐÐQÈÈÛÛY\H[ÛÛ\[ËÛËÙÙËYÂ
+NÂB]\[ÎÂBÊ[\Y\ÝXHQQQKMÍM]KY[X[
+Â[Ý[ÛÙÙÔXYÝXJÙ^Â\[]È]UY]ÊY\]ÈZ[\^JKY\]SÙÙ]
+NÂ]\Ù]Ø]
+
+ÙYJNÂB[Ý[ÛÙÙÔXYZ[ÌÙ^Â]\ÛÙ_
+ÛÙÌWO
+_
+ÛÙÌOM_
+ÛÙÌ×O
+NÂB[Ý[ÛÙÙÔXYZ[MÙ^È]\ÛÙ_
+ÛÙÌWO
+NÈBÊ8¥ 8¥ \Ù\ÑÈL
+PÌLJH8¥ 8¥ 
+Â[Ý[ÛÜ\ÙQÑ×ÔL^ÂËÈLXY\M]\ËÙXÝ[ÛXHÝ\È]ÙÙ]ËÈÙXÝ[ÛÚ[\È
+
+ÙXÝ[ÛÈ0åÈ]\ÈØYH[JH\ÙHÙÙ]ËÈØYH[YNÙÙ]
+
+H
+ÈÚ^J
+BËÈÙXØÚpìÛRPQTOPÓTÔËUPTËÏPÐÒÔË
+QSUQTË
+OSÐPÕÂ\\ÙSÙLÂ\[ÙWÙÙÔXYZ[Ì\ÙSÙÍ
+
+NÈËÈÙXØÚpìÛ
+HSUQTÂ\[ÞWÙÙÔXYZ[Ì\ÙSÙÍ
+
+Í
+NÂYY[ÙY[Þ[ÙÙ[Þ[Ý
+H]\×NÂ]\ÙÙÔØØ[[]Y\Ê[Ù[ÙÙ[ÞNÂBÊ8¥ 8¥ \Ù\ÑÈ8 $ÔN8¥ 8¥ 
+Â[Ý[ÛÜ\ÙQÑ×Ô
+^ÂËÈ[\Ú]ÈY[HÙXØÚ[Û\ÈXÙYY\ÈÜ[X\HHÙXØÚ[Û\ËËÈ\ØØ\HÙXØÚpìÛHØ]ÜËÙ[YY\È\ØØ[X[È]Û\È[\[ÜËËÈ\Ý]YÚXN\ØØ\ÙXÝY[ÚX\ÈHØ]ÜÈSHÈÔÓSSH[[ÝX[K]\ÙÙÒ]\\ÝXÔØØ[NÂBÊ\ØØ[[È]\°ë\ÝXÛÎ\ØØH]Û\ÈHÛÛÜ[Y\È[[[\[È
+Â[Ý[ÛÙÙÒ]\\ÝXÔØØ[^Â\[ÏV×NÂ\[X[ÝÂËÈ[ÑÈ
+ÈÜÈØ]ÜÈÛÛY[[]Y[Ë\ØØ[[ÜÈÙYÛY[ÜÈÛBËÈ^HLÈÝX\ÈÛÛÙXÝ]]ÜÈÛÛ[Ü\È]\ÚX\È
+ÛÛÜ[Y\È]ÛÂËÈÈÛÛÜ[Y\È[\ÈHÞYXÝÈ[Y]ÜÊKËÈ[Xpê[\ØØ[[ÜÈ\ÈØY[\ÈSHHÔÓSSHÛÛ[È[Û\Ë[Ý[ÛXY
+Ù^È]\ÙÙÔXYÝXJÙNÈB[Ý[Û]\ÚXJ^È]\\Ñ[]JIX]XÊOYNIX]XÊOYKMÈBËÈ\ØØ\Ü]Y\ÈH
+ÈÝX\È°è[YÜÈÛÛÙXÝ]]ÜÈ
+ØXHÛ[0ë[XJB\OLÂÚ[JO[M
+^Â\O\XY
+JKLO\XY
+JÎ
+NÂY]\ÚXJJI]\ÚXJLJJ^Â\ÛÛÜÏVÖÞKLWWNÂ\ZJÌMÂÚ[J[LM^Â\\XY
+KO\XY
+Î
+NÂY]\ÚXJ
+I]\ÚXJJIX]XÊ^JOYMIX]XÊK^LJOYMJ^ÂÛÛÜË\Ú
+ÞWJNÂÏLMÂY[ÙHXZÎÂBYÛÛÜË[ÝL^Â[Ë\Ú
+Ý\NÛÛÜË[ÝOOLÉÓSIÎÔÓSSIËÛÛÜÎÛÛÜËX\
+[Ý[ÛÊ^Ü]\ÞÖÌKNÖÌW_NßJKÛÜÙY[Ù_JNÂOZÈÛÛ[YNÂBBJÊÎÂB]\[ÎÂBÊ\ØØ[[È[ÙYÛY[ÈH[YY\ÈL
+Â[Ý[ÛÙÙÔØØ[[]Y\ÊÝ\[
+^Â\[ÏV×NÂ\O\Ý\ÂÚ[JO[L
+^ÂËÈ\ÈH[YY[LOSSKNOTÓSSK
+ÍSÔÓSSK][\ÙY\]\OWÙÙÔXYZ[MJNÂY]\OOOLJ^ÈËÈSB^Â\OWÙÙÔXYÝXJJÎ
+NÂ\LOWÙÙÔXYÝXJJÌMNÂ\WÙÙÔXYÝXJJÌ
+NÂ\LWÙÙÔXYÝXJJÌÌNÂY\Ñ[]JJI\Ñ[]JLJI\Ñ[]JI\Ñ[]JLJ^Â[Ë\Ú
+Ý\NÓSIËÛÛÜÎÞÞKNL_KÞNLWKÛÜÙY[Ù_JNÂJÏMÈÛÛ[YNÂBXØ]Ú
+J^ßBBJÏLÂB]\[ÎÂBÊ8¥ 8¥ \Ù\YÙ\Î^YHSHHÔÓSSH[Ü]YHSUQTÈ8¥ 8¥ 
+Â[Ý[Û\ÙQ^
+^Â\[\Ï]^Ü]
+××ÊNÂ\[]Y\ÏV×NÂ\[[]Y\ÏY[ÙNÂ\OLÂÚ[JO[\Ë[Ý
+^Â\ÛÙO[[\ÖÚWOÛ[\ÖÚWK[J
+NÉÎÂ\[[[\ÖÚJÌWOÛ[\ÖÚJÌWK[J
+NÉÎÂYÛÙOOOIÌÉ[OOIÑSUQTÉÊ^Ú[[]Y\Ï]YNÚJÏLØÛÛ[YNßBYÛÙOOOIÌ	É[OOIÑSÑPÉÉ[[]Y\Ê^ØXZÎßBY[[]Y\ÉÛÙOOOIÌ	Ê^ÂY[OOIÓSIÊ^ÂO\\ÙS[J[\ËJÌ[]Y\ÊNÂH[ÙHY[OOIÓÔÓSSIÊ^ÂO\\ÙSÔÛJ[\ËJÌ[]Y\ÊNÂH[ÙHY[OOIÔÓSSIÊ^ÂO\\ÙTÛJ[\ËJÌ[]Y\ÊNÂH[ÙHÈJÏLÈBH[ÙHÈJÏLÈBB]\[]Y\ÎÂB[Ý[Û\ÙS[J[\ËKÝ]
+^Â\LLLOLLOLÂÚ[JO[\Ë[Ý
+^Â\ÛÙO[[\ÖÚWOÛ[\ÖÚWK[J
+NÉÎÂ\[[[\ÖÚJÌWOÜ\ÙQØ]
+[\ÖÚJÌWJNÂYÛÙOOOIÌ	Ê^ØXZÎßBYÛÙOOOIÌL	Ê^][È[ÙHYÛÙOOOIÌ	Ê^L][Â[ÙHYÛÙOOOIÌLIÊ^O][È[ÙHYÛÙOOOIÌIÊ^LO][ÂJÏLÂBYX]XÊK^
+OX]XÊLK^L
+O
+^ÂÝ]\Ú
+Ý\NÓSIËÛÛÜÎÞÞNLKÞKNL_W_JNÂB]\NÂB[Ý[Û\ÙSÔÛJ[\ËKÝ]
+^Â\ÛÛÜÏV×NÂ\Þ[[ÞO[[ÛÜÙYY[ÙNÂÚ[JO[\Ë[Ý
+^Â\ÛÙO[[\ÖÚWOÛ[\ÖÚWK[J
+NÉÎÂ\[[[\ÖÚJÌWOÛ[\ÖÚJÌWK[J
+NÉÎÂYÛÙOOOIÌ	Ê^ØXZÎßBYÛÙOOOIÍÌ	ÊXÛÜÙYJ
+\ÙR[
+[
+IJOOOLJNÈËÈÛÜÙY]YÛÙOOOIÌL	Ê^ÚYÞOO[[	ÞHOO[[
+XÛÛÜË\Ú
+ÞÞNÞ_JNØÞ\\ÙQØ]
+[
+NßBYÛÙOOOIÌ	ÊXÞO\\ÙQØ]
+[
+NÂJÏLÂBYÞOO[[	ÞHOO[[
+XÛÛÜË\Ú
+ÞÞNÞ_JNÂYÛÜÙY	ÛÛÜË[Ý
+XÛÛÜË\Ú
+ÛÛÜÖÌJNÈËÈÙ\\YÛÛÜË[ÝL[Ý]\Ú
+Ý\NÓÔÓSSIËÛÛÜÎÛÛÜËÛÜÙYÛÜÙYJNÂ]\NÂB[Ý[Û\ÙTÛJ[\ËKÝ]
+^ÂËÈÓSSKÕTVÛ\ÜX]\ÛÛÜÏV×NÂÚ[JO[\Ë[Ý
+^Â\ÛÙO[[\ÖÚWOÛ[\ÖÚWK[J
+NÉÎÂ\[[[\ÖÚJÌWOÛ[\ÖÚJÌWK[J
+NÉÎÂYÛÙOOOIÌ	É[OOIÔÑTQS	Ê^ÚJÏLØXZÎßBYÛÙOOOIÌ	É[OOIÕTV	Ê^Â\LOLÂJÏLÂÚ[JO[\Ë[Ý
+^Â\Ï[[\ÖÚWOÛ[\ÖÚWK[J
+NÉÎÂ\[[\ÖÚJÌWOÛ[\ÖÚJÌWK[J
+NÉÎÂYÏOOIÌ	ÊXXZÎÂYÏOOIÌL	Ê]\\ÙQØ]
+NÂYÏOOIÌ	Ê]O\\ÙQØ]
+NÂJÏLÂBÛÛÜË\Ú
+ÞN_JNÂH[ÙHÈJÏLÈBBYÛÛÜË[ÝL[Ý]\Ú
+Ý\NÔÓSSIËÛÛÜÎÛÛÜßJNÂ]\NÂBÊ8¥ 8¥ Ø[Ý[HÛÚ]YH[H[YY[[YY\ÈÐQ8¥ 8¥ 
+Â[Ý[ÛÛÑ[YY
+[
+^Â\Ý[OLÂÜ\OLNÚO[ÛÛÜË[ÝÚJÊÊ^Â\Y[ÛÛÜÖÚWKY[ÛÛÜÖÚKLWKÂ\OY[ÛÛÜÖÚWKKY[ÛÛÜÖÚKLWKNÂÝ[JÏSX]Ü\
+
+
+ÙJJNÂB]\Ý[NÂBÊ8¥ 8¥ Ù[ÜY\[ÚXH[YY\ÈÐQHÛÛÜ[Y\È]ÛÈ8¥ 8¥ 
+Â[Ý[ÛÙ[ÜY\\ÐQ
+]Ñ[ËÞ
+^Â\Z[R[[]KX^KR[[]KZ[OR[[]KX^OKR[[]NÂ]Ñ[ËÜXXÚ
+[Ý[ÛJ^ÂKÛÛÜËÜXXÚ
+[Ý[ÛÊ^ÂYËZ[
+[Z[XËÈYËX^
+[X^XËÂYËOZ[J[Z[OXËNÈYËOX^J[X^OXËNÂJNÂJNÂ\Ö[X^[Z[KÖO[X^K[Z[_NÂ\ÓÏXÞX^ËXÞZ[ËÓ]XÞX^]XÞZ[]Â]\]Ñ[ËX\
+[Ý[ÛJ^Â]\Â\NK\KÛÜÙYKÛÜÙYÛÛÜÎKÛÛÜËX\
+[Ý[ÛÊ^Â]\ÂÞZ[]
+ÊËK[Z[JKÜÖJÓ]ÞZ[ÊÊË[Z[
+KÜÖ
+ÓÂNÂJBNÂJNÂBÊ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥dpäÑSÈSSÔÎÓTÒQPÐPÒpäÓHTÑpäSÂ8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d8¥d
+Â\SS×ÐÓÓÔÏVÉÈÙMLÎLÍIË	ÈÙN	Ë	ÈÌÎË	ÈÍYYIË	ÈÙ
+	Ë	ÈÙL
+×NÂ\SS×ÓSQTÈVÉÐ[[ÈIË	Ð[[ÈË	Ð[[ÈÉË	Ð[[È
+	Ë	Ð[[È
+IË	Ð[[È
+×NÂ[Ý[Û\ÙpìX\[[ÜÐÐQ
+ØYÙ[ËX\Þ
+^Â\[[ÜÏ\\ÙR[
+ØÝ[Y[Ù][[Y[RY
+	ÜÙ[X[[ÜÉÊK[YJ_ÎÂËÈKØ[Ý[\ÛÚ]YHØYH[YYÙ[ÜY\[ÚXYB\[ÏXØYÙ[ËX\
+[Ý[ÛJ^Â\[LÂÜ\OLNÚOKÛÛÜË[ÝÚJÊÊ^Â\]YKÛÛÜÖÚWVÌKYKÛÛÜÖÚKLWVÌNÂ\ÏYKÛÛÜÖÚWVÌWKYKÛÛÜÖÚKLWVÌWNÂ[ÏSX]Ü\
+]
+]
+ÙÊÊNÂB]\ÙNK[[NÂJKÛÜ
+[Ý[ÛK^Ü]\[XK[ßJNÈËÈÜ[\HX^[ÜHY[Ü\Ý[Y[Ë[ÝÂYÝ[OOL
+\]\ÂËÈÛ\ÚYXØ\ÛØ[
+ÜL	JK[[ÜÈ
+ÚYÝZY[H	H[Ü\ÜÊK\ÝXXÚpìÛ
+\ÝÊB\[ÏSX]X^
+KX]Ý[
+Ý[
+L
+JNÂ\\ÝSX]X^
+KX]Ý[
+Ý[
+Ì
+JNÂ\[[ÜÑ[]Ý[[[Ë[\ÝÂ\[Ñ[ÈY[ËÛXÙJ[ÊNÂ\[[ÜÑ[ÏY[ËÛXÙJ[Ë[ÊÛ[[ÜÑ[
+NÂ\\Ý[ÈY[ËÛXÙJ[ÊÛ[[ÜÑ[
+NÂËÈËXZ\\ÝXXÚpìÛ
+\H[ÊB\Ý[ËÜXXÚ
+[Ý[Û]
+^ÂÛ[[J]KÛÛÜËØÛÛÜÈÍYYIËÙZYÚKÜXÚ]NK\Ú\^NÍÉßJKYÊX\
+NÂJNÂËÈ
+]Y\[[ÜÑ[È[Ü\ÜÈHXZ\ØYH[ÈÛÛÝHÛÛÜ\ÜÚ^OSX]X^
+KX]ÙZ[
+[[ÜÑ[Ë[ÝÛ[[ÜÊJNÂ\[[Ò[ÏV×NÂÜ\OLØO[[ÜÎØJÊÊ^Â\Ü\ÏX[[ÜÑ[ËÛXÙJJÜÚ^K
+JÌJJÜÚ^JNÂYÜ\Ë[ÝOOL
+XÛÛ[YNÂ\ÛÛPSS×ÐÓÓÔÖØIPSS×ÐÓÓÔË[ÝNÂ\ÛXOPSS×ÓSQTÖØWNÂÜ\ËÜXXÚ
+[Ý[Û]
+^ÂÛ[[J]KÛÛÜËØÛÛÜÛÛÙZYÚKÜXÚ]NJKYÊX\
+B[Ü\
+	ÏÝ[OHÛÛÜÊØÛÛ
+ÉÈÊÛÛXJÉÏØX]\X[	ÊÜX]
+ÉÏ\ÚpìÛ	ÊÜ\ÊNÂJNÂ[[Ò[Ë\Ú
+ÛÛXNÛXKÛÛÜÛÛÙYÛY[ÜÎÜ\Ë[ÝJNÂBËÈ
+KXZ\ÛØ[
+[ÛËÙÜY\ÛÊB[Ñ[ËÜXXÚ
+[Ý[Û]
+^ÂÛ[[J]KÛÛÜËØÛÛÜÈÙËÙZYÚÜXÚ]NLJKYÊX\
+B[Ü\
+	ÏYÛØ[ÓØ	ÊÜÝ
+ÉÈ[H0­È	ÊÜX]
+NÂJNÂËÈ
+Û][[\Î[ÜÈ^[[ÜËÚ[\ÙXØÚ[Û\ÈHØYH[[ÈÛÛ[ÛØ[\XÛÛY[Ý[ÛÛÛÜ^Â]\]XÛÛØÛ\ÜÓ[YNÉË[	Ï]Ý[OHÚYMÚZYÚMØXÚÙÜÝ[ÊØÛÛÜÉÎÝ[ÙÜNÝ]J
+
+YYÊNÉÂ
+ÉØÜ\ÛÛYÙØÞ\ÚYÝÎØJMKMKMKNÈÙ]ËXÛÛÚ^NÌMMKXÛÛ[ÚÜÍË
+×BJNÂNÂ\ÛÝ[LÂÜ\OLØO[[ÜÎØJÊÊ^Â\Ü\ÌX[[ÜÑ[ËÛXÙJJÜÚ^K
+JÌJJÜÚ^JNÂYÜ\Ì[ÝOOL
+XÛÛ[YNÂ\ÛÛPSS×ÐÓÓÔÖØIPSS×ÐÓÓÔË[ÝNÂËÈÛÛØØ\Û][[H[[[XÚ[È[[Y\ÙYÛY[ÈHØYH[[Â\[Y\ÙYÏYÜ\ÌÌKKÛÛÜÎÂ\\[Y\ÙYÖÌNÂX\Ù\ÚXÛÛXÛÛÛÛ_JB[Ü\
+	Ï¼'å-ÈÛ][[H8 %	ÊÐSS×ÓSQTÖØWJÉÏØ[ÈHÙXØÚ[Û[ZY[ÈH[[Ï\ÚpìÛ	ÊÜ\ÊÉÏÛÛ^pìÛ	ÊÜÜÊÉÈ[IÊBYÊX\
+NÂÛÝ[
+ÊÎÂËÈÛ][[H[[0î[[ÈÙYÛY[È[Xpê[\[[[ÔÙYÏYÜ\ÌÙÜ\Ì[ÝLWKKÛÛÜÎÂ\][[[ÔÙYÖÝ[[[ÔÙYË[ÝLWNÂX\Ù\ÚXÛÛXÛÛÛÛ_JB[Ü\
+	Ï¼'å-ÈÛ][[H8 %	ÊÐSS×ÓSQTÖØWJÉÏØ[ÈHÚY\HH[[ÉÊBYÊX\
+NÂÛÝ[
+ÊÎÂBËÈ
+Ë\ÝXÚpìÛÓ\Ü]Z[H^\[Ü[Þ\]XÞZ[]JÞX^]XÞZ[]
+JNÂ\ÏXÞZ[ËJÞX^ËXÞZ[ÊJNÂËÈÛÛXÝ\[[XÚ[ÈHHÛØ[Y[Ñ[Ë[Ý
+^Â\Ý\][Ñ[ÖÌKKÛÛÜÖÌNÂÛ[[JÖÜ]×KÝ\KØÛÛÜÈÙËÙZYÚË\Ú\^NÌL
+ËÜXÚ]NÍ_JKYÊX\
+NÂB\ÝXÛÛS]XÛÛØÛ\ÜÓ[YNÉË[	Ï]Ý[OHÚYÚZYÚØXÚÙÜÝ[Ù
+ØÜ\\ÛÛYÙØÜ\\Y]\ÎL	NÉÂ
+ÉÙ\Ü^N^Ø[YÛZ][\ÎÙ[\Ú\ÝYKXÛÛ[Ù[\ÙÛ\Ú^NMÉÂ
+ÉØÞ\ÚYÝÎMØJMKMMJNÈ¸«dÙ]ËXÛÛÚ^NÌKXÛÛ[ÚÜÌMMBJNÂX\Ù\Ü]×KÚXÛÛÝXÛÛJB[Ü\
+	Ï¸«d\ÝXÚpìÛH[XXÙ[[ZY[ÈÓØÊÜÜJÉÈ[]YJÊOØ]Y[	ÊÙ]
+WÜKJJÉÈp¬ËÚËÝOØ\XÚYYÝ[	ÊÙ]
+WÝÝJJÉÈp¬ËÚ	ÊBYÊX\
+NÂËÈÞHÛØ\\BÛYÛÛÖØÞZ[]ÞZ[×KØÞZ[]ÞX^×KØÞX^]ÞX^×KØÞX^]ÞZ[×WKØÛÛÜÜØJL
+ÍËMKJIËÙZYÚKK[ÛÛÜÜØJL
+ÍËMKIË\Ú\^NÎ
+	ßJKYÊX\
+NÂËÈK^Y[\Â\^Y[OSÛÛÛ
+ÜÜÚ][ÛØÝÛ[Y	ßJNÂ^Y[KÛYY[Ý[Û
+^Â\]SÛU][ÜX]J	Ù]Ë	ÜØ][YÙ[	ÊNÂ\[IÏ]Û\ÜÏHØ][YÙ[]]HVQSHQÓ0­ÈTÑpäSÈÐQÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÙÚZYÚÜÈÙ]ÛØ[[Ú\[Ù]ÎÂÜ\OLØO[[Ò[Ë[ÝØJÊÊ^Â[
+ÏIÏ]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÊØ[[Ò[ÖØWKÛÛÜÉÎÚZYÚÈÙ]ÊØ[[Ò[ÖØWKÛXJÉÈ
+	ÊØ[[Ò[ÖØWKÙYÛY[ÜÊÉÈÙYËOÙ]ÎÂB[
+ÏIÏ]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÍYYNÚZYÚK\ØÜ\\Ý[N\ÚYÈÙ]YH\ÝXXÚpìÛÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈ]Ý[OHÚYLÚZYÚLØXÚÙÜÝ[ÙNÝ[ÙÜNÝ]J
+
+YYÊNØÜ\K\ÛÛYÙÙ^\Ú[ÎÈÙ]Û][[OÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YËYÝÝ[OHXÚÙÜÝ[Ù
+ÈÙ]\ÝXÚpìÛÓÙ]Â
+ÉÏ]Ý[OHX\Ú[]ÜÙÛ\Ú^NÜØÛÛÜØJMKJNÙÛY[Z[NÜ]Û[ÛÜÜXÙNÈÐQ0­È	ÊÝÝ[
+ÉÈ[YY\ÏÙ]ÎÂ][\SZ[Â]\]ÂNÂ^Y[KYÊX\
+NÂËÈ[[ÔB\[ÏSÛÛÛ
+ÜÜÚ][ÛÝÜYÚ	ßJNÂ[ËÛYY[Ý[Û
+^Â\]SÛU][ÜX]J	Ù]Ë	ÜØ][YÙ[	ÊNÂ][\SIÏ]Û\ÜÏHØ][YÙ[]]HÊÜËÛXKÕ\\Ø\ÙJ
+JÉÈ0­ÈTÑpäSÈÐQÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJH\ÝX\[ÜÏÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+WÝÝ
+JÉÏØÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHØ]Y[Ý[ÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+WÝÝJJÉÈp¬ËÚØÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJH[[ÜÏÜÜ[Ý[OHÛÛÜÌÎÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÛ[[ÜÊÉÈYØÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHÛ][[\ÏÜÜ[Ý[OHÛÛÜÙNÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÜÛÝ[
+ÉÈYØÙ]Â
+ÉÏ]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHYÝ[ÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+ÝÝJJÉÈÛOØÙ]ÎÂ]\]ÂNÂ[ËYÊX\
+NÂX\[[Y]TÚ^J
+NÂBÚ[ÝËÛØYY[Ý[Û
+^Â[XÚX\R[Ê
+NÂØ\ÜÊ
+NÂNÂÊ8¥d8¥d8¥dÑSPÕÔTÈ8¥d8¥d8¥d
+Â[Ý[ÛØ\ÜÊ
+^Â\ÜÏVË]ÈÙ]
+ÒUQQTËX\
+[Ý[ÛÊ^Ü]\ËÎßJJWKÛÜ
+
+NÂ\Ù[YØÝ[Y[Ù][[Y[RY
+	ÜÙ[YÉÊNÂÜËÜXXÚ
+[Ý[Û
+^Ý\ÏYØÝ[Y[ÜX]Q[[Y[
+	ÛÜ[ÛÊNÛË[YOYÛË^ÛÛ[YÜÙ[\[Ú[
+ÊNßJNÂØ\Ú]YY\Ê	ÉÊNÂB[Ý[Û[\Ú]YY\Ê
+^ÜØ\Ú]YY\ÊØÝ[Y[Ù][[Y[RY
+	ÜÙ[YÉÊK[YJNßB[Ý[ÛØ\Ú]YY\ÊÊ^Â\Ù[YØÝ[Y[Ù][[Y[RY
+	ÜÙ[XÚ]YY	ÊNÂÙ[[\SIÏÜ[Û[YOH¸ %Ù[XØÚ[ÛH][XÚ\[È8 %ÛÜ[ÛÎÂ\\ÝOYÏÐÒUQQTË[\[Ý[ÛÊ^Ü]\ËÏOOYÎßJNÒUQQTËÛXÙJ
+NÂËÈY\\ÙY[^ßNÂ\ÝO[\ÝK[\[Ý[ÛÊ^ÚYÙY[ØËYJ\]\[ÙNÜÙY[ØËYO]YNÜ]\YNßJNÂ\ÝKÛÜ
+[Ý[ÛK^Ü]\KÛXKØØ[PÛÛ\\JÛXJNßJNÂ\ÝKÜXXÚ
+[Ý[ÛÊ^Â\ÏYØÝ[Y[ÜX]Q[[Y[
+	ÛÜ[ÛÊNÛË[YOXËYÂË^ÛÛ[XËÛXJÊÏÉÉÎÈ0­È	ÊØËÊNÂÙ[\[Ú[
+ÊNÂJNÂB[Ý[ÛÛÚ]YYÚ[ÙJ
+^Â\YYØÝ[Y[Ù][[Y[RY
+	ÜÙ[XÚ]YY	ÊK[YNÂ\ÏPÒUQQTË[
+[Ý[Û
+^Ü]\YOOZYßJNÂØÝ[Y[Ù][[Y[RY
+	Ø\ÞIÊK\ØXYHXÎÂ\\ÏYØÝ[Y[Ù][[Y[RY
+	ØÚ]YY\\ÉÊNÂYXÊ^Ü\ËÝ[K\Ü^OIÛÛIÎÜ]\ßB\ËÝ[K\Ü^OIØØÚÉÎÂËÈ]]ËY[ÜXÚ[ZY[Â\[YØÝ[Y[Ù][[Y[RY
+	Ú[XÜXÉÊNÂYZ[[Y_[Ø]]ÊHÚ[[YOXËÜXËÑ^Y
+JNÚ[Ø]]Ï]YNßBØÝ[Y[Ù][[Y[RY
+	Ü\ËXÛÛ[	ÊK[\SBÜ	ÔØXÚpìÛXÝX[	Ë]
+ËÜ
+JIÈXÊJÂÜ	ðà\XH\[H\ÞËË\XWÝ\ÉÈÛp¬ÊJÂÜ	Ô\ËÝ]Y[HÛYY[ÉËËÑ^Y
+JJJÂÜ	ÐÜXÚ[ZY[È\ÝËËÜXËÑ^Y
+JJÉÉH[X[	ÊJÂÜ	Ñ\\[Y[ÉËËÊNÂB[Ý[ÛÜË^Ü]\	Ï]Û\ÜÏHÜ\ÝÈÜ[Û\ÜÏHÜZÙ^HÊÚÊÉÏÜÜ[Ü[Û\ÜÏHÜ][ÊÝÉÏÜÜ[Ù]ÎßBÊ8¥d8¥d8¥dKRSÈ8¥d8¥d8¥d
+Â\ÜTYÂ[Ý[Û[XÚX\R[Ê
+^Â\ÝYØÝ[Y[Ù][[Y[RY
+	ÜKXØ[\ÉÊNÂÝÚY]Ú[ÝË[\ÚYØÝZYÚ]Ú[ÝË[\ZYÚÂ\ÝXÝÙ]ÛÛ^
+	Ì	ÊNÂ\ÛÛÏSX]ÛÜÝÚYÌM
+NÂ\ÜÏP\^JÛÛÊK[
+
+KX\
+[Ý[Û
+^Ü]\
+X][ÛJ
+JÝZYÚÌM
+_ßJNÂ\Ú\ÏIÑÓ0­ÐÒ8 ¡0­Ðø  Ò8 ¢0­Ñ°­ÔLL0­ÐT°­ÓTp­ÒÓp­Óp¬ð­ÑÐTð­ÔQ0­ÕPp­ÐTUPÐp­ÌLÍ
+MÎPPÑQÎÂ[Ý[Û]Ê
+^ÂÝ[Ý[OIÜØJ
+IÎØÝ[XÝ
+ÝÚYÝZYÚ
+NÂÝÛIÌLÜ[ÛÜÜXÙIÎÂÜ\OLÚOÜË[ÝÚJÊÊ^Â\ÚXÚ\ÖÓX]ÛÜX][ÛJ
+JÚ\Ë[Ý
+WNÂ\ZJMOYÜÖÚWJMÂ\ÙÏ^KØÝZYÚÂÝ[Ý[O\ÙÏBÉÜØJL
+ÍËMK	ÊÊ
+ÜÙÊKÑ^Y
+JÉÊIÂÜØJL
+KMÍ	ÊÊ
+ÙËLJJK
+ÌÍJKÑ^Y
+JÉÊIÎÂÝ[^
+ÚJNÂYOÝZYÚ	X][ÛJ
+OMÍJYÜÖÚWOLÈ[ÙHÜÖÚWJÊÎÂBÜTY\\]Y\Ý[[X][Û[YJ]ÊNÂB]Ê
+NÂÙ][Y[Ý]
+[ÜÝ\[Ë
+NÂB[Ý[Û[ÜÝ\[Ê
+^ÂØ[Ù[[[X][Û[YJÜTYNÂ\OYØÝ[Y[Ù][[Y[RY
+	ÜKZ[ÉÊNÂKÝ[K[Ú][ÛIÛÜXÚ]HÉÎÜKÝ[KÜXÚ]OIÌ	ÎÂÙ][Y[Ý]
+[Ý[Û
+^ÜKÝ[K\Ü^OIÛÛIÎÝ\[YØÝ[Y[Ù][[Y[RY
+	Ú[ÉÊNÚ[Ý[K\Ü^OIÙ^	ÎßK
+
+NÂB[Ý[Û[XÚX\\Ú
+
+^Â\[YØÝ[Y[Ù][[Y[RY
+	Ú[ÉÊNÂ[Ý[K[Ú][ÛIÛÜXÚ]H\ÉÎÚ[Ý[KÜXÚ]OIÌ	ÎÂÙ][Y[Ý]
+[Ý[Û
+^Ú[Ý[K\Ü^OIÛÛIÎÙØÝ[Y[Ù][[Y[RY
+	Ù\ÚØ\	ÊKÝ[K\Ü^OIÙ^	ÎßK
+L
+NÂBÊ8¥d8¥d8¥dðàSÕSÔÈ8¥d8¥d8¥d
+Â[Ý[ÛØ[Ý[\Ë
+^Â\Ü\\ÙR[
+ÜNÂ\ÛØ\\ÙR[
+ÛØKÌLÂ\\Ï\\ÎÂ\[\[Â\ÜXÐ[X[J\ÙQØ]
+ÜXÊ_ËÜXÊKÌLÂ\ÜÙ]SX]Ý[
+ËÜ
+X]ÝÊJØÜXÐ[X[ÜJNÂ\ÜØÛØSX]Ý[
+ÜÙ]
+ÛØNÂ\]Y[\ÏSX]Ý[
+ÜØÛØØËNÂ\Z^^Ü\ÎÛÛN[NÂY\ÏOOIÜ\ÚY[ÚX[	Ê^ÛZ^\ÏL
+NÛZ^ÛÛOLLÛZ^[LÎßB[ÙHY\ÏOOIÛZ^ÉÊ^ÛZ^\ÏLNÛZ^ÛÛOLÛZ^[L
+ÎßB[Ù^ÛZ^\ÏLÌÛZ^ÛÛOLLÛZ^[LNßB\Y[OOIØ[IÏÌ
+N[OOIÛYYXIÏÌKKNÂ\WÜ\ÏSX]Ý[
+]Y[\ÊZ^\Ê
+NÂ\WØÛÛOSX]Ý[
+]Y[\ÊZ^ÛÛJNÂ\WÚ[SX]Ý[
+]Y[\ÊZ^[
+MJNÂ\WÝÝ]WÜ\ÊÝWØÛÛJÝWÚ[ÂËÈØ]Y[\Èp¬ËÚÓ
+Ü[ÊB\WÜ\Ï]WÜ\Ê
+ÍJNÂ\WØÛÛO]WØÛÛJÍJÍNÂ\WÚ[]WÚ[
+JMNÂ\WÝÝTWÜ\ÊÔWØÛÛJÔWÚ[Â\WÚÙÚTWÝÝ
+KMÎÈËÈKMÈÙËÛp¬ÈÜ[ÂËÈ0à\XHÛØ\\B\\XWØÛØXË\XWÝ\ÛØÂ\YÏSX]Ü\
+\XWØÛØNÂËÈÛÚ]Y\ÈY
+ÛJB\Ý[Ï[YÊ
+KÂ\ÜÏY[OOIØ[IÏÌN[OOIÛYYXIÏÌÂ\ÜÙXÏJ\XWØÛØÜÜÊJKNÂ\OY[OOIØ[IÏÌL[OOIÛYYXIÏÌNÂ\Ù\Ý]WÝÝ
+NÂ\ÝÝSÝ[ÊÓÜÙXÊÓÙ\ÝÂËÈpè[Y]ÜÈÛZ[[\Â\ÝTWÝÝÌLWÝÝLÌWÝÝLÌMLWÝÝÌLÂ\ÜÏTWÝÝLÍÎWÝÝÍLÂ\ÙLÌÂËÈ[[Y[ÜÂ\ÜOSX]X^
+KX]ÙZ[
+WÝÝÍL
+JNÂ\Ù\OSX]ÙZ[
+WÝÝÌL
+NÂ\Ý[SX]ÙZ[
+Ý[ËÌJJÓX]ÙZ[
+ÜÙXËÌK
+NÂ\ØXÛÏ]WÝÝÂËÈØ[YY\ÈX]\X[
+JB\WÝSX]Ý[
+Ý[ÊL
+NÂ\WÜÏSX]Ý[
+ÜÙXÊL
+NÂ\WÙSX]Ý[
+Ù\Ý
+L
+NÂËÈ[\ÚpìÛ
+ÓÔZ[Û\ÊB\WÝØÛÜ\X]OOIØXÙ\ÉÏÎ
+LX]OOIÔLL	ÏÌÂ\WÜ×ØÛÜ\X]OOIØXÙ\ÉÏÍNÂ\WÙØÛÜNMLÂ\WÜYJWÝ
+WÝØÛÜ
+ÛWÜÊWÜ×ØÛÜ
+ÛWÙ
+WÙØÛÜ
+KÌYMÂ\WÜOJÜJWÝÝLÌLL
+JKÌYMÂ\WÙ\OJÙ\JN
+KÌYMÂ\WÝ[JÝ[
+
+L
+KÌYMÂ\WØXÛÏJØXÛÊL
+KÌYMÂ\WÜÝXRWÜY
+ÒWÜJÒWÙ\JÒWÝ[
+ÒWØXÛÎÂ\WÚ[ÏRWÜÝXNÂ\WÝÝRWÜÝXÒWÚ[ÎÂËÈ\ÚpìÛX\\\Ú[ÛÝ\\ÏOOIØZIÏÉÏ
+LX\Î\ÏOOIÛYYXIÏÉÍL8 $È
+X\ÎÏ
+X\ÎÂ]\ÂÎËÜØXÝËÜÜÙ]ÜÙ]ÜØÛØÜØÛØ]Y[\Î]Y[\ËWÜ\ÎWÜ\ËWØÛÛNWØÛÛKWÚ[WÚ[WÝÝWÝÝWÝÝWÝÝWÚÙÚWÚÙÚWÜ\ÎWÜ\ËWØÛÛNWØÛÛKWÚ[WÚ[ÜNÜKWÜNWÝÝÛÜJKÙ\NÙ\KÝ[Ý[ØXÛÎØXÛË\XWØÛØ\XWØÛØÝ[ÎÝ[ËÜÙXÎÜÙXËÙ\ÝÙ\ÝÝÝÝÝÝÝÜÎÜËÙÙWÝWÝWÜÎWÜËWÙWÙWÜYWÜYWÜNWÜKWÙ\NWÙ\KWÝ[WÝ[WØXÛÎWØXÛËWÚ[ÎWÚ[ËWÝÝWÝÝ\Ú[ÛÝ\Ú[ÛÝNÂBÊ8¥d8¥d8¥dÑSTT8¥d8¥d8¥d
+Â[Ý[ÛÙ[\\ÞYXØÚ[Û
+^Â\YYØÝ[Y[Ù][[Y[RY
+	ÜÙ[XÚ]YY	ÊK[YNÂ\ÏPÒUQQTË[
+[Ý[Û
+^Ü]\YOOZYßJNÂYXÊ\]\Â\\[\Ï^Â\ÎØÝ[Y[Ù][[Y[RY
+	ÜÙ[]\ÉÊK[YKÛØØÝ[Y[Ù][[Y[RY
+	ÜËXÛØÊK[YKÜØÝ[Y[Ù][[Y[RY
+	ÜÙ[ZÜÊK[YK\ÎØÝ[Y[Ù][[Y[RY
+	ÜÙ[\\ÉÊK[YKX]ØÝ[Y[Ù][[Y[RY
+	ÜÙ[[X]	ÊK[YK[ØÝ[Y[Ù][[Y[RY
+	ÜÙ[Y[ÊK[YKÜXÎØÝ[Y[Ù][[Y[RY
+	Ú[XÜXÉÊK[Y_ËÜXËNÂØÝ[Y[Ù][[Y[RY
+	ÜÞK[ØY	ÊKÝ[K\Ü^OIÙ^	ÎÂØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ØØ[\Ë\	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÛYÙ[XÞ	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÜØØ[KXÞ	ÊKÝ[K\Ü^OIÛÛIÎÂÙ][Y[Ý]
+[Ý[Û
+^ÂÜÞOXØ[Ý[\Ë\[\ÊNÂXZ\X\JÜÞJNÂ[ÜÝ\\ÜJÜÞJNÂØÝ[Y[Ù][[Y[RY
+	ÜÞK[ØY	ÊKÝ[K\Ü^OIÛÛIÎÂËÈ[ÜÝ\ÙÙÛB\ÙÏYØÝ[Y[Ù][[Y[RY
+	Ý\ÝK]ÙÙÛIÊNÂÙËÝ[K\Ü^OIÙ^	ÎÂËÈ[ÜÝ\\ÝHXÝ]BYÝ\ÝS[ÙOOOIÙ\Ü]Y[XIÊ^ÂØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÛYÙ[XÞ	ÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÜØØ[KXÞ	ÊKÝ[K\Ü^OIØØÚÉÎÂH[ÙHÂØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÛYÙ[XÞ	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÜØØ[KXÞ	ÊKÝ[K\Ü^OIÛÛIÎÂÙ][Y[Ý]
+[Ý[Û
+^ÙXZ\Ø][][
+ÜÞJNßKML
+NÂBÉØ^	Ë	Ø\Ë	ØZÉ×KÜXXÚ
+[Ý[ÛY
+^ÙØÝ[Y[Ù][[Y[RY
+Y
+K\ØXYY[ÙNßJNÂKL
+NÂBÊ8¥d8¥d8¥dPRÈPTH8¥d8¥d8¥d
+Â[Ý[ÛXZ\X\J^Â\Ü\YØÝ[Y[Ù][[Y[RY
+	ØØ[\Ë]Ü\	ÊNÂ\Ï]Ü\ÛY[ÚYLÌ]Ü\ÛY[ZYÚLÌÂ\ÝYØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊNÂÝÚYUÎØÝZYÚRÂ\ÝXÝÙ]ÛÛ^
+	Ì	ÊNÂËÈÛÂÝ[Ý[OIÈÌÌYIÎØÝ[XÝ
+Ë
+NÂËÈY[\0è\XHHX\HÛÛX\Ù[\^M^OL]ÏUË[^LMZR[^KLÂËÈ\ØØ[H\ÝX[\Y×ÚÛOSX]Ü\
+\XWØÛØNÂ\ÚÛOSX]Z[]ËZ
+KÊY×ÚÛJKNÂ\X\ÝÏSX]Z[]ËY×ÚÛJKÚÛJNÂ\X\Ú[X\ÝÎÈËÈÝXYYÂ\Þ[^
+Ê]Ë[X\ÝÊKÌÞO[^JÊZ[X\Ú
+KÌÂËÈÜHÛH\[BÝ[Ý[OIÜØJN
+MJIÎÂÝ[XÝ
+ÝÞÞKX\ÝËX\Ú
+KYK[ÙJNÂÝÝÚÙTÝ[OIÜØJL
+ÍËMKÍJIÎØÝ[UÚYLKNÂÝ[XÝ
+ÝÞÞKX\ÝËX\Ú
+K[ÙKYJNÂËÈÝXY°ëXÝ[B\[\[Â\Y[OOIØ[IÏÌM[OOIÛYYXIÏÌÎÂ\]Y[OOIØ[IÏÍÎÂ\ÏSX]ÛÜX\ÝËØ
+KSX]ÛÜX\ÚØ
+NÂ\Ï[X\ÝËÛË[X\ÚÛÂËÈX[[\È[[\ÂÜ\OLÚOÎÚJÊÊYÜ\LÚÚÊÊ^ÂYX][ÛJ
+OM
+^ÂÝ[Ý[OIÜØJL
+
+
+JIÎÂÝ[XÝ
+Þ
+ÚJÊÌKKÞJÚ
+ÌKKËLËLÊNÂY[Ù^ÂËÈ\]YBÝ[Ý[OIÜØJ
+
+IÎÂÝ[XÝ
+Þ
+ÚJÊÌKKÞJÚ
+ÌKKËLËLÊNÂBBËÈØ[\ÂÜ\OLÚO[ÎÚJÊÊ^Â\[Þ
+ÚJË\Ð]JIX]OOL
+NÂÝÝÚÙTÝ[OY\Ð]ÉÜØJ
+
+K
+ÍKJIÎÜØJM
+LÍJIÎÂÝ[UÚYY\Ð]ÌKNÂ[JÝÞKÞJÛX\Ú
+NÂBÜ\LÚ[ÚÊÊ^Â\O[ÞJÚ\Ð]JX]OOL
+NÂÝÝÚÙTÝ[OY\Ð]ÉÜØJ
+
+K
+ÍKJIÎÜØJM
+LÍJIÎÂÝ[UÚYY\Ð]ÌKNÂ[JÝÞKÞ
+ÛX\ÝËJNÂBËÈ][Y\È[Ú\[\Â\]V×K]V×NÂÜ\OLÚO[ÚJÏX]X]\Ú
+ÞJÚJ
+NÂÜ\OLÚO[ÎÚJÏX]X]\Ú
+Þ
+ÚJÊNÂËÈZHÛØ[
+ÜXÙHÙ[[
+B\X]ÓX]ÛÜ][ÝÌW_]ÌNÂ\X]ÓX]ÛÜ][ÝÌW_]ÌNÂËÈÛÝÈ[\[Ý[ÛÛÝÓ[JÛÛÜ\ËKLKL^ÂÝØ]J
+NØÝÚYÝÐÛÛÜXÛÛÜØÝÚYÝÐ\X\ÂÝÝÚÙTÝ[OXÛÛÜØÝ[UÚY[ÎØÝÙ][Q\Ú
+×JNÂ[JÝKLKLNØÝ\ÝÜJ
+NÂBËÈYÛØ[ÛÝÓ[J	ÈÙMLÎLÍIËLËKÞÞ
+ÛX\ÝË
+NÂÛÝÓ[J	ÈÙMLÎLÍIËLËKÞKÞJÛX\Ú
+NÂËÈÛÛ^pìÛ\ÙH^\[Ü
+[JBÝØ]J
+NØÝÝÚÙTÝ[OIÈÙMLÎLÍIÎØÝ[UÚYLNØÝÙ][Q\Ú
+ÍË
+JNØÝÚYÝÐÛÛÜIÈÙMLÎLÍIÎØÝÚYÝÐ\MÂ[JÝÞ[^
+ÍÞ
+NØÝ\ÝÜJ
+NÂËÈYÙXÝ[\XH
+Ý\È][Y\ÊB]ÜXXÚ
+[Ý[ÛKJ^ÂYOOOSX]ÛÜ][ÝÌJ\]\ÂÛÝÓ[J	ÈÙN	Ë
+KÞKÞ
+ÛX\ÝËJNÂJNÂ]ÜXXÚ
+[Ý[ÛJ^ÂYOOOSX]ÛÜ][ÝÌJ\]\ÂÛÝÓ[J	ÈÙN	Ë
+KÞKÞJÛX\Ú
+NÂJNÂËÈY\ÝXXÚpìÛ
+Ø[\È\Ý[\ÊBÝØ]J
+NØÝÝÚÙTÝ[OIÜØJL
+KMÍJIÎØÝ[UÚYLNØÝÚYÝÐÛÛÜIÜØJL
+KMÍJIÎØÝÚYÝÐ\LÎÂÜ\OLÚO[ÚJÊÊ^ÚYIX]OOL
+XÛÛ[YNÝ\O[ÞJÚJÛ[JÝÞKÞ
+ÛX\ÝËJNßBÜ\OLÚO[ÎÚJÊÊ^ÚYIX]OOL
+XÛÛ[YNÝ\[Þ
+ÚJÎÛ[JÝÞKÞJÛX\Ú
+NßBÝ\ÝÜJ
+NÂËÈ[H
+\Ý[H[X\[K^\[Ü^]ZY\JB]ÔÝ\ÝÞLÞJÌL
+JNÂÝ[Ý[OIÈÙ
+	ÎØÝ[
+
+NÂÝÝÚÙTÝ[OIÜØJMKMKMK
+IÎØÝ[UÚYLKØÝÝÚÙJ
+NÂÝ[Ý[OIÜØJMKMÊIÎØÝÛIØÛ
+ÜØ[Ë\Ù\YÎØÝ^[YÛIØÙ[\ÎÂÝ[^
+	Ô	ËÞLÞJÌÍJNÂËÈT\È
+ðë\Ý[ÜÈ0î\JB\\TÏV×NÂ]ÜXXÚ
+[Ý[ÛJ^Ø]ÜXXÚ
+[Ý[Û
+^Ù\TË\Ú
+ÞN_JNßJNßJNÂ\Ý\SX]X^
+KX]ÛÜ\TË[ÝÜÙ\JJNÂ\ÛLÂ\TËÜXXÚ
+[Ý[ÛJ^ÂYI\Ý\OOL	ÛÙ\J^ÂÝØ]J
+NØÝÚYÝÐÛÛÜIÜØJL
+ÍËMK
+IÎØÝÚYÝÐ\NÂÝYÚ[]
+
+NØÝ\ÊK
+KX]JNÂÝ[Ý[OIÜØJL
+ÍËMKMJIÎØÝ[
+
+NÂÝÝÚÙTÝ[OIÜØJMKMKMK
+JIÎØÝ[UÚYLKØÝÝÚÙJ
+NÂÝ\ÝÜJ
+NÂÝ[Ý[OIÈÙÎØÝÛIØÛ
+\Ø[Ë\Ù\YÎØÝ^[YÛIØÙ[\ÎØÝ^\Ù[[OIÛZYIÎÂÝ[^
+	ÔËJNÂÛ
+ÊÎÂBJNÂËÈ°è[[\È
+ÝXYYÜÈÞX[B\[ÏV×NÂ]ÜXXÚ
+[Ý[ÛKJ^ÂÜ\OLÝO][ÝLNÝJÏL][Ë\Ú
+Þ]ÝWJÊ]ÝJÌW_]ÝWJØÊ]JKÌN_JNÂJNÂ\Ý\SX]X^
+KX]ÛÜ[Ë[ÝÓX]Z[Ý[[Ë[Ý
+JJNÂ[ËÜXXÚ
+[Ý[ÛJ^ÂYI]Ý\OOL
+^ÂÝØ]J
+NØÝÚYÝÐÛÛÜIÜØJMKIÎØÝÚYÝÐ\MNÂÝ[Ý[OIÈÌÎÎØÝ[XÝ
+MKM
+NÂÝ\ÝÜJ
+NÂBJNÂËÈ0ë][È[X\BÝ[Ý[OIÜØJL
+ÍËMKJIÎØÝÛHÛ\	ÓÜ]ÛË[ÛÜÜXÙHÂÝ^[YÛIÛY	ÎØÝ^\Ù[[OIÝÜ	ÎÂÝ[^
+	ÔQÓÖQPÕQH8 %	ÊÜËÛXKÕ\\Ø\ÙJ
+JÉË	ÊÜËËÕ\\Ø\ÙJ
+KÞÞKL
+NÂËÈ\ØØ[B\WÜ\ÜJY×ÚÛJL
+KÛX\ÝÎÈËÈY]ÜÈÜ^[ØÝ[Y[Ù][[Y[RY
+	ÜØØ[K]	ÊK[\SB	ÌH8¢b	ÊÛWÜ\ÜÑ^Y
+
+JÉÈO°à\XN	ÊÜ\XWØÛØÑ^Y
+JJÉÈÛp¬ÎÂB[Ý[ÛÝ[XÝ
+ÝKË[ÝÚÙJ^ÂÝYÚ[]
+
+NØÝ[ÝUÊ
+ÜJNØÝ[UÊ
+ÝË\JNÂÝ]XY]XÐÝ\UÊ
+ÝËK
+ÝËJÜNØÝ[UÊ
+ÝËJÚ\NÂÝ]XY]XÐÝ\UÊ
+ÝËJÚ
+ÝË\JÚ
+NØÝ[UÊ
+ÜJÚ
+NÂÝ]XY]XÐÝ\UÊJÚJÚ\NØÝ[UÊJÜNÂÝ]XY]XÐÝ\UÊK
+ÜJNØÝÛÜÙT]
+
+NÂY[
+XÝ[
+
+NÚYÝÚÙJXÝÝÚÙJ
+NÂB[Ý[Û[JÝKLKL^ØÝYÚ[]
+
+NØÝ[ÝUÊKLJNØÝ[UÊLNØÝÝÚÙJ
+NßB[Ý[Û]ÔÝ\ÝÞÞKÊ^Â\Ý\SX]KÜÎØÝYÚ[]
+
+NÂÜ\OLÚOÊÚJÊÊ^Â\OZILOOLÜÂ\OZJÝ\SX]KÌÂYOOOL
+XÝ[ÝUÊÞ
+ÜJX]ÛÜÊJKÞJÜJX]Ú[JJNÂ[ÙHÝ[UÊÞ
+ÜJX]ÛÜÊJKÞJÜJX]Ú[JJNÂXÝÛÜÙT]
+
+NÂBÊ8¥d8¥d8¥dTÔH8¥d8¥d8¥d
+Â[Ý[Û]
+
+^ÚYO[[\ÓSJ\]\	ø %	ÎÜ]\ÓØØ[TÝ[Ê	Ù\ËPÓÉËÛX^[][QXÝ[ÛYÚ]ÎJNßB[Ý[Û]J^Ü]\	ÐÓÔ		ÊÙ]
+
+JÉÈIÎßB[Ý[Û[ÜÝ\\ÜJ^ÂØÝ[Y[Ù][[Y[RY
+	ÜY[\IÊKÝ[K\Ü^OIÛÛIÎÂ\Ï\Ë[IÉÎÂËÈY[YXØXÚpìÛ[
+Ï\ÙXÊ	ü'äãHÖQPÕÉËÂÊ	Ó][XÚ\[ÉËËÛXJÉË	ÊØËÊKÊ	Õ\È0è\XIË\ËÚ\]
+
+KÕ\\Ø\ÙJ
+JÜ\ËÛXÙJJJKÊ	ÒÜ^ÛIËÜÉÈpì[ÜÉÊKÊ	Ô\ÚpìÛË\Ú[ÛÝ
+KÊ	ÓX]\X[	ËX]
+KÊ	ÑXÚIË]È]J
+KÓØØ[Q]TÝ[Ê	Ù\ËPÓÉÊJKJNÂËÈÔ\Â[
+ÏIÏ]Û\ÜÏHÈ]Û\ÜÏHË]¸¦¨HSPÐQÔTÈÓUOÙ]]Û\ÜÏHÜKYÜYÎÂ[
+ÏZÜJ]
+WÝÝ
+K	ÉË	Õ\ÝX\[ÜÈÞYXÝYÜÉÊNÂ[
+ÏZÜJ]
+WÝÝJK	Ûp¬ËÚ	Ë	ÐØ]Y[H\Ùpì[ÉÊNÂ[
+ÏZÜJ]
+ÝÝJK	ÚÛIË	ÓÛËÝ[Y	ÊNÂ[
+ÏZÜJ]
+\XWØÛØJK	ÚÛp¬Ë	ðà\XHÛØ\\IÊNÂ[
+ÏIÏÙ]Ù]ÎÂËÈ[[ÙÜY°ëXB[
+Ï\ÙXÊ	ü'äiHSSÑÔQ°ãPIËÂÊ	ÔØXÚpìÛXÝX[	Ë]
+ÜØXÝ
+JÉÈXÊKÊ	ÔØXÚpìÛpì[È
+ÉÊÜÜ]
+ÜÙ]
+JÉÈXÊKÊ	ÐÛØ\\IËÛØÉÉIÊKÊ	ÔØXÚpìÛ[YXÚXYIË]
+ÜØÛØJÉÈXÊKÊ	Õ]Y[\ÉË]
+]Y[\ÊJÉÈ[ÊKJNÂËÈ\ÝX\[ÜÂ[
+Ï\ÙXÊ	ü'ãæTÑÓÔÑHTÕPTSÔÉËÂØÊ	Ù\Ý	Ë	Ô\ÚY[ÚX[	Ë]
+WÜ\ÊJÉÈYËÊKØÊ	ÜÙXÉË	ÐÛÛY\ÚX[	Ë]
+WØÛÛJJÉÈYËÊKØÊ	Ý[ÉË	Ò[\ÝX[	Ë]
+WÚ[
+JÉÈYËÊKÊ	ÕÕS	Ë]
+WÝÝ
+JÉÈYËÊKJNÂËÈ[X[B[
+Ï\ÙXÊ	ü'äªSPSHÓ	ËÂÊ	ÔHÚ[][0è[[È\ÚY[ÚX[	Ë]
+WÜ\ËJJÉÈp¬ËÚ	ÊKÊ	ÔHÚ[][0è[[ÈÛÛY\ÚX[	Ë]
+WØÛÛKJJÉÈp¬ËÚ	ÊKÊ	ÔHÚ[][0è[[È[\ÝX[	Ë]
+WÚ[JJÉÈp¬ËÚ	ÊKÊ	ÐØ]Y[pè^Ý[	Ë]
+WÝÝJJÉÈp¬ËÚ	ÊKÊ	ÐØ]Y[[X\ØIË]
+WÚÙÚJJÉÈÙËÚ	ÊKÊ	Ô[\È\]Y\Y\ÉËÜJÉÈ0­È	ÊÙ]
+WÜKJJÉÈp¬ËÚËÝIÊKJNÂËÈY[
+Ï\ÙXÊ	ü'å*HQHPT°ãPTÉËÂØÊ	Ý[ÉË	ÕÛØ[ÊÜÝ
+ÉÈ[IË]
+Ý[ËJÉÈÛIÊKØÊ	ÜÙXÉË	ÔÙXÝ[\XHÊÜÜÊÉÈ[IË]
+ÜÙXËJÉÈÛIÊKØÊ	Ù\Ý	Ë	Ñ\ÝXXÚpìÛÊÜÙ
+ÉÈ[IË]
+Ù\ÝJÉÈÛIÊKÊ	ÓÛÚ]YÝ[	Ë]
+ÝÝJJÉÈÛIÊKÊ	ÓX]\X[	ËX]
+KÊ	Ô\ÚpìÛ\Ùpì[ÉË\Ú[ÛÝ
+KJNÂËÈ[[Y[ÜÂ\[[ÜÔ\JØØY]ÉØØY]Ë[Ý
+OÜ\ÙR[
+ØÝ[Y[Ù][[Y[RY
+	ÜÙ[X[[ÜÉÊK[Y_ÊNÂ\\[[[ÜÔ\
+Â\ØYÝÜÏVÂÊ	Ô[\È[XXÙ[[ZY[ÉËÜJÉÈY
+ÊKÊKÊ	Ñ\ÝXÚ[Û\ÈTIË]
+Ù\JJÉÈY
+ÊKÊKÊ	Õ°è[[\ÈÙXØÚ[Û[ZY[ÉË]
+Ý[
+JÉÈY
+ÊKÊKNÂY[[ÜÔ\
+^ÂØYÝÜË\Ú
+	Ï]Û\ÜÏH\ÝÈÜ[Û\ÜÏHÈ[[ÜÈH\ÝXXÚpìÛÜÜ[Ü[Û\ÜÏHÝ[OHÛÛÜÌÎÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÛ[[ÜÔ\
+ÉÈ[[ÜÏÜÜ[Ù]ÊNÂØYÝÜË\Ú
+	Ï]Û\ÜÏH\ÝÈÜ[Û\ÜÏHÈÛ][[\ÈH[[ÏÜÜ[Ü[Û\ÜÏHÝ[OHÛÛÜÙNÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÜ\
+ÉÈY
+ÊKÜÜ[Ù]ÊNÂËÈYÙ\ÈH[[ÜÂ\YÙ\ÏIÉÎÂÜ\XOLÚXO[[ÜÔ\ÚXJÊÊ^ØYÙ\ÊÏIÏÜ[Û\ÜÏH[[ËXYÙHIÊÚXJÉÈ¸«)	ÊÐSS×ÓSQTÖÚXWJÉÏÜÜ[ÎßBØYÝÜË\Ú
+	Ï]Ý[OHX\Ú[Ù\Ü^N^Ù^]Ü\Ü\ÈÊØYÙ\ÊÉÏÙ]ÊNÂBØYÝÜË\Ú
+Ê	ÐXÛÛY]Y\ÈÛZXÚ[X\X\ÉË]
+ØXÛÊJÉÈY
+ÊKÊJNÂØYÝÜË\Ú
+Ê	ÓYYYÜ\È
+ÛÛYÜ\ÊIË]
+ØXÛÊJÉÈY
+ÊKÊJNÂ[
+Ï\ÙXÊ	ø¦¦{î#ÈSSQSÔÈHQ	ËØYÝÜÊNÂËÈØ[YY\Â[
+Ï\ÙXÊ	ü'äéÐSQQTÈPUTPS	ËÂØÊ	Ý[ÉË	ÕX\°ëXHÊÜÝ]
+WÝ
+JÉÈIÊKØÊ	ÜÙXÉË	ÕX\°ëXHÊÜÜË]
+WÜÊJÉÈIÊKØÊ	Ù\Ý	Ë	ÕX\°ëXHÊÜÙ]
+WÙ
+JÉÈIÊKÊ	ÕX\°ëXHÝ[	Ë]
+WÝ
+ÜWÜÊÜWÙ
+JÉÈIÊKJNÂËÈ[\ÚpìÛ[
+Ï\ÙXÊ	ü'ä¬STÒpäÓTÕSPQIËÂÊ	ÔYHX\°ëX\ÉË]JWÜY
+JKÊ	Ô[\È[XXÙ[Ë]JWÜJJKÊ	Ñ\ÝXÚ[Û\ÈTIË]JWÙ\JJKÊ	Õ°è[[\ÈHÙXØÚ[Û[ZY[ÉË]JWÝ[
+JK
+ØØY]ÉØØY]Ë[Ý
+OÜÊ	ÔÛ][[\È
+	ÊÜ\
+ÉÈY
+IË]J\
+
+JNÉËÊ	ÐXÛÛY]Y\ÉË]JWØXÛÊJKÊ	Ò[Ë
+ÈÛÛ[Ù[ÚX\È
+N	JIË]JWÚ[ÊJKØÊ	Ú[Ë	ÒSTÒpäÓÕS	Ë]JWÝÝ
+Ê
+ØØY]ÉØØY]Ë[Ý
+OÜ\
+
+JJKÊ	ÐÛÜÝÈÈ\ÝX\[ÉË	ÐÓÔ		ÊÙ]
+
+WÝÝ
+Ê
+ØØY]ÉØØY]Ë[Ý
+OÜ\
+
+JJYMÜWÝÝ
+JÉÈ	ÊKJNÂØÝ[Y[Ù][[Y[RY
+	ÜXÛÛ[	ÊK[\SZ[ÂØÝ[Y[Ù][[Y[RY
+	ÜXÛÛ[	ÊKÝ[K\Ü^OIØØÚÉÎÂB[Ý[ÛÙXÊÝÜÊ^Ü]\	Ï]Û\ÜÏHÈ]Û\ÜÏHË]ÊÝ
+ÉÏÙ]ÊÜÝÜËÚ[	ÉÊJÉÏÙ]ÎßB[Ý[ÛÊË^Ü]\ØÊ	ÉËËNßB[Ý[ÛØÊÛËË^Ü]\	Ï]Û\ÜÏH\ÝÈÜ[Û\ÜÏHÈÊÚÊÉÏÜÜ[Ü[Û\ÜÏH	ÊØÛÊÉÈÊÝÉÏÜÜ[Ù]ÎßB[Ý[ÛÜJK
+^Ü]\	Ï]Û\ÜÏHÜKXØ\]Û\ÜÏHÜK]ÊÝÉÏÙ]ÊÊOÉÏ]Û\ÜÏHÜK]HÊÝJÉÏÙ]ÎÉÊJÉÏ]Û\ÜÏHÜK[ÊÛ
+ÉÏÙ]Ù]ÎßBÊ8¥d8¥d8¥dVÔÈ8¥d8¥d8¥d
+ÂÊ8¥d8¥d8¥dÑÑÓHTÕH8¥d8¥d8¥d
+ÂÚ[ÝËÙÙÛU\ÝOY[Ý[Û[ÙÊ^ÂÝ\ÝS[ÙO[[ÙÎÂ\\ÜPYØÝ[Y[Ù][[Y[RY
+	Ø]Y\ÜIÊNÂ\Ø]YØÝ[Y[Ù][[Y[RY
+	Ø]\Ø]	ÊNÂY[ÙÏOOIÙ\Ü]Y[XIÊ^Â\ÜPÛ\ÜÓ\ÝY
+	ØXÝ]IÊNÈØ]Û\ÜÓ\Ý[[ÝJ	ØXÝ]IÊNÂØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÛYÙ[XÞ	ÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÜØØ[KXÞ	ÊKÝ[K\Ü^OIØØÚÉÎÂH[ÙHÂØ]Û\ÜÓ\ÝY
+	ØXÝ]IÊNÈ\ÜPÛ\ÜÓ\Ý[[ÝJ	ØXÝ]IÊNÂØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊKÝ[K\Ü^OIØØÚÉÎÂØÝ[Y[Ù][[Y[RY
+	ÛYÙ[XÞ	ÊKÝ[K\Ü^OIÛÛIÎÂØÝ[Y[Ù][[Y[RY
+	ÜØØ[KXÞ	ÊKÝ[K\Ü^OIÛÛIÎÂYÜÞJHÙ][Y[Ý]
+[Ý[Û
+^ÙXZ\Ø][][
+ÜÞJNßKL
+NÂBNÂÊ8¥d8¥d8¥dTÕHÐUSUSÓÓUÔÈPSTÈÔÓH8¥d8¥d8¥d
+Â[Ý[ÛØ[ÖÛÛJY×ÚÛJ^ÂYY×ÚÛOJ\]\MÎÈYY×ÚÛOJ\]\MÈYY×ÚÛO\]\MNÂYY×ÚÛO
+\]\MÈYY×ÚÛO
+\]\LÎÈYY×ÚÛOMJ\]\LÂYY×ÚÛOÌ
+\]\LNÈ]\LÂB[Ý[ÛXZ\Ø][][
+^ÂY\Ë]
+^Ø[\
+	ÔÚ[ÛÛÜ[Y\È\H\ÝH][XÚ\[ËÊNÜ]\ßB\]\Ë]Ì\ËÎÂ\Y×ÚÛOSX]Ü\
+\XWØÛØNÂYÛX\
+^×ÛX\[[ÝJ
+N×ÛX\[[ßB\X\]YØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊNÂÛX\SX\
+X\]ØÙ[\Û]ÌKÛÛNØ[ÖÛÛJY×ÚÛJKÛÛPÛÛÛYK]X][ÛÛÛÛY_JNÂËÈ[HØ][][TÔHÛÜ[XYÙ\B[S^Y\	ÚÎËÜÙ\\\ÙÚ\ÛÛ[KÛÛKÐ\ÑÒTËÜ\ÝÜÙ\XÙ\ËÕÛÜÒ[XYÙ\KÓX\Ù\\Ý[KÞÞKÞÞ_KÞÞIËÂ]X][ÛðªH\ÜH0­ÈX^\0­ÈX\Ý\Ù[ÙÜ\XÜÉËX^ÛÛNJKYÊÛX\
+NÂËÈ]\]Y]\ÈHY\[ÚXH\[B[S^Y\	ÚÎËÜÙ\XÙ\Ë\ÙÚ\ÛÛ[KÛÛKÐ\ÑÒTËÜ\ÝÜÙ\XÙ\ËÔY\[ÙKÕÛÜÐÝ[\Y\×Ø[ÔXÙ\ËÓX\Ù\\Ý[KÞÞKÞÞ_KÞÞIËÂ]X][ÛÉËX^ÛÛNÜXÚ]NÍBJKYÊÛX\
+NÂËÈÝ[[ÈÞ[0è\XHHÛØ\\B\]LKÌLLKÌÂ\ÏLKÊLLKÌX]ÛÜÊ]
+X]KÌN
+JNÂ\[[Y×ÚÛJNÂ\Þ^ÂZ[]]Z[]X^]]
+Ú[]Z[ÎÌZ[ËX^ÎÌ
+Ú[ÂNÂËÈ8¥ 8¥ ÚH^HÐQØ\ØYË\Ø\\Ùpì[ÈÛØHÙ[ÛY]°ëXHX[[[È8¥ 8¥ YØØY]ÉØØY]Ë[Ý
+^ÂØØY]OYÙ[ÜY\\ÐQ
+ØØY]ËÞ
+NÂ\ÙpìX\[[ÜÐÐQ
+ØØY]KÛX\Þ
+NÂ]\ÂBËÈÝ\^HHØ\ØH[[X\B\ØY]YØÝ[Y[ÜX]Q[[Y[
+	Ù]ÊNÂØY]YIÜØ][ÜÛK[ØY	ÎÂØY]Ý[KÜÜÕ^IÜÜÚ][ÛXÛÛ]NÚ[Ù]ÞZ[^LØXÚÙÜÝ[ØJÌNÉÂ
+ÉÙ\Ü^N^Ù^Y\XÝ[ÛÛÛ[[Ø[YÛZ][\ÎÙ[\Ú\ÝYKXÛÛ[Ù[\ÙØ\MÜÚ[\Y][ÎÛNÉÎÂØY][\SB	Ï]Ý[OHÚYÍÚZYÚÍØÜ\ÜÛÛYØJL
+ÍËMKN
+NØÜ\]ÜXÛÛÜÍØÍØÜ\\Y]\ÎL	NØ[[X][ÛÜ[È[X\[[]NÈÙ]Â
+ÉÏ]Ý[OHÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^NÛ]\\ÜXÚ[ÎØÛÛÜØJL
+ÍËMKÍJNÈYHÜÛK[ØY]VQSÈÐÕTPÒpäÓTSH
+ÔÓJKÙ]Â
+ÉÏ]Ý[OHÛ\Ú^N\ØÛÛÜØJNNL
+NÈ[[^[È\ÝXXÚpìÛHÛÛÝXØÚ[Û\ÏÙ]ÎÂX\]\[Ú[
+ØY]NÂËÈ[ÈH°ëX\ÈÙYðî[Xpì[È[0è\XB\\XQÜ[O\\XWØÛØÂ\Ñ[\X\XQÜ[BÉÈYÚØ^H[ÝÜØ^_[ß[X\_ÙXÛÛ\HÂÈYÚØ^H[ÝÜØ^_[ß[X\_ÙXÛÛ\_\X\_\ÚY[X[[Û\ÜÚYYYÎÂËÈ]Y\HÝ\\ÜÈTH8 %YX[X[[][XÚ\[Â\OIÖÛÝ]ÛÛVÝ[Y[Ý]ÌNÊ	Â
+ÉÝØ^VÉÊÚÑ[\É×J	ÊØÞZ[]Ñ^Y
+
+JÉË	ÊØÞZ[ËÑ^Y
+
+JÉË	Â
+ØÞX^]Ñ^Y
+
+JÉË	ÊØÞX^ËÑ^Y
+
+JÉÊNÉÂ
+ÉÊNÛÝ]Ù[ÛNÉÎÂ]Ú
+	ÚÎËÛÝ\\ÜËX\KKØ\KÚ[\]\ËÛY]ÙÔÔÕ	ËÙNÙ]OIÊÙ[ÛÙUTPÛÛ\Û[
+J_JB[[Ý[Û^ÂY\ÚÊ]ÝÈ]È\Ü	Ò	ÊÜÝ]\ÊNÂ]\ÛÛ
+NÂJB[[Ý[ÛÜÛQ]J^Â\YØÝ[Y[Ù][[Y[RY
+	ÜØ][ÜÛK[ØY	ÊNÂY
+[[[ÝJ
+NÂÙ[\\YÔÓJÜÛQ]KÛX\Þ
+NÂJBØ]Ú
+[Ý[Û\^ÂÛÛÛÛKØ\	ÓÝ\\ÜÈ[0ìÎË\NÂ\YØÝ[Y[Ù][[Y[RY
+	ÜØ][ÜÛK[ØY	ÊNÂY
+^ÂØÝ[Y[Ù][[Y[RY
+	ÛÜÛK[ØY]	ÊK^ÛÛ[IÔÚ[ÛÛ^pìÛÔÓH0­È\Ø[ÈÝXY°ëXÝ[H\Ý[XYIÎÂÙ][Y[Ý]
+[Ý[Û
+^ÚY
+[[[ÝJ
+NÈÙ[\\YÜY
+ÛX\Þ
+NßKML
+NÂBJNÂBÊ8¥ 8¥ 8¥ Y\ÙH]ÜÈX[\ÈÜ[ÝY]X\8¥ 8¥ 8¥ 
+Â[Ý[ÛÙ[\\YÔÓJÜÛQ]KX\Þ
+^Â\Ø^\Ï[ÜÛQ]K[[Y[ß×NÂËÈÛ\ÚYXØ\°ëX\ÈÜ\Â\SÏ^Û[ÝÜØ^NK[ÎK[X\N_NÂ\ÑPÏ^ÜÙXÛÛ\NK\X\N_NÂËÈ\ÚY[X[È[Û\ÜÚYYYÈÙ\XÙH8¡¤\ÝXXÚpìÛ\[ÕØ^\ÏV×KÙXÕØ^\ÏV×K\ÝØ^\ÏV×NÂËÈ\H[\ÙXØÚ[Û\ÈHÛØ[ÜÙXÝ[\XB\ÙU\ØYÙO^ßNÈËÈÛ]H]È8¡¤ÛÝ[H°ëX\È]YH\Ø[Ø^\ËÜXXÚ
+[Ý[ÛØ^J^ÂY]Ø^KÙ[ÛY]_]Ø^KYÜßØ^KÙ[ÛY]K[Ý\]\Â\]Ø^KYÜËYÚØ^NÂ\ÛÛÜÏ]Ø^KÙ[ÛY]KX\
+[Ý[Û^Ü]\Û]ÛNßJNÂYSÖÚJHÈ[ÕØ^\Ë\Ú
+ÛÛÜÊNÈYÚ\Ý\ÙÜÊÛÛÜËÙU\ØYÙKNÈB[ÙHYÑPÖÚJHÈÙXÕØ^\Ë\Ú
+ÛÛÜÊNÈYÚ\Ý\ÙÜÊÛÛÜËÙU\ØYÙKJNÈB[ÙHÈ\ÝØ^\Ë\Ú
+ÛÛÜÊNÈBJNÂËÈ8¥ Ø\HN\ÝXXÚpìÛ
+\K[ÊH8 %ÚYÝYHØ[\È\ÚY[ÚX[\ÈX[\Â\ÝØ^\ËÜXXÚ
+[Ý[ÛÊ^ÂÛ[[JËØÛÛÜÈÍYYIËÙZYÚKÜXÚ]NJKYÊX\
+NÂJNÂËÈ8¥ Ø\HÙXÝ[\XH
+\[JH8 %ÚYÝYH°ëX\ÈÙXÝ[\X\ËÝ\ÚX\X\ÂÙXÕØ^\ËÜXXÚ
+[Ý[ÛÊ^ÂÛ[[JËØÛÛÜÈÙN	ËÙZYÚÜXÚ]NJKYÊX\
+NÂJNÂËÈ8¥ Ø\HÎÛØ[
+ÚÈÜY\ÛÊH8 %ÚYÝYH°ëX\È[Ú\[\Â[ÕØ^\ËÜXXÚ
+[Ý[ÛÊ^ÂÛ[[JËØÛÛÜÈÙMLÎLÍIËÙZYÚKÜXÚ]NM_JKYÊX\
+NÂJNÂËÈ8¥ [\ÙXØÚ[Û\ÈX[\È8¡¤T\Â\[\ÙXØÚ[Û\ÏV×NÂØXÝÙ^\ÊÙU\ØYÙJKÜXXÚ
+[Ý[ÛÊ^ÂYÙU\ØYÙVÚ×OLÊ^ÈËÈÙÈÛÛ\\YÈÜ8¢iLÈÙYÛY[ÜÈH[\ÙXØÚpìÛX[\ZËÜ]
+	Ë	ÊNÂ[\ÙXØÚ[Û\Ë\Ú
+Ü\ÙQØ]
+ÌJK\ÙQØ]
+ÌWJWJNÂBJNÂËÈÚHØØ\È[\ÙXØÚ[Û\ËZ\[X[Y[\ÙXØÚ[Û\Ë[ÝÙ\J^Â[\ÙXØÚ[Û\ÏV×NÂØXÝÙ^\ÊÙU\ØYÙJKÜXXÚ
+[Ý[ÛÊ^ÂYÙU\ØYÙVÚ×OL^Ý\ZËÜ]
+	Ë	ÊNÚ[\ÙXØÚ[Û\Ë\Ú
+Ü\ÙQØ]
+ÌJK\ÙQØ]
+ÌWJWJNßBJNÂB\\TÝ\SX]X^
+KX]ÛÜ[\ÙXØÚ[Û\Ë[ÝÜÙ\JJNÂ\\PÛLÂ[\ÙXØÚ[Û\ËÜXXÚ
+[Ý[ÛJ^ÂYIY\TÝ\OOL	\PÛÙ\J^ÂÚ\ÛSX\Ù\ÜY]\ÎËÛÛÜÈÙËÙZYÚK[ÛÛÜÈÍØÍË[ÜXÚ]NM_JB[Ü\
+	Ï¼'å-H\ÝXÚpìÛTHÉÊÊ\PÛ
+ÌJJÉÏØÂ
+ÉÔ\ÚpìÛ	ÊÜ\ÊÉÏX]\X[	ÊÜX]
+ÉÏÂ
+ÉÕ\ÝX\[ÜÈ\Ý[XYÜÎÊÓX]Ý[
+WÝÝÜÙ\JJBYÊX\
+NÂ\PÛ
+ÊÎÂBJNÂËÈÛÛ\[Y[\T\ÈÛÛ[ÜÈHÛØ[ÚH[[Y\PÛÙ\I[ÕØ^\Ë[Ý
+^Â\^O][ÕØ^\ÎÂ\^TÝ\SX]X^
+KX]ÛÜ^K[ÝÊÙ\KY\PÛ
+JJNÂ^KÜXXÚ
+[Ý[ÛÛÛÜËJ^ÂY\PÛ\Ù\J\]\ÂYIY^TÝ\OOL
+^Â\ZYXÛÛÜÖÓX]ÛÜÛÛÜË[ÝÌWNÂÚ\ÛSX\Ù\ZYÜY]\ÎËÛÛÜÈÙËÙZYÚK[ÛÛÜÈÍØÍË[ÜXÚ]NM_JB[Ü\
+	Ï¼'å-H\ÝXÚpìÛTHÉÊÊ\PÛ
+ÌJJÉÏØÊBYÊX\
+NÂ\PÛ
+ÊÎÂBJNÂBËÈ8¥ °è[[\ÈHÈ\ÛÈH°ëX\ÈÛØ[\Â\X^[SX]Z[Ý[
+
+NÂ\[Ý\SX]X^
+KX]ÛÜ[ÕØ^\Ë[ÝÛX^[
+JNÂ\[ÛLÂ[ÕØ^\ËÜXXÚ
+[Ý[ÛÛÛÜËJ^ÂY[Û[X^[
+\]\ÂYI][Ý\OOL
+^Â\ZYXÛÛÜÖÓX]ÛÜÛÛÜË[ÝÌWNÂÚ\ÛSX\Ù\ZYÜY]\ÎÛÛÜÈÌÎËÙZYÚ[ÛÛÜÈÌÎË[ÜXÚ]NJB[Ü\
+	Ï¼'å-È°è[[HHÙXØÚ[Û[ZY[ÏØ°ëXN	ÊÊØ^\ÖÚWIØ^\ÖÚWKYÜÉØ^\ÖÚWKYÜË[YOÝØ^\ÖÚWKYÜË[YNø %	ÊJBYÊX\
+NÂ[Û
+ÊÎÂBJNÂËÈ8¥ [N^\[Ü[ÞÛÛXÝYHHH[YHHHYÛØ[\]XÞZ[]JÞX^]XÞZ[]
+JLÂ\ÏXÞZ[ËJÞX^ËXÞZ[ÊJLÂ\[YU[Ï][ÕØ^\Ë[ÝÝ[ÕØ^\ÖÌVÌNÙXÕØ^\Ë[ÝÜÙXÕØ^\ÖÌVÌNÛ]ÌNÂÛ[[JÖÜ]×K[YU[×KØÛÛÜÈÙMLÎLÍIËÙZYÚK\Ú\^NÎ
+IËÜXÚ]NJKYÊX\
+NÂ\[XÛÛS]XÛÛØÛ\ÜÓ[YNÉË[	Ï]Ý[OHÚYÚZYÚØXÚÙÜÝ[Ù
+ØÜ\ÛÛYÙØÜ\\Y]\ÎL	NÉÂ
+ÉÙ\Ü^N^Ø[YÛZ][\ÎÙ[\Ú\ÝYKXÛÛ[Ù[\ÙÛ\Ú^NLÜÉÂ
+ÉØÞ\ÚYÝÎMØJMKMJNÈ¸«dÙ]ËXÛÛÚ^NÌKXÛÛ[ÚÜÌLËL×BJNÂX\Ù\Ü]×KÚXÛÛ[XÛÛJB[Ü\
+	Ï¸«d[HH[XXÙ[[ZY[ÈÓØÊÜÜJÉÈ[YY
+\ÊH0­ÈN	ÊÙ]
+WÜKJJÉÈp¬ËÚËÝIÊBYÊX\
+NÂËÈ8¥ Û0ëYÛÛÈHÛØ\\BÛYÛÛÖØÞZ[]ÞZ[×KØÞZ[]ÞX^×KØÞX^]ÞX^×KØÞX^]ÞZ[×WKØÛÛÜÜØJL
+ÍËMKMJIËÙZYÚ[ÛÛÜÜØJL
+ÍËMKÊIË\Ú\^NÎ
+	ßJKYÊX\
+NÂËÈ8¥ [ÈÛØH]ÜÈX[\ÈØ\ØYÜÂ\Ý[][ÕØ^\Ë[Ý
+ÜÙXÕØ^\Ë[Ý
+Ù\ÝØ^\Ë[ÝÂYÜYØ\^Y[\ÔØ]
+X\	ÓÔÓH0­È	ÊÝÝ[
+ÉÈ[[ÜÈH°ëXHX[\ÉÊNÂX\[[Y]TÚ^J
+NÂB[Ý[ÛYÚ\Ý\ÙÜÊÛÛÜËX\K\ÛÊ^ÂÛÛÜËÜXXÚ
+[Ý[ÛÊ^Â\ÏXÖÌKÑ^Y
+
+JJÉË	ÊØÖÌWKÑ^Y
+
+JNÂX\VÚ×OJX\VÚ×_
+JÜ\ÛÎÂJNÂBÊ8¥ 8¥ 8¥ [XÚÎÝXY°ëXÝ[HÝX[ÈÔÓHÈ\Ý0èH\ÜÛXH8¥ 8¥ 8¥ 
+Â[Ý[ÛÙ[\\YÜY
+X\Þ
+^Â\]JÞZ[]
+ØÞX^]
+KÌÌJÞZ[ÊØÞX^ÊKÌÂ\]LKÌLLKÌÏLKÊLLKÌX]ÛÜÊ]
+X]KÌN
+JNÂ\[\[Â\]ÚÛOY[OOIØ[IÏÌN[OOIÛYYXIÏÌNÂ\ÝÚÛOY[OOIØ[IÏÌ[OOIÛYYXIÏÌLÎÂ\]V×K]V×NÂÜ\XÞZ[]ÛXÞX^]
+ÌYKNNÛ
+ÏX]ÚÛJ]
+X]\Ú
+
+ÛÑ^Y
+
+ÊJNÂÜ\ÏXÞZ[ÎÛÏXÞX^ÊÌYKNNÛÊÏX]ÚÛJÊX]\Ú
+
+ÛËÑ^Y
+
+ÊJNÂ\ZYX]ÓX]ÛÜ][ÝÌW_]Â\ZYX]ÓX]ÛÜ][ÝÌW_ÌÂÜ\XÞZ[]ÛXÞX^]
+ÌYKNNÛÏ\ÝÚÛJ]
+^ÂYX]XÊ[ZY
+OÝÚÛJ]
+
+XÛÛ[YNÂÛ[[JÖÛÞZ[×KÛÞX^×WKØÛÛÜÈÍYYIËÙZYÚKÜXÚ]NJKYÊX\
+NÂB]ÜXXÚ
+[Ý[ÛÊ^ÂYX]XÊË[ZY
+O]ÚÛJ]
+
+\]\ÂÛ[[JÖÛËÞZ[×KÛËÞX^×WKØÛÛÜÈÙN	ËÙZYÚÜXÚ]NJKYÊX\
+NÂJNÂÛ[[JÖÛZYÞZ[×KÛZYÞX^×WKØÛÛÜÈÙMLÎLÍIËÙZYÚKÜXÚ]NM_JKYÊX\
+NÂÛ[[JÖØÞZ[]ZYKØÞX^]ZYWKØÛÛÜÈÙMLÎLÍIËÙZYÚKÜXÚ]NM_JKYÊX\
+NÂ\]XÞZ[]JÞX^]XÞZ[]
+JLÂ\ÏXÞZ[ËJÞX^ËXÞZ[ÊJLÂÛ[[JÖÜ]×KÛZYÞZ[×WKØÛÛÜÈÙMLÎLÍIËÙZYÚK\Ú\^NÎ
+IËÜXÚ]NJKYÊX\
+NÂ\[XÛÛS]XÛÛØÛ\ÜÓ[YNÉË[	Ï]Ý[OHÚYÚZYÚØXÚÙÜÝ[Ù
+ØÜ\ÛÛYÙØÜ\\Y]\ÎL	NÉÂ
+ÉÙ\Ü^N^Ø[YÛZ][\ÎÙ[\Ú\ÝYKXÛÛ[Ù[\ÙÛ\Ú^NLØÞ\ÚYÝÎLØJMKMJNÈ¸«dÙ]ËXÛÛÚ^NÌKXÛÛ[ÚÜÌLL_JNÂX\Ù\Ü]×KÚXÛÛ[XÛÛJK[Ü\
+	Ï¸«d[HÓØÊKYÊX\
+NÂ\\TÝ\SX]X^
+KX]ÛÜ
+][Ý
+][Ý
+KÜÙ\JJNÂ\\PÛLYLÂ]ÜXXÚ
+[Ý[Û
+^Ø]ÜXXÚ
+[Ý[ÛÌ^ÂYY	Y\TÝ\OOL	\PÛÙ\J^ÂÚ\ÛSX\Ù\Û
+ÌKÜY]\ÎËÛÛÜÈÙËÙZYÚK[ÛÛÜÈÍØÍË[ÜXÚ]NM_JB[Ü\
+	Ï¼'å-HTHÉÊÊ\PÛ
+ÌJJÉÏØÊKYÊX\
+NÂ\PÛ
+ÊÎÂZY
+ÊÎÂJNßJNÂÛYÛÛÖØÞZ[]ÞZ[×KØÞZ[]ÞX^×KØÞX^]ÞX^×KØÞX^]ÞZ[×WKØÛÛÜÜØJL
+ÍËMKMJIËÙZYÚ[ÛÛÜÜØJL
+ÍËMKÊIË\Ú\^NÎ
+	ßJKYÊX\
+NÂYÜYØ\^Y[\ÔØ]
+X\	ÐÝXY°ëXÝ[H\Ý[XYH
+Ú[ÛÛ^pìÛÔÓJIÊNÂX\[[Y]TÚ^J
+NÂBÊ8¥ 8¥ 8¥ ^Y[\ÈÛÛ][\È\H\ÝHØ][][8¥ 8¥ 8¥ 
+Â[Ý[ÛYÜYØ\^Y[\ÔØ]
+X\Y[J^Â\^Y[OSÛÛÛ
+ÜÜÚ][ÛØÝÛ[Y	ßJNÂ^Y[KÛYY[Ý[Û
+^Â\]SÛU][ÜX]J	Ù]Ë	ÜØ][YÙ[	ÊNÂ][\SB	Ï]Û\ÜÏHØ][YÙ[]]HVQSHQÓÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÙMLÎLÍNÈÙ]YÛØ[
+[X\XJOÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÙNÚZYÚÈÙ]YÙXÝ[\XOÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YË[[HÝ[OHXÚÙÜÝ[ÍYYNÚZYÚK\ÈÙ]YH\ÝXXÚpìÛÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YËYÝÝ[OHXÚÙÜÝ[Ù
+ÈÙ][H[XXÙ[[ZY[ÏÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YËYÝÝ[OHXÚÙÜÝ[ÍØÍÈÙ]\ÝXÚpìÛYÝ[YÜHTOÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈ]Û\ÜÏHØ][YËYÝÝ[OHXÚÙÜÝ[ÌÎÝÚYÚZYÚØÜ\\Y]\ÎÈÙ]°è[[HÙXØÚ[Û[ZY[ÏÙ]ÊÂ	Ï]Ý[OHX\Ú[]ÜÙÛ\Ú^NÜØÛÛÜØJL
+ÍËMK
+NÙÛY[Z[NÜ]Û[ÛÜÜXÙNÈÊÙY[JÉÏÙ]ÎÂ]\]ÂNÂ^Y[KYÊX\
+NÂ\[ÏSÛÛÛ
+ÜÜÚ][ÛÝÜYÚ	ßJNÂ[ËÛYY[Ý[Û
+^Â\]SÛU][ÜX]J	Ù]Ë	ÜØ][YÙ[	ÊNÂ][\SB	Ï]Û\ÜÏHØ][YÙ[]]HÊÜËÛXKÕ\\Ø\ÙJ
+JÉÈ0­È	ÊÜËËÕ\\Ø\ÙJ
+JÉÏÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJH\ÝX\[ÜÏÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+WÝÝ
+JÉÏØÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHØ]Y[ÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+WÝÝJJÉÈp¬ËÚØÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHYÝ[ÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÙ]
+ÝÝJJÉÈÛOØÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHT\ÏÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÜÙ\JÉÈYØÙ]ÊÂ	Ï]Û\ÜÏHØ][YË\ÝÈÝ[OH\ÝYKXÛÛ[ÜXÙKX]ÙY[ÙØ\MÈÜ[Ý[OHÛÛÜØJNNLJHÛØ\\OÜÜ[Ý[OHÛÛÜÍØÍÙÛY[Z[NÜ]Û[ÛÜÜXÙNÙÛ\Ú^N\ÈÊÜÛØÉÉOØÙ]ÎÂ]\]ÂNÂ[ËYÊX\
+NÂBÚ[ÝË^^Ù[Y[Ý[Û
+^ÂYWÜÞJ\]\Ý\WÜÞKÏ\ÎÂ\ØVÖ][ËÛÚ×Û]Ê
+NÂ\]OVÂÉÔTÔHÖQPÐÒpäÓQÓ8 %TUPÐSHHÐTÑT`ËÐKHKÔË×K×KÉÓ][XÚ\[ÉËËÛXWKÉÑ\\[Y[ÉËË×KÉÕ\È0è\XIË\×KÉÒÜ^ÛIËÜÉÈpì[ÜÉ×KÉÐÛØ\\IËÛØÉÉI×KÉÔ\ÚpìÛË\Ú[ÛÝKÉÓX]\X[	ËX]K×KÉÑSSÑÔQ°ãPI×KÉÔØXÚpìÛXÝX[	ËÜØXÝKÉÔØXÚpìÛ]\IËÜÙ]KÉÔØ[YXÚXYIËÜØÛØKÉÕ]Y[\ÉË]Y[\×K×KÉÕTÕPTSÔÉ×KÉÔ\ÚY[ÚX[	ËWÜ\×KÉÐÛÛY\ÚX[	ËWØÛÛWKÉÒ[\ÝX[	ËWÚ[KÉÕÝ[	ËWÝÝK×KÉÑSPSHÓ	×KÉÐØ]Y[pè^Ý[
+p¯ËÚ
+IË
+ÜWÝÝÑ^Y
+WKÉÐØ]Y[[X\ØH
+ÙËÚ
+IË
+ÜWÚÙÚÑ^Y
+WKÉÔ[\ÉËÜWK×KÉÔQHST°ãPTÉ×KÉÕÛØ[ÊÜÝ
+ÉÈ
+ÛJIË
+ÜÝ[ËÑ^Y
+ÊWKÉÔÙXÝ[\XHÊÜÜÊÉÈ
+ÛJIË
+ÜÜÙXËÑ^Y
+ÊWKÉÑ\ÝXXÚpìÛÊÜÙ
+ÉÈ
+ÛJIË
+ÜÙ\ÝÑ^Y
+ÊWKÉÓÛÚ]YÝ[
+ÛJIË
+ÜÝÝÑ^Y
+WK×KÉÑSSQSÔÈHQ	×KÉÔ[\ÉËÜWKÉÑT\ÉËÙ\WKÉÕ°è[[\ÉËÝ[KÉÐXÛÛY]Y\ÉËØXÛ×K×KÉÐÐSQQTÈPUTPS
+JI×KÉÕX\°ëXHÊÜÝWÝKÉÕX\°ëXHÊÜÜËWÜ×KÉÕX\°ëXHÊÜÙWÙKÉÕÝ[	ËWÝ
+ÜWÜÊÜWÙK×KÉÒSTÒpäÓ
+ÓÔZ[Û\ÊI×KÉÔYX\°ëX\ÉË
+ÜWÜYÑ^Y
+JWKÉÔ[\ÉË
+ÜWÜKÑ^Y
+JWKÉÑT\ÉË
+ÜWÙ\KÑ^Y
+JWKÉÕ°è[[\ÉË
+ÜWÝ[Ñ^Y
+JWKÉÐXÛÛY]Y\ÉË
+ÜWØXÛËÑ^Y
+JWKÉÒ[ËÐÛÛ[Ù[ÚX\ÉË
+ÜWÚ[ËÑ^Y
+JWKÉÕÕS	Ë
+ÜWÝÝÑ^Y
+JWKÉÐÛÜÝÈÜ\ÝX\[È
+ÓÔ
+IËX]Ý[
+WÝÝ
+YMÜWÝÝ
+WKNÂ\ÜÏVÖ][Ë[ØWÝ×ÜÚY]
+]JNÝÜÖÉÈXÛÛÉ×OVÞÝØÚÎKÝØÚWNÂÖ][ËÛÚ×Ø\[ÜÚY]
+ØÜË	ÔÞYXØÚpìÛÓ	ÊNÂÖÜ]Q[JØ	ÔÞYXØÚ[ÛÑÓÉÊØËÛXK\XÙJÈÙË	×ÉÊJÉËÞ	ÊNÂNÂÚ[ÝË^QÏY[Ý[Û
+^ÂYWÜÞJ\]\Â\ÛXOWÜÞKËÛXK\XÙJÈÙË	×ÉÊNÂYÝ\ÝS[ÙOOOIÙ\Ü]Y[XIÊ^ÂËÈ^ÜØ[\È\XÝÂ\ÝYØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊNÂ\OYØÝ[Y[ÜX]Q[[Y[
+	ØIÊNÂKÝÛØYIÓX\WÑ\Ü]Y[XWÑÓÉÊÛÛXJÉËÉÎÂKYXÝÑ]UT
+	Ú[XYÙKÚYÉËLNØKÛXÚÊ
+NÂH[ÙHÂËÈ^ÜØ][][ÛÛ[Ø[\Â\Ø]]YØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊNÂ[Ø[\ÊØ]]Ý\ÙPÓÔÎYK[ÝÕZ[YKØØ[NKKXÚÙÜÝ[ÛÛÜÈÌM	ßJK[[Ý[ÛÝ^Â\OYØÝ[Y[ÜX]Q[[Y[
+	ØIÊNÂKÝÛØYIÓX\WÔØ][][ÑÓÉÊÛÛXJÉËÉÎÂKYXÝÑ]UT
+	Ú[XYÙKÚYÉË
+NØKÛXÚÊ
+NÂJKØ]Ú
+[Ý[Û
+^Â[\
+	Ô\H^Ü\H\ÝHØ][][\ØHHØ\\HH[[H[Ú\Ý[XH
+Ý
+ÔÚY
+ÔÊKÊNÂJNÂBNÂÚ[ÝË^Y[Ý[Û
+^ÂYWÜÞJ\]\ÂYÝ\ÝS[ÙOOOIÜØ][][	Ê^ÂËÈ\HØ][][Ø\\\ÛÛ[Ø[\ÈYYÛÈÙ[\\[Ø[\ÊØÝ[Y[Ù][[Y[RY
+	ÜØ][X\	ÊKÝ\ÙPÓÔÎYK[ÝÕZ[YKØØ[NKXÚÙÜÝ[ÛÛÜÈÌM	ßJB[[Ý[ÛÝ^×ÙÙ[\\ÜÞKÝÑ]UT
+	Ú[XYÙKÚYÉËK	ÔØ][][	ÊNßJBØ]Ú
+[Ý[Û
+^ÊÙ[\\ÜÞKØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÑ]UT
+	Ú[XYÙKÚYÉË
+JK	Ñ\Ü]Y[XIÊNßJNÂ]\ÂBÙÙ[\\ÜÞKØÝ[Y[Ù][[Y[RY
+	ÛX\KXØ[\ÉÊKÑ]UT
+	Ú[XYÙKÚYÉË
+JK	Ñ\Ü]Y[XIÊNÂNÂ[Ý[ÛÙÙ[\\[YË\ÝSX[
+^Â\Ï\ÎÂ\Ô]Ú[ÝËÜÔÂ\ØÏ[]ÈÔÛÜY[][ÛÛ[ØØ\IË[]Û[IËÜX]ØM	ßJNÂ\ÏLMËLLÂËÈÛÂØËÙ][ÛÛÜ
+NÙØËXÝ
+Ë	ÑÊNÂËÈ0ë][ÂØËÙ]^ÛÛÜL
+ÍËMJNÙØËÙ]ÛÚ^JLÊNÙØËÙ]Û
+[Y[Y	ØÛ	ÊNÂØË^
+	ÔÖQPÐÒpäÓQÓ8 %	ÊØËÛXKÕ\\Ø\ÙJ
+JÉË	ÊØËËÕ\\Ø\ÙJ
+KMM
+NÂØËÙ]ÛÚ^J
+ËJNÙØËÙ]^ÛÛÜMNMÌ
+NÙØËÙ]Û
+[Y[Y	ÛÜX[	ÊNÂØË^
+	Ð\]XØ[HHØ\Ù\ÈËKKË0­È	ÊÛ]È]J
+KÓØØ[Q]TÝ[Ê	Ù\ËPÓÉÊJÉÈ0­ÈÛØ\\N	ÊÜÛØÉÉH0­ÈÜ^ÛN	ÊÜÜÉÈpì[ÜÈ0­È	ÊÜ\Ú[ÛÝM
+NÂËÈX\B\UÏLMMKR[UÊÝZYÚØÝÚY
+NÂØËY[XYÙJ[YË	ÒQÉËMUËX]Z[RL
+JNÂËÈ\ÜHÛÛ[[H\XÚB\LMÍOLÂØËÙ]ÛÚ^J
+ÊNÂ\Y[ÏVÂÉÒSPÐQÔTÈÓUIË	É×KÉÕ\ÝX\[ÜÈÞYXÝË]
+WÝÝ
+WKÉÐØ]Y[\Ùpì[ÉË]
+WÝÝJJÉÈp¬ËÚ	×KÉÓÛËÝ[Y	Ë]
+ÝÝJJÉÈÛI×KÉðà\XHÛØ\\IË]
+\XWØÛØJJÉÈÛp¬×KÉÉË	É×KÉÔQHPT°ãPTÉË	É×KÉÕÛØ[ÊÜÝ]
+Ý[ËJÉÈÛI×KÉÔÙXÝ[\XHÊÜÜË]
+ÜÙXËJÉÈÛI×KÉÑ\ÝXXÚpìÛÊÜÙ]
+Ù\ÝJÉÈÛI×KÉÉË	É×KÉÑSSQSÔÉË	É×KÉÔ[\ÉËÜJÉÈY×KÉÑT\ÉË]
+Ù\JJÉÈY×KÉÕ°è[[\ÉË]
+Ý[
+JÉÈY×KÉÐXÛÛY]Y\ÉË]
+ØXÛÊJÉÈY×KÉÉË	É×KÉÒSTÒpäÓÕS	Ë	É×KÉÉË]JWÝÝ
+WKÉÐÛÜÝËÝ\ÝX\[ÉË	ÐÓÔ		ÊÙ]
+WÝÝ
+YMÜWÝÝ
+WKNÂ\ÞL\NÂY[ËÜXXÚ
+[Ý[Û^ÂYÌIYÌWJ^ÂØËÙ]^ÛÛÜL
+ÍËMJNÙØËÙ]Û
+[Y[Y	ØÛ	ÊNÂØË^
+ÌKÞLNØÞLÏMNÂH[ÙHYÌIÌWJ^ÂØËÙ]^ÛÛÜL
+NÙØËÙ]Û
+[Y[Y	ÛÜX[	ÊNÂØË^
+ÌKÞLNÙØË^
+ÌWKËNÞLØ[YÛÜYÚ	ßJNØÞLÏMÂH[ÙHØÞLÏLßBJNÂØËØ]J	ÔÞYXØÚ[ÛÑÓÉÊØËÛXK\XÙJÈÙË	×ÉÊJÉ×ÉÊÝ\ÝSX[
+ÉËÊNÂB</script>
 </body>
 </html>
