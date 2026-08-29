@@ -719,8 +719,7 @@ function diseñarAnillosCAD(pr,cadGeo,map,bbox){
   };
   info.addTo(map);
   map.invalidateSize();
-}
-;});
+});
   var rX=mxX-mnX||1, rY=mxY-mnY||1;
   var rLng=bbox.maxLng-bbox.minLng, rLat=bbox.maxLat-bbox.minLat;
   return rawEnts.map(function(e){return {type:e.type,closed:e.closed,
