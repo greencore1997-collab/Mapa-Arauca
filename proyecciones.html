@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:'Rajdhani',sans-serif;color:#e0e8f0;}
@@ -127,6 +129,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .rv.trunk{color:#e53935;} .rv.sec{color:#ff9800;} .rv.dist{color:#69f0ae;} .rv.inv{color:#ffd600;}
 
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(124,77,255,0.28);border-radius:3px;}
+
+/* TOGGLE VISTA */
+#vista-toggle{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:none;background:rgba(0,8,24,0.9);border:1px solid rgba(124,77,255,0.25);border-radius:8px;padding:3px;gap:2px;display:none;flex-direction:row;}
+.btn-vista{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:1.5px;padding:6px 14px;border-radius:6px;cursor:pointer;border:none;color:rgba(180,200,210,0.5);background:transparent;transition:all 0.2s;}
+.btn-vista.active{color:#fff;background:rgba(124,77,255,0.55);box-shadow:0 0 12px rgba(124,77,255,0.4);}
+.btn-vista:hover:not(.active){color:rgba(200,220,230,0.8);background:rgba(124,77,255,0.15);}
+
+/* MAPA SATELITAL */
+#sat-map{position:absolute;inset:0;display:none;z-index:5;}
+.leaflet-container{background:#000814!important;}
+/* Leyenda Leaflet */
+.sat-legend{background:rgba(0,8,24,0.88)!important;border:1px solid rgba(124,77,255,0.2)!important;border-radius:8px!important;padding:10px 12px!important;color:#e0e8f0!important;font-family:'Rajdhani',sans-serif!important;}
+.sat-legend-title{font-family:'Orbitron',monospace;font-size:6.5px;letter-spacing:2px;color:rgba(124,77,255,0.55);margin-bottom:8px;}
+.sat-leg-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:8px;color:rgba(200,220,210,0.65);}
+.sat-leg-line{height:3px;width:22px;border-radius:2px;flex-shrink:0;}
+.sat-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+/* Leaflet popup */
+.leaflet-popup-content-wrapper{background:rgba(0,12,35,0.95)!important;border:1px solid rgba(124,77,255,0.3)!important;color:#e0e8f0!important;border-radius:8px!important;font-family:'Rajdhani',sans-serif!important;font-size:11px!important;}
+.leaflet-popup-tip{background:rgba(0,12,35,0.95)!important;}
+.leaflet-control-zoom a{background:rgba(0,12,35,0.9)!important;color:#7c4dff!important;border-color:rgba(124,77,255,0.3)!important;}
 </style>
 </head>
 <body>
@@ -246,6 +268,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
     <!-- Main (canvas) -->
     <div id="main-area">
       <div id="canvas-wrap">
+        <!-- Toggle esquema / satelital -->
+        <div id="vista-toggle">
+          <button class="btn-vista active" id="btn-v-esq" onclick="toggleVista('esquema')">📐 ESQUEMA</button>
+          <button class="btn-vista" id="btn-v-sat" onclick="toggleVista('satelital')">🛰 SATELITAL</button>
+        </div>
+
+        <!-- Mapa satelital Leaflet -->
+        <div id="sat-map"></div>
+
         <div id="canvas-ph">
           <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="8" y="8" width="56" height="56" rx="4" stroke="#7c4dff" stroke-width="1.2" opacity="0.4"/>
@@ -306,46 +337,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 <script>
 /* ═══ DATOS CIUDADES ═══ */
 var CIUDADES=[
-  {id:'arauca',nombre:'Arauca',dpto:'Arauca',pop:96000,area_urb:12,ppv:3.2,crec:2.2},
-  {id:'saravena',nombre:'Saravena',dpto:'Arauca',pop:48000,area_urb:5,ppv:3.3,crec:2.5},
-  {id:'arauquita',nombre:'Arauquita',dpto:'Arauca',pop:20000,area_urb:2.5,ppv:3.4,crec:1.8},
-  {id:'tame',nombre:'Tame',dpto:'Arauca',pop:28000,area_urb:3.5,ppv:3.5,crec:1.6},
-  {id:'fortul',nombre:'Fortul',dpto:'Arauca',pop:16000,area_urb:1.8,ppv:3.5,crec:1.5},
-  {id:'rondon',nombre:'Puerto Rondón',dpto:'Arauca',pop:5500,area_urb:0.7,ppv:3.6,crec:1.2},
-  {id:'cravo',nombre:'Cravo Norte',dpto:'Arauca',pop:4000,area_urb:0.5,ppv:3.7,crec:1.0},
-  {id:'bogota',nombre:'Bogotá D.C.',dpto:'Cundinamarca',pop:7412566,area_urb:307,ppv:2.8,crec:1.1},
-  {id:'medellin',nombre:'Medellín',dpto:'Antioquia',pop:2533424,area_urb:105,ppv:2.6,crec:0.9},
-  {id:'cali',nombre:'Cali',dpto:'Valle del Cauca',pop:2471474,area_urb:120,ppv:2.9,crec:1.0},
-  {id:'barranquilla',nombre:'Barranquilla',dpto:'Atlántico',pop:1232766,area_urb:154,ppv:3.1,crec:1.3},
-  {id:'cartagena',nombre:'Cartagena',dpto:'Bolívar',pop:1028736,area_urb:98,ppv:3.3,crec:1.5},
-  {id:'cucuta',nombre:'Cúcuta',dpto:'Norte de Santander',pop:764254,area_urb:170,ppv:3.2,crec:1.2},
-  {id:'bucaramanga',nombre:'Bucaramanga',dpto:'Santander',pop:582652,area_urb:165,ppv:2.8,crec:0.8},
-  {id:'ibague',nombre:'Ibagué',dpto:'Tolima',pop:563012,area_urb:140,ppv:3.0,crec:1.1},
-  {id:'pereira',nombre:'Pereira',dpto:'Risaralda',pop:474335,area_urb:120,ppv:2.9,crec:1.0},
-  {id:'manizales',nombre:'Manizales',dpto:'Caldas',pop:432224,area_urb:90,ppv:2.7,crec:0.7},
-  {id:'armenia',nombre:'Armenia',dpto:'Quindío',pop:302564,area_urb:58,ppv:2.8,crec:0.9},
-  {id:'villavicencio',nombre:'Villavicencio',dpto:'Meta',pop:493364,area_urb:110,ppv:3.1,crec:2.1},
-  {id:'pasto',nombre:'San Juan de Pasto',dpto:'Nariño',pop:444886,area_urb:88,ppv:3.2,crec:1.4},
-  {id:'monteria',nombre:'Montería',dpto:'Córdoba',pop:421056,area_urb:80,ppv:3.5,crec:1.8},
-  {id:'valledupar',nombre:'Valledupar',dpto:'Cesar',pop:462064,area_urb:95,ppv:3.4,crec:1.7},
-  {id:'santa_marta',nombre:'Santa Marta',dpto:'Magdalena',pop:523326,area_urb:115,ppv:3.2,crec:1.6},
-  {id:'neiva',nombre:'Neiva',dpto:'Huila',pop:344033,area_urb:78,ppv:3.1,crec:1.3},
-  {id:'popayan',nombre:'Popayán',dpto:'Cauca',pop:280121,area_urb:62,ppv:3.0,crec:1.2},
-  {id:'tunja',nombre:'Tunja',dpto:'Boyacá',pop:180807,area_urb:38,ppv:2.8,crec:0.9},
-  {id:'sincelejo',nombre:'Sincelejo',dpto:'Sucre',pop:288886,area_urb:68,ppv:3.5,crec:1.5},
-  {id:'yopal',nombre:'Yopal',dpto:'Casanare',pop:160000,area_urb:32,ppv:3.2,crec:2.8},
-  {id:'florencia',nombre:'Florencia',dpto:'Caquetá',pop:172000,area_urb:36,ppv:3.3,crec:1.6},
-  {id:'riohacha',nombre:'Riohacha',dpto:'La Guajira',pop:272621,area_urb:60,ppv:3.8,crec:2.0},
-  {id:'quibdo',nombre:'Quibdó',dpto:'Chocó',pop:122071,area_urb:28,ppv:4.0,crec:1.4},
-  {id:'mocoa',nombre:'Mocoa',dpto:'Putumayo',pop:46000,area_urb:10,ppv:3.4,crec:1.8},
-  {id:'leticia',nombre:'Leticia',dpto:'Amazonas',pop:42000,area_urb:8,ppv:3.5,crec:1.5},
-  {id:'yopal',nombre:'Yopal',dpto:'Casanare',pop:160000,area_urb:32,ppv:3.2,crec:2.8},
-  {id:'san_jose',nombre:'San José del Guaviare',dpto:'Guaviare',pop:62000,area_urb:12,ppv:3.5,crec:1.8},
-  {id:'mitu',nombre:'Mitú',dpto:'Vaupés',pop:18000,area_urb:3,ppv:4.0,crec:1.2},
-  {id:'inirida',nombre:'Puerto Inírida',dpto:'Guainía',pop:16000,area_urb:2.5,ppv:4.1,crec:1.0},
+  {id:'arauca',     nombre:'Arauca',               dpto:'Arauca',             pop:96000,   area_urb:12,  ppv:3.2,crec:2.2, lat:7.0852,  lng:-70.7516},
+  {id:'saravena',   nombre:'Saravena',              dpto:'Arauca',             pop:48000,   area_urb:5,   ppv:3.3,crec:2.5, lat:6.9522,  lng:-71.8611},
+  {id:'arauquita',  nombre:'Arauquita',             dpto:'Arauca',             pop:20000,   area_urb:2.5, ppv:3.4,crec:1.8, lat:7.0256,  lng:-71.4325},
+  {id:'tame',       nombre:'Tame',                  dpto:'Arauca',             pop:28000,   area_urb:3.5, ppv:3.5,crec:1.6, lat:6.4666,  lng:-71.7294},
+  {id:'fortul',     nombre:'Fortul',                dpto:'Arauca',             pop:16000,   area_urb:1.8, ppv:3.5,crec:1.5, lat:6.7742,  lng:-71.7654},
+  {id:'rondon',     nombre:'Puerto Rondón',         dpto:'Arauca',             pop:5500,    area_urb:0.7, ppv:3.6,crec:1.2, lat:6.2883,  lng:-70.9597},
+  {id:'cravo',      nombre:'Cravo Norte',           dpto:'Arauca',             pop:4000,    area_urb:0.5, ppv:3.7,crec:1.0, lat:6.3162,  lng:-70.2083},
+  {id:'bogota',     nombre:'Bogotá D.C.',           dpto:'Cundinamarca',       pop:7412566, area_urb:307, ppv:2.8,crec:1.1, lat:4.7110,  lng:-74.0721},
+  {id:'medellin',   nombre:'Medellín',              dpto:'Antioquia',          pop:2533424, area_urb:105, ppv:2.6,crec:0.9, lat:6.2476,  lng:-75.5659},
+  {id:'cali',       nombre:'Cali',                  dpto:'Valle del Cauca',    pop:2471474, area_urb:120, ppv:2.9,crec:1.0, lat:3.4516,  lng:-76.5320},
+  {id:'barranquilla',nombre:'Barranquilla',         dpto:'Atlántico',          pop:1232766, area_urb:154, ppv:3.1,crec:1.3, lat:10.9685, lng:-74.7813},
+  {id:'cartagena',  nombre:'Cartagena',             dpto:'Bolívar',            pop:1028736, area_urb:98,  ppv:3.3,crec:1.5, lat:10.3910, lng:-75.4794},
+  {id:'cucuta',     nombre:'Cúcuta',                dpto:'Norte de Santander', pop:764254,  area_urb:170, ppv:3.2,crec:1.2, lat:7.8939,  lng:-72.5078},
+  {id:'bucaramanga',nombre:'Bucaramanga',           dpto:'Santander',          pop:582652,  area_urb:165, ppv:2.8,crec:0.8, lat:7.1293,  lng:-73.1227},
+  {id:'ibague',     nombre:'Ibagué',                dpto:'Tolima',             pop:563012,  area_urb:140, ppv:3.0,crec:1.1, lat:4.4389,  lng:-75.2322},
+  {id:'pereira',    nombre:'Pereira',               dpto:'Risaralda',          pop:474335,  area_urb:120, ppv:2.9,crec:1.0, lat:4.8143,  lng:-75.6960},
+  {id:'manizales',  nombre:'Manizales',             dpto:'Caldas',             pop:432224,  area_urb:90,  ppv:2.7,crec:0.7, lat:5.0689,  lng:-75.5174},
+  {id:'armenia',    nombre:'Armenia',               dpto:'Quindío',            pop:302564,  area_urb:58,  ppv:2.8,crec:0.9, lat:4.5339,  lng:-75.6811},
+  {id:'villavicencio',nombre:'Villavicencio',       dpto:'Meta',               pop:493364,  area_urb:110, ppv:3.1,crec:2.1, lat:4.1420,  lng:-73.6266},
+  {id:'pasto',      nombre:'San Juan de Pasto',     dpto:'Nariño',             pop:444886,  area_urb:88,  ppv:3.2,crec:1.4, lat:1.2136,  lng:-77.2811},
+  {id:'monteria',   nombre:'Montería',              dpto:'Córdoba',            pop:421056,  area_urb:80,  ppv:3.5,crec:1.8, lat:8.7479,  lng:-75.8814},
+  {id:'valledupar', nombre:'Valledupar',            dpto:'Cesar',              pop:462064,  area_urb:95,  ppv:3.4,crec:1.7, lat:10.4631, lng:-73.2532},
+  {id:'santa_marta',nombre:'Santa Marta',           dpto:'Magdalena',          pop:523326,  area_urb:115, ppv:3.2,crec:1.6, lat:11.2408, lng:-74.1990},
+  {id:'neiva',      nombre:'Neiva',                 dpto:'Huila',              pop:344033,  area_urb:78,  ppv:3.1,crec:1.3, lat:2.9273,  lng:-75.2819},
+  {id:'popayan',    nombre:'Popayán',               dpto:'Cauca',              pop:280121,  area_urb:62,  ppv:3.0,crec:1.2, lat:2.4419,  lng:-76.6060},
+  {id:'tunja',      nombre:'Tunja',                 dpto:'Boyacá',             pop:180807,  area_urb:38,  ppv:2.8,crec:0.9, lat:5.5353,  lng:-73.3678},
+  {id:'sincelejo',  nombre:'Sincelejo',             dpto:'Sucre',              pop:288886,  area_urb:68,  ppv:3.5,crec:1.5, lat:9.3047,  lng:-75.3978},
+  {id:'yopal',      nombre:'Yopal',                 dpto:'Casanare',           pop:160000,  area_urb:32,  ppv:3.2,crec:2.8, lat:5.3378,  lng:-72.3959},
+  {id:'florencia',  nombre:'Florencia',             dpto:'Caquetá',            pop:172000,  area_urb:36,  ppv:3.3,crec:1.6, lat:1.6144,  lng:-75.6063},
+  {id:'riohacha',   nombre:'Riohacha',              dpto:'La Guajira',         pop:272621,  area_urb:60,  ppv:3.8,crec:2.0, lat:11.5444, lng:-72.9072},
+  {id:'quibdo',     nombre:'Quibdó',                dpto:'Chocó',              pop:122071,  area_urb:28,  ppv:4.0,crec:1.4, lat:5.6919,  lng:-76.6583},
+  {id:'mocoa',      nombre:'Mocoa',                 dpto:'Putumayo',           pop:46000,   area_urb:10,  ppv:3.4,crec:1.8, lat:1.1522,  lng:-76.6483},
+  {id:'leticia',    nombre:'Leticia',               dpto:'Amazonas',           pop:42000,   area_urb:8,   ppv:3.5,crec:1.5, lat:-4.2153, lng:-69.9405},
+  {id:'san_jose',   nombre:'San José del Guaviare', dpto:'Guaviare',           pop:62000,   area_urb:12,  ppv:3.5,crec:1.8, lat:2.5647,  lng:-72.6408},
+  {id:'mitu',       nombre:'Mitú',                  dpto:'Vaupés',             pop:18000,   area_urb:3,   ppv:4.0,crec:1.2, lat:1.2516,  lng:-70.2339},
+  {id:'inirida',    nombre:'Puerto Inírida',        dpto:'Guainía',            pop:16000,   area_urb:2.5, ppv:4.1,crec:1.0, lat:3.8653,  lng:-67.9239},
 ];
 
 var _proy=null;
+var _lmap=null;          // Leaflet map instance
+var _vistaMode='esquema'; // 'esquema' | 'satelital'
 
 window.onload=function(){
   iniciarPreIntro();
@@ -548,10 +580,23 @@ function generarProyeccion(){
     dibujarMapa(_proy);
     mostrarReporte(_proy);
     document.getElementById('proy-load').style.display='none';
-    document.getElementById('mapa-canvas').style.display='block';
-    document.getElementById('legend-box').style.display='block';
-    document.getElementById('scale-box').style.display='block';
-    ['b-xl','b-pdf','b-jpg'].forEach(function(id){document.getElementById(id).disabled=false;});
+    // Mostrar toggle
+    var tog=document.getElementById('vista-toggle');
+    tog.style.display='flex';
+    // Mostrar vista activa
+    if(_vistaMode==='esquema'){
+      document.getElementById('mapa-canvas').style.display='block';
+      document.getElementById('sat-map').style.display='none';
+      document.getElementById('legend-box').style.display='block';
+      document.getElementById('scale-box').style.display='block';
+    } else {
+      document.getElementById('mapa-canvas').style.display='none';
+      document.getElementById('sat-map').style.display='block';
+      document.getElementById('legend-box').style.display='none';
+      document.getElementById('scale-box').style.display='none';
+      setTimeout(function(){dibujarSatelital(_proy);},150);
+    }
+    ['b-xl','b-pdf','b-jpg'].forEach(function(bid){document.getElementById(bid).disabled=false;});
   },900);
 }
 
@@ -824,6 +869,188 @@ function rwc(cls,k,v){return '<div class="rp-row"><span class="rk">'+k+'</span><
 function kpi(v,u,l){return '<div class="kpi-card"><div class="kpi-v">'+v+'</div>'+(u?'<div class="kpi-u">'+u+'</div>':'')+'<div class="kpi-l">'+l+'</div></div>';}
 
 /* ═══ EXPORTS ═══ */
+/* ═══ TOGGLE VISTA ═══ */
+window.toggleVista=function(modo){
+  _vistaMode=modo;
+  var esqBtn=document.getElementById('btn-v-esq');
+  var satBtn=document.getElementById('btn-v-sat');
+  if(modo==='esquema'){
+    esqBtn.classList.add('active'); satBtn.classList.remove('active');
+    document.getElementById('mapa-canvas').style.display='block';
+    document.getElementById('sat-map').style.display='none';
+    document.getElementById('legend-box').style.display='block';
+    document.getElementById('scale-box').style.display='block';
+  } else {
+    satBtn.classList.add('active'); esqBtn.classList.remove('active');
+    document.getElementById('mapa-canvas').style.display='none';
+    document.getElementById('sat-map').style.display='block';
+    document.getElementById('legend-box').style.display='none';
+    document.getElementById('scale-box').style.display='none';
+    if(_proy) setTimeout(function(){dibujarSatelital(_proy);},100);
+  }
+};
+
+/* ═══ VISTA SATELITAL ═══ */
+function calcZoom(lado_km){
+  if(lado_km<0.5)return 17; if(lado_km<1)return 16; if(lado_km<2)return 15;
+  if(lado_km<4)return 14;   if(lado_km<8)return 13; if(lado_km<15)return 12;
+  if(lado_km<30)return 11;  return 10;
+}
+
+function dibujarSatelital(pr){
+  if(!pr.c.lat){alert('Sin coordenadas para este municipio.');return;}
+  var lat0=pr.c.lat, lng0=pr.c.lng;
+  var lado_km=Math.sqrt(pr.area_cob);
+
+  // Limpiar mapa anterior
+  if(_lmap){_lmap.remove();_lmap=null;}
+
+  var mapDiv=document.getElementById('sat-map');
+  _lmap=L.map(mapDiv,{center:[lat0,lng0],zoom:calcZoom(lado_km),zoomControl:true,attributionControl:true});
+
+  // Tile satelital ESRI
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+    attribution:'© Esri · Maxar · Earthstar Geographics',maxZoom:20
+  }).addTo(_lmap);
+
+  // Capa de etiquetas encima
+  L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
+    attribution:'',maxZoom:20,opacity:0.8,pane:'markerPane'
+  }).addTo(_lmap);
+
+  // ══ Generar red en coordenadas geográficas ══
+  var den=pr.p.den;
+  var dLat=1/111.32;
+  var dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
+
+  var half=lado_km*0.55;
+  var minLat=lat0-half*dLat, maxLat=lat0+half*dLat;
+  var minLng=lng0-half*dLng, maxLng=lng0+half*dLng;
+
+  // Espaciado avenidas
+  var av_km=den==='alta'?0.25:den==='media'?0.40:0.65;
+  var st_km=den==='alta'?0.08:den==='media'?0.13:0.22;
+
+  var avH=[], avV=[];
+  for(var lt=minLat;lt<=maxLat+1e-9;lt+=av_km*dLat)avH.push(parseFloat(lt.toFixed(7)));
+  for(var lg=minLng;lg<=maxLng+1e-9;lg+=av_km*dLng)avV.push(parseFloat(lg.toFixed(7)));
+
+  // Troncal central
+  var midH=avH[Math.floor(avH.length/2)]; if(!midH)midH=lat0;
+  var midV=avV[Math.floor(avV.length/2)]; if(!midV)midV=lng0;
+
+  // ─ Distribución (verde fino)
+  var dStyle={color:'#69f0ae',weight:1.8,opacity:0.65};
+  for(var lt=minLat;lt<=maxLat+1e-9;lt+=st_km*dLat){
+    if(Math.abs(lt-midH)<st_km*dLat*0.4)continue;
+    L.polyline([[lt,minLng],[lt,maxLng]],dStyle).addTo(_lmap);
+  }
+  for(var lg=minLng;lg<=maxLng+1e-9;lg+=st_km*dLng){
+    if(Math.abs(lg-midV)<st_km*dLng*0.4)continue;
+    L.polyline([[minLat,lg],[maxLat,lg]],dStyle).addTo(_lmap);
+  }
+
+  // ─ Secundaria (naranja)
+  var sStyle={color:'#ff9800',weight:2.8,opacity:0.88};
+  avH.forEach(function(lt){
+    if(Math.abs(lt-midH)<av_km*dLat*0.4)return;
+    L.polyline([[lt,minLng],[lt,maxLng]],sStyle).addTo(_lmap);
+  });
+  avV.forEach(function(lg){
+    if(Math.abs(lg-midV)<av_km*dLng*0.4)return;
+    L.polyline([[minLat,lg],[maxLat,lg]],sStyle).addTo(_lmap);
+  });
+
+  // ─ Troncal (rojo grueso)
+  var tStyle={color:'#e53935',weight:4.5,opacity:0.95};
+  L.polyline([[midH,minLng-av_km*dLng*0.4],[midH,maxLng]],tStyle).addTo(_lmap);
+  L.polyline([[minLat,midV],[maxLat,midV]],tStyle).addTo(_lmap);
+
+  // ─ Planta (exterior esquina SO)
+  var pLat=minLat-av_km*dLat*0.45, pLng=minLng-av_km*dLng*0.45;
+  L.polyline([[pLat,pLng],[midH,minLng]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(_lmap);
+  L.polyline([[pLat,pLng],[minLat,midV]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(_lmap);
+
+  // Icono planta personalizado
+  var plantIcon=L.divIcon({className:'',html:
+    '<div style="width:22px;height:22px;background:#ffd600;border:2px solid #fff;border-radius:50%;'
+    +'display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 0 10px rgba(255,214,0,0.8);">⭐</div>',
+    iconSize:[22,22],iconAnchor:[11,11]
+  });
+  L.marker([pLat,pLng],{icon:plantIcon})
+   .bindPopup('<b>⭐ Planta GLP</b><br>'+pr.n_pla+' unidad(es)<br>Caudal: '+fmt(pr.Q_pla,1)+' m³/h c/u')
+   .addTo(_lmap);
+
+  // ─ ERMs (círculos púrpura) en intersecciones
+  var ermCnt=0;
+  var ermStep=Math.max(1,Math.floor((avH.length*avV.length)/pr.n_erm));
+  var idx=0;
+  avH.forEach(function(lt){
+    avV.forEach(function(lg){
+      if(idx%ermStep===0&&ermCnt<pr.n_erm){
+        L.circleMarker([lt,lg],{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95,
+          className:'erm-marker'})
+         .bindPopup('<b>🔵 Estación ERM #'+(ermCnt+1)+'</b><br>Red: '+pr.p.pres+' presión<br>Material: '+pr.p.mat)
+         .addTo(_lmap);
+        ermCnt++;
+      }
+      idx++;
+    });
+  });
+
+  // ─ Válvulas (cuadrados cyan) a lo largo del troncal
+  var valStep=Math.max(1,Math.floor(avV.length/Math.min(Math.floor(pr.n_val/2)+1,avV.length)));
+  avV.forEach(function(lg,i){
+    if(i%valStep===0){
+      L.circleMarker([midH,lg],{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.85})
+       .bindPopup('<b>🔷 Válvula de seccionamiento</b>')
+       .addTo(_lmap);
+    }
+  });
+  avH.forEach(function(lt,i){
+    if(i%valStep===0){
+      L.circleMarker([lt,midV],{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.85})
+       .addTo(_lmap);
+    }
+  });
+
+  // ─ Polígono del área de cobertura (borde)
+  var bounds=[[minLat,minLng],[minLat,maxLng],[maxLat,maxLng],[maxLat,minLng]];
+  L.polygon(bounds,{color:'rgba(124,77,255,0.6)',weight:2,fillColor:'rgba(124,77,255,0.04)',dashArray:'8,4'}).addTo(_lmap);
+
+  // ─ Leyenda Leaflet
+  var leyenda=L.control({position:'bottomleft'});
+  leyenda.onAdd=function(){
+    var div=L.DomUtil.create('div','sat-legend');
+    div.innerHTML=
+      '<div class="sat-legend-title">LEYENDA RED GLP</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#e53935;"></div>Red troncal</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#ff9800;height:2px;"></div>Red secundaria</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Planta almacen.</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#7c4dff;"></div>Estación ERM</div>'+
+      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#00c8ff;width:8px;height:8px;border-radius:2px;"></div>Válvula secciona.</div>';
+    return div;
+  };
+  leyenda.addTo(_lmap);
+
+  // Info panel derecho
+  var info=L.control({position:'topright'});
+  info.onAdd=function(){
+    var div=L.DomUtil.create('div','sat-legend');
+    div.innerHTML=
+      '<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+'</div>'+
+      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Usuarios</span><b style="color:#7c4dff">'+fmt(pr.u_tot)+'</b></div>'+
+      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Caudal</span><b style="color:#7c4dff">'+fmt(pr.Q_tot,1)+' m³/h</b></div>'+
+      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Red total</span><b style="color:#7c4dff">'+fmt(pr.L_tot,1)+' km</b></div>'+
+      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">ERMs</span><b style="color:#7c4dff">'+pr.n_erm+' ud.</b></div>';
+    return div;
+  };
+  info.addTo(_lmap);
+
+  _lmap.invalidateSize();
+}
+
 window.expExcel=function(){
   if(!_proy)return;var pr=_proy,c=pr.c;
   var wb=XLSX.utils.book_new();
@@ -862,16 +1089,40 @@ window.expExcel=function(){
 
 window.expJPEG=function(){
   if(!_proy)return;
-  var cv=document.getElementById('mapa-canvas');
-  var a=document.createElement('a');
-  a.download='Mapa_GLP_'+_proy.c.nombre.replace(/ /g,'_')+'.jpg';
-  a.href=cv.toDataURL('image/jpeg',0.92);a.click();
+  var nombre=_proy.c.nombre.replace(/ /g,'_');
+  if(_vistaMode==='esquema'){
+    // Export canvas directo
+    var cv=document.getElementById('mapa-canvas');
+    var a=document.createElement('a');
+    a.download='Mapa_Esquema_GLP_'+nombre+'.jpg';
+    a.href=cv.toDataURL('image/jpeg',0.92);a.click();
+  } else {
+    // Export satelital con html2canvas
+    var satDiv=document.getElementById('sat-map');
+    html2canvas(satDiv,{useCORS:true,allowTaint:true,scale:1.5,backgroundColor:'#000814'}).then(function(cv2){
+      var a=document.createElement('a');
+      a.download='Mapa_Satelital_GLP_'+nombre+'.jpg';
+      a.href=cv2.toDataURL('image/jpeg',0.88);a.click();
+    }).catch(function(){
+      alert('Para exportar la vista satelital, usa la captura de pantalla del sistema (Ctrl+Shift+S).');
+    });
+  }
 };
 
 window.expPDF=function(){
-  if(!_proy)return;var pr=_proy,c=pr.c;
-  var cv=document.getElementById('mapa-canvas');
-  var img=cv.toDataURL('image/jpeg',0.85);
+  if(!_proy)return;
+  if(_vistaMode==='satelital'){
+    // Para satelital: capturar con html2canvas luego generar PDF
+    html2canvas(document.getElementById('sat-map'),{useCORS:true,allowTaint:true,scale:1.2,backgroundColor:'#000814'})
+      .then(function(cv2){_generarPDF(_proy,cv2.toDataURL('image/jpeg',0.82),'Satelital');})
+      .catch(function(){_generarPDF(_proy,document.getElementById('mapa-canvas').toDataURL('image/jpeg',0.85),'Esquema');});
+    return;
+  }
+  _generarPDF(_proy,document.getElementById('mapa-canvas').toDataURL('image/jpeg',0.85),'Esquema');
+};
+
+function _generarPDF(pr,img,vistaLabel){
+  var c=pr.c;
   var jsPDF=window.jspdf.jsPDF;
   var doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   var W=297,H=210;
@@ -910,8 +1161,8 @@ window.expPDF=function(){
       doc.text(f[0],rx,cy2);doc.text(f[1],W-8,cy2,{align:'right'});cy2+=4;
     } else {cy2+=2;}
   });
-  doc.save('Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'.pdf');
-};
+  doc.save('Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'_'+vistaLabel+'.pdf');
+}
 </script>
 </body>
 </html>
