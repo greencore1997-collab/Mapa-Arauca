@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Centro de Proyecciones GLP · Araucana de Gases</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:'Rajdhani',sans-serif;color:#e0e8f0;}
+
+/* PRE-INTRO */
+#pre-intro{position:fixed;inset:0;z-index:999999;background:#000814;display:flex;align-items:center;justify-content:center;}
+#pi-canvas{display:block;}
+
+/* INTRO */
+#intro{position:fixed;inset:0;z-index:99999;background:#000814;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+.intro-scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 50%,rgba(124,77,255,0.018) 50%);background-size:100% 4px;animation:scan 0.1s linear infinite;}
+@keyframes scan{to{background-position:0 4px;}}
+.intro-corner{position:absolute;width:55px;height:55px;border-color:#7c4dff;border-style:solid;border-width:0;}
+.ic-tl{top:20px;left:20px;border-top-width:3px;border-left-width:3px;}
+.ic-tr{top:20px;right:20px;border-top-width:3px;border-right-width:3px;}
+.ic-bl{bottom:20px;left:20px;border-bottom-width:3px;border-left-width:3px;}
+.ic-br{bottom:20px;right:20px;border-bottom-width:3px;border-right-width:3px;}
+.intro-eyebrow{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:5px;color:rgba(124,77,255,0.55);text-align:center;}
+.intro-title{font-family:'Orbitron',monospace;font-size:clamp(20px,3.5vw,40px);font-weight:900;letter-spacing:4px;color:#fff;text-align:center;line-height:1.25;text-shadow:0 0 40px rgba(124,77,255,0.9);}
+.intro-sub{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:rgba(124,77,255,0.6);text-align:center;}
+.btn-iniciar{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:3px;color:#000c1a;background:linear-gradient(135deg,#7c4dff,#512da8);border:none;border-radius:10px;padding:14px 38px;cursor:pointer;box-shadow:0 0 30px rgba(124,77,255,0.5);transition:all 0.3s;margin-top:8px;}
+.btn-iniciar:hover{background:linear-gradient(135deg,#9c6dff,#7c4dff);box-shadow:0 0 55px rgba(124,77,255,0.8);transform:scale(1.04);}
+
+/* DASHBOARD */
+#dashboard{position:fixed;inset:0;z-index:1;display:none;flex-direction:column;background:#000814;}
+
+/* Header */
+#dash-header{height:52px;flex-shrink:0;background:rgba(0,12,35,0.97);border-bottom:1px solid rgba(124,77,255,0.2);display:flex;align-items:center;padding:0 20px;gap:14px;}
+.dh-logo{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;color:rgba(124,77,255,0.45);}
+.dh-sep{width:1px;height:26px;background:rgba(124,77,255,0.18);}
+.dh-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px;color:#7c4dff;}
+.dh-sub{font-size:10px;color:rgba(180,200,190,0.45);letter-spacing:1px;}
+.dh-space{flex:1;}
+.dh-badge{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:rgba(105,240,174,0.45);border:1px solid rgba(105,240,174,0.18);padding:3px 9px;border-radius:4px;}
+.dh-back{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:rgba(124,77,255,0.55);border:1px solid rgba(124,77,255,0.2);padding:4px 10px;border-radius:5px;cursor:pointer;text-decoration:none;transition:all 0.2s;}
+.dh-back:hover{color:#7c4dff;border-color:rgba(124,77,255,0.5);background:rgba(124,77,255,0.07);}
+
+/* Body layout */
+#dash-body{flex:1;display:flex;overflow:hidden;}
+
+/* Config sidebar */
+#config-panel{width:274px;flex-shrink:0;background:rgba(0,8,24,0.85);border-right:1px solid rgba(124,77,255,0.13);display:flex;flex-direction:column;overflow-y:auto;}
+.cp-sec{padding:13px 14px;border-bottom:1px solid rgba(124,77,255,0.07);}
+.cp-sec-title{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;color:rgba(124,77,255,0.55);margin-bottom:11px;display:flex;align-items:center;gap:6px;}
+.cp-sec-title::before{content:'';width:3px;height:10px;background:#7c4dff;border-radius:2px;}
+.cp-f{margin-bottom:9px;}
+.cp-lbl{font-size:8.5px;letter-spacing:1px;color:rgba(180,200,190,0.45);margin-bottom:4px;display:block;}
+.cp-sel,.cp-inp{width:100%;background:rgba(0,12,35,0.85);border:1px solid rgba(124,77,255,0.18);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:6px;padding:7px 10px;outline:none;transition:border-color 0.2s;}
+.cp-sel:focus,.cp-inp:focus{border-color:rgba(124,77,255,0.55);}
+.cp-rng{width:100%;accent-color:#7c4dff;margin-top:2px;}
+.cp-rng-val{font-family:'Orbitron',monospace;font-size:10px;color:#7c4dff;text-align:right;margin-top:2px;}
+
+.btn-proy{margin:12px 14px;width:calc(100% - 28px);font-family:'Orbitron',monospace;font-size:9.5px;font-weight:700;letter-spacing:2px;color:#000c1a;background:linear-gradient(135deg,#7c4dff,#512da8);border:none;border-radius:9px;padding:13px;cursor:pointer;box-shadow:0 0 20px rgba(124,77,255,0.35);transition:all 0.3s;}
+.btn-proy:hover:not(:disabled){background:linear-gradient(135deg,#9c6dff,#7c4dff);box-shadow:0 0 38px rgba(124,77,255,0.6);}
+.btn-proy:disabled{opacity:0.35;cursor:not-allowed;}
+
+#ciudad-res{padding:0 14px 12px;}
+.cr-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:9.5px;}
+.cr-key{color:rgba(180,200,190,0.4);}
+.cr-val{font-family:'Orbitron',monospace;font-size:8.5px;color:#c0d0e0;}
+
+/* Main */
+#main-area{flex:1;display:flex;overflow:hidden;}
+
+/* Canvas */
+#canvas-wrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000c1e;overflow:hidden;}
+#mapa-canvas{display:none;border:1px solid rgba(124,77,255,0.2);border-radius:3px;box-shadow:0 0 40px rgba(124,77,255,0.12);}
+#canvas-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:rgba(124,77,255,0.25);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;text-align:center;}
+
+#legend-box{position:absolute;bottom:12px;left:12px;background:rgba(0,8,24,0.9);border:1px solid rgba(124,77,255,0.18);border-radius:8px;padding:10px 12px;display:none;}
+.leg-t{font-family:'Orbitron',monospace;font-size:6.5px;letter-spacing:2px;color:rgba(124,77,255,0.55);margin-bottom:8px;}
+.leg-it{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.leg-ln{height:3px;border-radius:2px;flex-shrink:0;}
+.leg-ci{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.leg-sq{width:8px;height:8px;flex-shrink:0;}
+.leg-lb{font-size:8px;color:rgba(200,220,210,0.65);}
+
+#scale-box{position:absolute;bottom:12px;right:12px;background:rgba(0,8,24,0.9);border:1px solid rgba(124,77,255,0.13);border-radius:6px;padding:8px 12px;font-family:'Orbitron',monospace;font-size:6.5px;color:rgba(180,200,190,0.45);display:none;text-align:right;line-height:1.7;}
+
+#proy-load{position:absolute;inset:0;z-index:50;background:rgba(0,8,24,0.88);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.pl-spin{width:38px;height:38px;border:3px solid rgba(124,77,255,0.18);border-top-color:#7c4dff;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pl-txt{font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:2px;color:rgba(124,77,255,0.65);}
+
+/* Report panel */
+#report-panel{width:316px;flex-shrink:0;background:rgba(0,8,24,0.85);border-left:1px solid rgba(124,77,255,0.13);display:flex;flex-direction:column;overflow:hidden;}
+#rp-head{padding:11px 14px;border-bottom:1px solid rgba(124,77,255,0.1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rph-title{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(124,77,255,0.65);}
+.exp-row{display:flex;gap:5px;}
+.btn-ep{font-family:'Orbitron',monospace;font-size:6.5px;letter-spacing:1px;padding:5px 8px;border-radius:5px;cursor:pointer;border:1px solid;transition:all 0.2s;font-weight:700;}
+.ep-xl{color:#69f0ae;border-color:rgba(105,240,174,0.28);background:rgba(105,240,174,0.06);}
+.ep-xl:hover:not(:disabled){background:rgba(105,240,174,0.14);}
+.ep-pdf{color:#ff7043;border-color:rgba(255,112,67,0.28);background:rgba(255,112,67,0.06);}
+.ep-pdf:hover:not(:disabled){background:rgba(255,112,67,0.14);}
+.ep-jpg{color:#ffd600;border-color:rgba(255,214,0,0.28);background:rgba(255,214,0,0.06);}
+.ep-jpg:hover:not(:disabled){background:rgba(255,214,0,0.14);}
+.btn-ep:disabled{opacity:0.28;cursor:not-allowed;}
+
+#rp-body{flex:1;overflow-y:auto;padding:13px 14px;}
+#rp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:rgba(124,77,255,0.25);font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:2px;text-align:center;}
+#rp-content{display:none;}
+
+.rps{margin-bottom:15px;}
+.rps-t{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:2px;color:rgba(124,77,255,0.55);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid rgba(124,77,255,0.1);display:flex;align-items:center;gap:5px;}
+.rps-t::before{content:'';width:2px;height:8px;background:#7c4dff;border-radius:1px;}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.kpi-card{background:rgba(0,12,35,0.6);border:1px solid rgba(124,77,255,0.12);border-radius:7px;padding:8px 9px;}
+.kpi-v{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;color:#7c4dff;line-height:1;}
+.kpi-u{font-size:7.5px;color:rgba(180,200,190,0.38);margin-top:1px;}
+.kpi-l{font-size:8px;color:rgba(180,200,190,0.5);margin-top:3px;}
+
+.rp-row{display:flex;justify-content:space-between;align-items:center;padding:3.5px 0;border-bottom:1px solid rgba(124,77,255,0.04);font-size:9.5px;}
+.rp-row:last-child{border-bottom:none;}
+.rk{color:rgba(180,200,190,0.45);}
+.rv{font-family:'Orbitron',monospace;font-size:8.5px;color:#e0e8f0;}
+.rv.trunk{color:#e53935;} .rv.sec{color:#ff9800;} .rv.dist{color:#69f0ae;} .rv.inv{color:#ffd600;}
+
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(124,77,255,0.28);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- PRE-INTRO -->
+<div id="pre-intro"><canvas id="pi-canvas"></canvas></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-scan"></div>
+  <div class="intro-corner ic-tl"></div><div class="intro-corner ic-tr"></div>
+  <div class="intro-corner ic-bl"></div><div class="intro-corner ic-br"></div>
+  <div class="intro-eyebrow">ARAUCANA DE GASES S.A. E.S.P.</div>
+  <div class="intro-title">CENTRO DE<br>PROYECCIONES GLP</div>
+  <div class="intro-sub">DISEÑO DE REDES URBANAS · COLOMBIA</div>
+  <button class="btn-iniciar" onclick="iniciarDash()">▶ INICIAR PROYECTOR</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div id="dash-header">
+    <div class="dh-logo">ARAUCANA DE GASES</div>
+    <div class="dh-sep"></div>
+    <div class="dh-title">🗺 CENTRO DE PROYECCIONES GLP</div>
+    <div class="dh-sep"></div>
+    <div class="dh-sub">DISEÑO DE REDES URBANAS · COLOMBIA</div>
+    <div class="dh-space"></div>
+    <a class="dh-back" href="index.html">← MÓDULOS</a>
+    <div class="dh-badge">GLP NETWORK DESIGNER v1.0</div>
+  </div>
+
+  <div id="dash-body">
+    <!-- Config -->
+    <div id="config-panel">
+      <div class="cp-sec">
+        <div class="cp-sec-title">LOCALIZACIÓN</div>
+        <div class="cp-f">
+          <label class="cp-lbl">DEPARTAMENTO</label>
+          <select class="cp-sel" id="sel-dpto" onchange="filtrarCiudades()">
+            <option value="">— Todos los departamentos —</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">MUNICIPIO / CIUDAD</label>
+          <select class="cp-sel" id="sel-ciudad" onchange="onCiudadChange()">
+            <option value="">— Seleccione municipio —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cp-sec">
+        <div class="cp-sec-title">PARÁMETROS DE DISEÑO</div>
+        <div class="cp-f">
+          <label class="cp-lbl">TIPO DE ÁREA PREDOMINANTE</label>
+          <select class="cp-sel" id="sel-tipo">
+            <option value="residencial">Residencial</option>
+            <option value="mixto" selected>Mixto (Residencial + Comercial)</option>
+            <option value="comercial">Comercial</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">COBERTURA PROYECTADA</label>
+          <input type="range" class="cp-rng" id="rng-cob" min="20" max="100" step="5" value="75"
+            oninput="document.getElementById('v-cob').textContent=this.value+'%'">
+          <div class="cp-rng-val" id="v-cob">75%</div>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">HORIZONTE DE DISEÑO</label>
+          <select class="cp-sel" id="sel-hor">
+            <option value="5">5 años</option>
+            <option value="10">10 años</option>
+            <option value="15" selected>15 años</option>
+            <option value="20">20 años</option>
+            <option value="25">25 años</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">NIVEL DE PRESIÓN DE DISEÑO</label>
+          <select class="cp-sel" id="sel-pres">
+            <option value="baja">Baja presión (&lt; 50 mbar)</option>
+            <option value="media" selected>Media presión (50 – 400 mbar)</option>
+            <option value="alta">Alta presión (&gt; 400 mbar)</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">MATERIAL TUBERÍA PRINCIPAL</label>
+          <select class="cp-sel" id="sel-mat">
+            <option value="PE80">PE80 — Polietileno media densidad</option>
+            <option value="PE100" selected>PE100 — Polietileno alta densidad</option>
+            <option value="acero">Acero carbono ASTM A53</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">DENSIDAD CONSTRUCTIVA</label>
+          <select class="cp-sel" id="sel-den">
+            <option value="baja">Baja (vivienda dispersa)</option>
+            <option value="media" selected>Media (manzana estándar)</option>
+            <option value="alta">Alta (edificios / multifamiliar)</option>
+          </select>
+        </div>
+        <div class="cp-f">
+          <label class="cp-lbl">FACTOR DE CRECIMIENTO (anual %)</label>
+          <input type="number" class="cp-inp" id="inp-crec" min="0" max="10" step="0.1" value="" placeholder="Auto (según municipio)">
+        </div>
+      </div>
+
+      <button class="btn-proy" id="btn-proy" onclick="generarProyeccion()" disabled>
+        ⚡ GENERAR PROYECCIÓN
+      </button>
+
+      <div id="ciudad-res" style="display:none">
+        <div class="cp-sec-title" style="margin-bottom:8px;">DATOS BASE MUNICIPIO</div>
+        <div id="res-content"></div>
+      </div>
+    </div>
+
+    <!-- Main (canvas) -->
+    <div id="main-area">
+      <div id="canvas-wrap">
+        <div id="canvas-ph">
+          <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="8" width="56" height="56" rx="4" stroke="#7c4dff" stroke-width="1.2" opacity="0.4"/>
+            <line x1="8" y1="26" x2="64" y2="26" stroke="#7c4dff" stroke-width="0.5" opacity="0.3"/>
+            <line x1="8" y1="44" x2="64" y2="44" stroke="#7c4dff" stroke-width="0.5" opacity="0.3"/>
+            <line x1="26" y1="8" x2="26" y2="64" stroke="#7c4dff" stroke-width="0.5" opacity="0.3"/>
+            <line x1="44" y1="8" x2="44" y2="64" stroke="#7c4dff" stroke-width="0.5" opacity="0.3"/>
+            <circle cx="26" cy="26" r="4" fill="#7c4dff" opacity="0.35"/>
+            <circle cx="44" cy="44" r="4" fill="#7c4dff" opacity="0.35"/>
+            <line x1="20" y1="36" x2="52" y2="36" stroke="#e53935" stroke-width="2" opacity="0.3"/>
+            <line x1="36" y1="14" x2="36" y2="58" stroke="#e53935" stroke-width="2" opacity="0.3"/>
+          </svg>
+          <div>SELECCIONE CIUDAD Y PARÁMETROS<br>PARA GENERAR LA PROYECCIÓN</div>
+        </div>
+
+        <canvas id="mapa-canvas"></canvas>
+
+        <div id="proy-load">
+          <div class="pl-spin"></div>
+          <div class="pl-txt">CALCULANDO DISEÑO DE RED...</div>
+        </div>
+
+        <div id="legend-box">
+          <div class="leg-t">LEYENDA RED GLP</div>
+          <div class="leg-it"><div class="leg-ln" style="width:22px;background:#e53935;"></div><span class="leg-lb">Red troncal (primaria)</span></div>
+          <div class="leg-it"><div class="leg-ln" style="width:22px;background:#ff9800;height:2px;"></div><span class="leg-lb">Red secundaria</span></div>
+          <div class="leg-it"><div class="leg-ln" style="width:22px;background:#69f0ae;height:1.5px;"></div><span class="leg-lb">Red de distribución</span></div>
+          <div class="leg-it"><div style="width:12px;height:12px;background:#ffd600;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);flex-shrink:0;"></div><span class="leg-lb">Planta almacenamiento</span></div>
+          <div class="leg-it"><div class="leg-ci" style="background:#7c4dff;border:1.5px solid #fff;"></div><span class="leg-lb">Estación reguladora (ERM)</span></div>
+          <div class="leg-it"><div class="leg-sq" style="background:#00c8ff;"></div><span class="leg-lb">Válvula de seccionamiento</span></div>
+        </div>
+
+        <div id="scale-box">
+          <div id="scale-txt"></div>
+          <div style="border-top:1px solid rgba(124,77,255,0.25);padding-top:3px;margin-top:3px;color:#7c4dff;">↑ N</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report -->
+    <div id="report-panel">
+      <div id="rp-head">
+        <div class="rph-title">📊 REPORTE TÉCNICO</div>
+        <div class="exp-row">
+          <button class="btn-ep ep-xl" id="b-xl" onclick="expExcel()" disabled>XLS</button>
+          <button class="btn-ep ep-pdf" id="b-pdf" onclick="expPDF()" disabled>PDF</button>
+          <button class="btn-ep ep-jpg" id="b-jpg" onclick="expJPEG()" disabled>IMG</button>
+        </div>
+      </div>
+      <div id="rp-body">
+        <div id="rp-empty"><div style="font-size:30px;opacity:0.25">🗺</div><div>GENERA UNA PROYECCIÓN<br>PARA VER EL REPORTE</div></div>
+        <div id="rp-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ DATOS CIUDADES ═══ */
+var CIUDADES=[
+  {id:'arauca',nombre:'Arauca',dpto:'Arauca',pop:96000,area_urb:12,ppv:3.2,crec:2.2},
+  {id:'saravena',nombre:'Saravena',dpto:'Arauca',pop:48000,area_urb:5,ppv:3.3,crec:2.5},
+  {id:'arauquita',nombre:'Arauquita',dpto:'Arauca',pop:20000,area_urb:2.5,ppv:3.4,crec:1.8},
+  {id:'tame',nombre:'Tame',dpto:'Arauca',pop:28000,area_urb:3.5,ppv:3.5,crec:1.6},
+  {id:'fortul',nombre:'Fortul',dpto:'Arauca',pop:16000,area_urb:1.8,ppv:3.5,crec:1.5},
+  {id:'rondon',nombre:'Puerto Rondón',dpto:'Arauca',pop:5500,area_urb:0.7,ppv:3.6,crec:1.2},
+  {id:'cravo',nombre:'Cravo Norte',dpto:'Arauca',pop:4000,area_urb:0.5,ppv:3.7,crec:1.0},
+  {id:'bogota',nombre:'Bogotá D.C.',dpto:'Cundinamarca',pop:7412566,area_urb:307,ppv:2.8,crec:1.1},
+  {id:'medellin',nombre:'Medellín',dpto:'Antioquia',pop:2533424,area_urb:105,ppv:2.6,crec:0.9},
+  {id:'cali',nombre:'Cali',dpto:'Valle del Cauca',pop:2471474,area_urb:120,ppv:2.9,crec:1.0},
+  {id:'barranquilla',nombre:'Barranquilla',dpto:'Atlántico',pop:1232766,area_urb:154,ppv:3.1,crec:1.3},
+  {id:'cartagena',nombre:'Cartagena',dpto:'Bolívar',pop:1028736,area_urb:98,ppv:3.3,crec:1.5},
+  {id:'cucuta',nombre:'Cúcuta',dpto:'Norte de Santander',pop:764254,area_urb:170,ppv:3.2,crec:1.2},
+  {id:'bucaramanga',nombre:'Bucaramanga',dpto:'Santander',pop:582652,area_urb:165,ppv:2.8,crec:0.8},
+  {id:'ibague',nombre:'Ibagué',dpto:'Tolima',pop:563012,area_urb:140,ppv:3.0,crec:1.1},
+  {id:'pereira',nombre:'Pereira',dpto:'Risaralda',pop:474335,area_urb:120,ppv:2.9,crec:1.0},
+  {id:'manizales',nombre:'Manizales',dpto:'Caldas',pop:432224,area_urb:90,ppv:2.7,crec:0.7},
+  {id:'armenia',nombre:'Armenia',dpto:'Quindío',pop:302564,area_urb:58,ppv:2.8,crec:0.9},
+  {id:'villavicencio',nombre:'Villavicencio',dpto:'Meta',pop:493364,area_urb:110,ppv:3.1,crec:2.1},
+  {id:'pasto',nombre:'San Juan de Pasto',dpto:'Nariño',pop:444886,area_urb:88,ppv:3.2,crec:1.4},
+  {id:'monteria',nombre:'Montería',dpto:'Córdoba',pop:421056,area_urb:80,ppv:3.5,crec:1.8},
+  {id:'valledupar',nombre:'Valledupar',dpto:'Cesar',pop:462064,area_urb:95,ppv:3.4,crec:1.7},
+  {id:'santa_marta',nombre:'Santa Marta',dpto:'Magdalena',pop:523326,area_urb:115,ppv:3.2,crec:1.6},
+  {id:'neiva',nombre:'Neiva',dpto:'Huila',pop:344033,area_urb:78,ppv:3.1,crec:1.3},
+  {id:'popayan',nombre:'Popayán',dpto:'Cauca',pop:280121,area_urb:62,ppv:3.0,crec:1.2},
+  {id:'tunja',nombre:'Tunja',dpto:'Boyacá',pop:180807,area_urb:38,ppv:2.8,crec:0.9},
+  {id:'sincelejo',nombre:'Sincelejo',dpto:'Sucre',pop:288886,area_urb:68,ppv:3.5,crec:1.5},
+  {id:'yopal',nombre:'Yopal',dpto:'Casanare',pop:160000,area_urb:32,ppv:3.2,crec:2.8},
+  {id:'florencia',nombre:'Florencia',dpto:'Caquetá',pop:172000,area_urb:36,ppv:3.3,crec:1.6},
+  {id:'riohacha',nombre:'Riohacha',dpto:'La Guajira',pop:272621,area_urb:60,ppv:3.8,crec:2.0},
+  {id:'quibdo',nombre:'Quibdó',dpto:'Chocó',pop:122071,area_urb:28,ppv:4.0,crec:1.4},
+  {id:'mocoa',nombre:'Mocoa',dpto:'Putumayo',pop:46000,area_urb:10,ppv:3.4,crec:1.8},
+  {id:'leticia',nombre:'Leticia',dpto:'Amazonas',pop:42000,area_urb:8,ppv:3.5,crec:1.5},
+  {id:'yopal',nombre:'Yopal',dpto:'Casanare',pop:160000,area_urb:32,ppv:3.2,crec:2.8},
+  {id:'san_jose',nombre:'San José del Guaviare',dpto:'Guaviare',pop:62000,area_urb:12,ppv:3.5,crec:1.8},
+  {id:'mitu',nombre:'Mitú',dpto:'Vaupés',pop:18000,area_urb:3,ppv:4.0,crec:1.2},
+  {id:'inirida',nombre:'Puerto Inírida',dpto:'Guainía',pop:16000,area_urb:2.5,ppv:4.1,crec:1.0},
+];
+
+var _proy=null;
+
+window.onload=function(){
+  iniciarPreIntro();
+  poblarDptos();
+};
+
+/* ═══ SELECTORES ═══ */
+function poblarDptos(){
+  var dptos=[...new Set(CIUDADES.map(function(c){return c.dpto;}))].sort();
+  var sel=document.getElementById('sel-dpto');
+  dptos.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+  poblarCiudades('');
+}
+function filtrarCiudades(){poblarCiudades(document.getElementById('sel-dpto').value);}
+function poblarCiudades(dpto){
+  var sel=document.getElementById('sel-ciudad');
+  sel.innerHTML='<option value="">— Seleccione municipio —</option>';
+  var lista=dpto?CIUDADES.filter(function(c){return c.dpto===dpto;}):CIUDADES.slice();
+  // dedup
+  var seen={};
+  lista=lista.filter(function(c){if(seen[c.id])return false;seen[c.id]=true;return true;});
+  lista.sort(function(a,b){return a.nombre.localeCompare(b.nombre);});
+  lista.forEach(function(c){
+    var o=document.createElement('option');o.value=c.id;
+    o.textContent=c.nombre+(dpto?'':' · '+c.dpto);
+    sel.appendChild(o);
+  });
+}
+function onCiudadChange(){
+  var id=document.getElementById('sel-ciudad').value;
+  var c=CIUDADES.find(function(x){return x.id===id;});
+  document.getElementById('btn-proy').disabled=!c;
+  var res=document.getElementById('ciudad-res');
+  if(!c){res.style.display='none';return;}
+  res.style.display='block';
+  // Auto-fill crecimiento
+  var inp=document.getElementById('inp-crec');
+  if(!inp.value||inp._auto) {inp.value=c.crec.toFixed(1);inp._auto=true;}
+  document.getElementById('res-content').innerHTML=
+    crR('Población actual',fmt(c.pop)+' hab.')+
+    crR('Área urbana aprox.',c.area_urb+' km²')+
+    crR('Pers./vivienda promedio',c.ppv.toFixed(1))+
+    crR('Crecimiento hist.',c.crec.toFixed(1)+'% anual')+
+    crR('Departamento',c.dpto);
+}
+function crR(k,v){return '<div class="cr-row"><span class="cr-key">'+k+'</span><span class="cr-val">'+v+'</span></div>';}
+
+/* ═══ PRE-INTRO ═══ */
+var _piRaf;
+function iniciarPreIntro(){
+  var cv=document.getElementById('pi-canvas');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  var ctx=cv.getContext('2d');
+  var cols=Math.floor(cv.width/14);
+  var drops=Array(cols).fill(0).map(function(){return (Math.random()*cv.height/14)|0;});
+  var chars='GLP·CH₄·C₃H₈·DN·PE100·BAR·MPa·KM·M³·GAS·RED·VIA·ARAUCA·0123456789ABCDEF';
+  function draw(){
+    ctx.fillStyle='rgba(0,8,20,0.08)';ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.font='13px monospace';
+    for(var i=0;i<drops.length;i++){
+      var ch=chars[Math.floor(Math.random()*chars.length)];
+      var x=i*14,y=drops[i]*14;
+      var prog=y/cv.height;
+      ctx.fillStyle=prog<0.5
+        ?'rgba(124,77,255,'+(0.4+prog).toFixed(2)+')'
+        :'rgba(105,240,174,'+((prog-0.5)*1.4+0.35).toFixed(2)+')';
+      ctx.fillText(ch,x,y);
+      if(y>cv.height&&Math.random()>0.975)drops[i]=0; else drops[i]++;
+    }
+    _piRaf=requestAnimationFrame(draw);
+  }
+  draw();
+  setTimeout(mostrarIntro,2800);
+}
+function mostrarIntro(){
+  cancelAnimationFrame(_piRaf);
+  var pi=document.getElementById('pre-intro');
+  pi.style.transition='opacity 0.6s';pi.style.opacity='0';
+  setTimeout(function(){pi.style.display='none';var in2=document.getElementById('intro');in2.style.display='flex';},600);
+}
+function iniciarDash(){
+  var in2=document.getElementById('intro');
+  in2.style.transition='opacity 0.5s';in2.style.opacity='0';
+  setTimeout(function(){in2.style.display='none';document.getElementById('dashboard').style.display='flex';},500);
+}
+
+/* ═══ CÁLCULOS ═══ */
+function calcular(c,p){
+  var hor=parseInt(p.hor);
+  var cob=parseInt(p.cob)/100;
+  var tipo=p.tipo;
+  var den=p.den;
+  var crecAnual=(parseFloat(p.crec)||c.crec)/100;
+
+  var pop_fut=Math.round(c.pop*Math.pow(1+crecAnual,hor));
+  var pop_cob=Math.round(pop_fut*cob);
+  var viviendas=Math.round(pop_cob/c.ppv);
+
+  var mix={res:0,com:0,ind:0};
+  if(tipo==='residencial'){mix.res=0.85;mix.com=0.12;mix.ind=0.03;}
+  else if(tipo==='mixto'){mix.res=0.65;mix.com=0.28;mix.ind=0.07;}
+  else{mix.res=0.30;mix.com=0.52;mix.ind=0.18;}
+
+  var dpx=den==='alta'?0.85:den==='media'?1.0:1.1;
+  var u_res=Math.round(viviendas*mix.res*dpx);
+  var u_com=Math.round(viviendas*mix.com*0.6);
+  var u_ind=Math.round(viviendas*mix.ind*0.15);
+  var u_tot=u_res+u_com+u_ind;
+
+  // Caudales m³/h GLP (propano)
+  var Q_res=u_res*0.075*0.25;
+  var Q_com=u_com*0.35*0.35;
+  var Q_ind=u_ind*2.5*0.55;
+  var Q_tot=Q_res+Q_com+Q_ind;
+  var Q_kgh=Q_tot*1.97; // 1.97 kg/m³ propano
+
+  // Área cobertura
+  var area_cob=c.area_urb*cob;
+  var lado=Math.sqrt(area_cob);
+
+  // Longitudes red (km)
+  var L_trunk=lado*4*1.2;
+  var spc=den==='alta'?0.25:den==='media'?0.40:0.60;
+  var L_sec=(area_cob/spc)*1.25;
+  var dpu=den==='alta'?0.012:den==='media'?0.018:0.026;
+  var L_dist=u_tot*dpu;
+  var L_tot=L_trunk+L_sec+L_dist;
+
+  // Diámetros nominales
+  var dn_t=Q_tot>2000?250:Q_tot>1000?200:Q_tot>500?150:Q_tot>200?100:80;
+  var dn_s=Q_tot>500?63:Q_tot>200?50:40;
+  var dn_d=32;
+
+  // Elementos
+  var n_pla=Math.max(1,Math.ceil(Q_tot/500));
+  var n_erm=Math.ceil(u_tot/1200);
+  var n_val=Math.ceil(L_trunk/0.5)+Math.ceil(L_sec/1.0);
+  var n_aco=u_tot;
+
+  // Cantidades material (m)
+  var m_t=Math.round(L_trunk*1000);
+  var m_s=Math.round(L_sec*1000);
+  var m_d=Math.round(L_dist*1000);
+
+  // Inversión (COP millones)
+  var u_t_cop=p.mat==='acero'?850000:p.mat==='PE100'?280000:240000;
+  var u_s_cop=p.mat==='acero'?600000:180000;
+  var u_d_cop=95000;
+  var I_red=(m_t*u_t_cop+m_s*u_s_cop+m_d*u_d_cop)/1e6;
+  var I_pla=(n_pla*(Q_tot>500?2500000000:1200000000))/1e6;
+  var I_erm=(n_erm*180000000)/1e6;
+  var I_val=(n_val*8500000)/1e6;
+  var I_aco=(n_aco*1200000)/1e6;
+  var I_sub=I_red+I_pla+I_erm+I_val+I_aco;
+  var I_ing=I_sub*0.18;
+  var I_tot=I_sub+I_ing;
+
+  // Presión mbar
+  var presion_txt=p.pres==='baja'?'< 50 mbar':p.pres==='media'?'50 – 400 mbar':'> 400 mbar';
+
+  return {
+    c:c,p:p,
+    pop_act:c.pop,pop_fut:pop_fut,pop_cob:pop_cob,viviendas:viviendas,
+    u_res:u_res,u_com:u_com,u_ind:u_ind,u_tot:u_tot,
+    Q_tot:Q_tot,Q_kgh:Q_kgh,Q_res:Q_res,Q_com:Q_com,Q_ind:Q_ind,
+    n_pla:n_pla,Q_pla:(Q_tot/n_pla),
+    n_erm:n_erm,n_val:n_val,n_aco:n_aco,
+    area_cob:area_cob,
+    L_trunk:L_trunk,L_sec:L_sec,L_dist:L_dist,L_tot:L_tot,
+    dn_t:dn_t,dn_s:dn_s,dn_d:dn_d,
+    m_t:m_t,m_s:m_s,m_d:m_d,
+    I_red:I_red,I_pla:I_pla,I_erm:I_erm,I_val:I_val,I_aco:I_aco,I_ing:I_ing,I_tot:I_tot,
+    presion_txt:presion_txt,
+  };
+}
+
+/* ═══ GENERAR ═══ */
+function generarProyeccion(){
+  var id=document.getElementById('sel-ciudad').value;
+  var c=CIUDADES.find(function(x){return x.id===id;});
+  if(!c)return;
+  var params={
+    tipo:document.getElementById('sel-tipo').value,
+    cob:document.getElementById('rng-cob').value,
+    hor:document.getElementById('sel-hor').value,
+    pres:document.getElementById('sel-pres').value,
+    mat:document.getElementById('sel-mat').value,
+    den:document.getElementById('sel-den').value,
+    crec:document.getElementById('inp-crec').value||c.crec,
+  };
+
+  document.getElementById('proy-load').style.display='flex';
+  document.getElementById('mapa-canvas').style.display='none';
+  document.getElementById('canvas-ph').style.display='none';
+  document.getElementById('legend-box').style.display='none';
+  document.getElementById('scale-box').style.display='none';
+
+  setTimeout(function(){
+    _proy=calcular(c,params);
+    dibujarMapa(_proy);
+    mostrarReporte(_proy);
+    document.getElementById('proy-load').style.display='none';
+    document.getElementById('mapa-canvas').style.display='block';
+    document.getElementById('legend-box').style.display='block';
+    document.getElementById('scale-box').style.display='block';
+    ['b-xl','b-pdf','b-jpg'].forEach(function(id){document.getElementById(id).disabled=false;});
+  },900);
+}
+
+/* ═══ DIBUJO MAPA ═══ */
+function dibujarMapa(pr){
+  var wrap=document.getElementById('canvas-wrap');
+  var W=wrap.clientWidth-32,H=wrap.clientHeight-32;
+  var cv=document.getElementById('mapa-canvas');
+  cv.width=W;cv.height=H;
+  var ctx=cv.getContext('2d');
+
+  // Fondo
+  ctx.fillStyle='#000c1e';ctx.fillRect(0,0,W,H);
+
+  // Definir área de mapa con margen
+  var mx=42,my=28,mw=W-mx-16,mh=H-my-22;
+
+  // Escala visual
+  var lado_km=Math.sqrt(pr.area_cob);
+  var px_km=Math.min(mw,mh)/(lado_km*1.2);
+  var map_w=Math.min(mw,lado_km*1.2*px_km);
+  var map_h=map_w; // cuadrado
+  var ox=mx+(mw-map_w)/2,oy=my+(mh-map_h)/2;
+
+  // Borde zona urbana
+  ctx.fillStyle='rgba(8,18,40,0.95)';
+  roundRect(ctx,ox,oy,map_w,map_h,5,true,false);
+  ctx.strokeStyle='rgba(124,77,255,0.35)';ctx.lineWidth=1.5;
+  roundRect(ctx,ox,oy,map_w,map_h,5,false,true);
+
+  // Cuadrícula
+  var den=pr.p.den;
+  var bpx=den==='alta'?16:den==='media'?24:38;
+  var av=den==='alta'?4:3;
+  var nc=Math.floor(map_w/bpx),nr=Math.floor(map_h/bpx);
+  var bw=map_w/nc,bh=map_h/nr;
+
+  // Manzanas rellenas
+  for(var i=0;i<nc;i++)for(var j=0;j<nr;j++){
+    if(Math.random()<0.94){
+      ctx.fillStyle='rgba(12,22,46,0.85)';
+      ctx.fillRect(ox+i*bw+1.5,oy+j*bh+1.5,bw-3,bh-3);
+    }else{
+      // parque
+      ctx.fillStyle='rgba(0,40,20,0.4)';
+      ctx.fillRect(ox+i*bw+1.5,oy+j*bh+1.5,bw-3,bh-3);
+    }
+  }
+
+  // Calles
+  for(var i=0;i<=nc;i++){
+    var x=ox+i*bw,esAv=(i%av===0);
+    ctx.strokeStyle=esAv?'rgba(28,45,75,0.9)':'rgba(14,26,52,0.75)';
+    ctx.lineWidth=esAv?1.4:0.5;
+    line(ctx,x,oy,x,oy+map_h);
+  }
+  for(var j=0;j<=nr;j++){
+    var y=oy+j*bh,esAv=(j%av===0);
+    ctx.strokeStyle=esAv?'rgba(28,45,75,0.9)':'rgba(14,26,52,0.75)';
+    ctx.lineWidth=esAv?1.4:0.5;
+    line(ctx,ox,y,ox+map_w,y);
+  }
+
+  // Avenidas principales
+  var avH=[],avV=[];
+  for(var i=0;i<=nr;i+=av)avH.push(oy+i*bh);
+  for(var i=0;i<=nc;i+=av)avV.push(ox+i*bw);
+
+  // Eje troncal (cruce central)
+  var tH=avH[Math.floor(avH.length/2)]||avH[0];
+  var tV=avV[Math.floor(avV.length/2)]||avV[0];
+
+  // Glow helper
+  function glowLine(color,blur,lw,x1,y1,x2,y2){
+    ctx.save();ctx.shadowColor=color;ctx.shadowBlur=blur;
+    ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.setLineDash([]);
+    line(ctx,x1,y1,x2,y2);ctx.restore();
+  }
+
+  // Red troncal
+  glowLine('#e53935',10,3.5,ox,tH,ox+map_w,tH);
+  glowLine('#e53935',10,3.5,tV,oy,tV,oy+map_h);
+  // Conexión desde exterior (planta)
+  ctx.save();ctx.strokeStyle='#e53935';ctx.lineWidth=2.5;ctx.setLineDash([7,4]);ctx.shadowColor='#e53935';ctx.shadowBlur=6;
+  line(ctx,ox-mx+4,tH,ox,tH);ctx.restore();
+
+  // Red secundaria (otras avenidas)
+  avH.forEach(function(y,i){
+    if(i===Math.floor(avH.length/2))return;
+    glowLine('#ff9800',5,2,ox,y,ox+map_w,y);
+  });
+  avV.forEach(function(x,i){
+    if(i===Math.floor(avV.length/2))return;
+    glowLine('#ff9800',5,2,x,oy,x,oy+map_h);
+  });
+
+  // Red distribución (calles restantes)
+  ctx.save();ctx.strokeStyle='rgba(105,240,174,0.5)';ctx.lineWidth=0.9;ctx.shadowColor='rgba(105,240,174,0.25)';ctx.shadowBlur=3;
+  for(var i=0;i<=nr;i++){if(i%av===0)continue;var y=oy+i*bh;line(ctx,ox,y,ox+map_w,y);}
+  for(var i=0;i<=nc;i++){if(i%av===0)continue;var x=ox+i*bw;line(ctx,x,oy,x,oy+map_h);}
+  ctx.restore();
+
+  // Planta (estrella amarilla, exterior izquierda)
+  drawStar(ctx,ox-24,oy+20,12,5);
+  ctx.fillStyle='#ffd600';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.fillStyle='rgba(255,214,0,0.7)';ctx.font='bold 7px sans-serif';ctx.textAlign='center';
+  ctx.fillText('P',ox-24,oy+35);
+
+  // ERMs (círculos púrpura)
+  var ermPts=[];
+  avH.forEach(function(y){avV.forEach(function(x){ermPts.push({x:x,y:y});});});
+  var step=Math.max(1,Math.floor(ermPts.length/pr.n_erm));
+  var cnt=0;
+  ermPts.forEach(function(pt,i){
+    if(i%step===0&&cnt<pr.n_erm){
+      ctx.save();ctx.shadowColor='rgba(124,77,255,0.8)';ctx.shadowBlur=8;
+      ctx.beginPath();ctx.arc(pt.x,pt.y,6.5,0,Math.PI*2);
+      ctx.fillStyle='rgba(124,77,255,0.95)';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=1.2;ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle='#fff';ctx.font='bold 6.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('R',pt.x,pt.y);
+      cnt++;
+    }
+  });
+
+  // Válvulas (cuadrados cyan)
+  var valPts=[];
+  avH.forEach(function(y,i){
+    for(var vi=0;vi<avV.length-1;vi+=2)valPts.push({x:(avV[vi]+(avV[vi+1]||avV[vi]+bw*av))/2,y:y});
+  });
+  var vstep=Math.max(1,Math.floor(valPts.length/Math.min(pr.n_val,valPts.length)));
+  valPts.forEach(function(pt,i){
+    if(i%vstep===0){
+      ctx.save();ctx.shadowColor='rgba(0,200,255,0.6)';ctx.shadowBlur=5;
+      ctx.fillStyle='#00c8ff';ctx.fillRect(pt.x-4,pt.y-4,8,8);
+      ctx.restore();
+    }
+  });
+
+  // Título del mapa
+  ctx.fillStyle='rgba(124,77,255,0.5)';ctx.font="bold 9px 'Orbitron',monospace";
+  ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('RED GLP PROYECTADA — '+pr.c.nombre.toUpperCase()+', '+pr.c.dpto.toUpperCase(),ox,oy-20);
+
+  // Escala
+  var m_per_px=(lado_km*1200)/map_w; // metros por pixel
+  document.getElementById('scale-txt').innerHTML=
+    '1 px ≈ '+m_per_px.toFixed(0)+' m<br>Área: '+pr.area_cob.toFixed(1)+' km²';
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  if(fill)ctx.fill();if(stroke)ctx.stroke();
+}
+function line(ctx,x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function drawStar(ctx,cx,cy,r,pts){
+  var step=Math.PI/pts;ctx.beginPath();
+  for(var i=0;i<pts*2;i++){
+    var ri=i%2===0?r:r*0.42;
+    var a=i*step-Math.PI/2;
+    if(i===0)ctx.moveTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    else ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+  }ctx.closePath();
+}
+
+/* ═══ REPORTE ═══ */
+function fmt(n,d){if(n==null||isNaN(n))return '—';return n.toLocaleString('es-CO',{maximumFractionDigits:d||0});}
+function fmtM(n){return 'COP $'+fmt(n,0)+' M';}
+
+function mostrarReporte(pr){
+  document.getElementById('rp-empty').style.display='none';
+  var c=pr.c,html='';
+
+  // Identificación
+  html+=sec('📍 PROYECTO',[
+    rw('Municipio',c.nombre+', '+c.dpto),
+    rw('Tipo área',pr.p.tipo.charAt(0).toUpperCase()+pr.p.tipo.slice(1)),
+    rw('Horizonte',pr.p.hor+' años'),
+    rw('Presión',pr.presion_txt),
+    rw('Material',pr.p.mat),
+    rw('Fecha',new Date().toLocaleDateString('es-CO')),
+  ]);
+
+  // KPIs
+  html+='<div class="rps"><div class="rps-t">⚡ INDICADORES CLAVE</div><div class="kpi-grid">';
+  html+=kpi(fmt(pr.u_tot),'','Usuarios proyectados');
+  html+=kpi(fmt(pr.Q_tot,1),'m³/h','Caudal de diseño');
+  html+=kpi(fmt(pr.L_tot,1),'km','Long. total red');
+  html+=kpi(fmt(pr.area_cob,1),'km²','Área cobertura');
+  html+='</div></div>';
+
+  // Demografía
+  html+=sec('👥 DEMOGRAFÍA',[
+    rw('Población actual',fmt(pr.pop_act)+' hab.'),
+    rw('Población año +'+pr.p.hor,fmt(pr.pop_fut)+' hab.'),
+    rw('Cobertura',pr.p.cob+'%'),
+    rw('Población beneficiada',fmt(pr.pop_cob)+' hab.'),
+    rw('Viviendas',fmt(pr.viviendas)+' und.'),
+  ]);
+
+  // Usuarios
+  html+=sec('🏘 DESGLOSE USUARIOS',[
+    rwc('dist','Residencial',fmt(pr.u_res)+' uds.'),
+    rwc('sec','Comercial',fmt(pr.u_com)+' uds.'),
+    rwc('trunk','Industrial',fmt(pr.u_ind)+' uds.'),
+    rw('TOTAL',fmt(pr.u_tot)+' uds.'),
+  ]);
+
+  // Demanda
+  html+=sec('💨 DEMANDA GLP',[
+    rw('Q simultáneo residencial',fmt(pr.Q_res,1)+' m³/h'),
+    rw('Q simultáneo comercial',fmt(pr.Q_com,1)+' m³/h'),
+    rw('Q simultáneo industrial',fmt(pr.Q_ind,1)+' m³/h'),
+    rw('Caudal máx. total',fmt(pr.Q_tot,1)+' m³/h'),
+    rw('Caudal en masa',fmt(pr.Q_kgh,1)+' kg/h'),
+    rw('Plantas requeridas',pr.n_pla+' · '+fmt(pr.Q_pla,1)+' m³/h c/u'),
+  ]);
+
+  // Red
+  html+=sec('🔩 RED DE TUBERÍAS',[
+    rwc('trunk','Troncal DN'+pr.dn_t+' mm',fmt(pr.L_trunk,2)+' km'),
+    rwc('sec','Secundaria DN'+pr.dn_s+' mm',fmt(pr.L_sec,2)+' km'),
+    rwc('dist','Distribución DN'+pr.dn_d+' mm',fmt(pr.L_dist,2)+' km'),
+    rw('Longitud total',fmt(pr.L_tot,1)+' km'),
+    rw('Material',pr.p.mat),
+    rw('Presión diseño',pr.presion_txt),
+  ]);
+
+  // Elementos
+  html+=sec('⚙️ ELEMENTOS DE RED',[
+    rw('Plantas almacenamiento',pr.n_pla+' ud(s).'),
+    rw('Estaciones ERM',fmt(pr.n_erm)+' ud(s).'),
+    rw('Válvulas seccionamiento',fmt(pr.n_val)+' ud(s).'),
+    rw('Acometidas domiciliarias',fmt(pr.n_aco)+' ud(s).'),
+    rw('Medidores (contadores)',fmt(pr.n_aco)+' ud(s).'),
+  ]);
+
+  // Cantidades
+  html+=sec('📦 CANTIDADES MATERIAL',[
+    rwc('trunk','Tubería DN'+pr.dn_t,fmt(pr.m_t)+' m'),
+    rwc('sec','Tubería DN'+pr.dn_s,fmt(pr.m_s)+' m'),
+    rwc('dist','Tubería DN'+pr.dn_d,fmt(pr.m_d)+' m'),
+    rw('Tubería total',fmt(pr.m_t+pr.m_s+pr.m_d)+' m'),
+  ]);
+
+  // Inversión
+  html+=sec('💰 INVERSIÓN ESTIMADA',[
+    rw('Red de tuberías',fmtM(pr.I_red)),
+    rw('Plantas almacen.',fmtM(pr.I_pla)),
+    rw('Estaciones ERM',fmtM(pr.I_erm)),
+    rw('Válvulas',fmtM(pr.I_val)),
+    rw('Acometidas',fmtM(pr.I_aco)),
+    rw('Ing. + contingencias (18%)',fmtM(pr.I_ing)),
+    rwc('inv','INVERSIÓN TOTAL',fmtM(pr.I_tot)),
+    rw('Costo / usuario','COP $'+fmt(pr.I_tot*1e6/pr.u_tot)+' '),
+  ]);
+
+  document.getElementById('rp-content').innerHTML=html;
+  document.getElementById('rp-content').style.display='block';
+}
+function sec(t,rows){return '<div class="rps"><div class="rps-t">'+t+'</div>'+rows.join('')+'</div>';}
+function rw(k,v){return rwc('',k,v);}
+function rwc(cls,k,v){return '<div class="rp-row"><span class="rk">'+k+'</span><span class="rv '+cls+'">'+v+'</span></div>';}
+function kpi(v,u,l){return '<div class="kpi-card"><div class="kpi-v">'+v+'</div>'+(u?'<div class="kpi-u">'+u+'</div>':'')+'<div class="kpi-l">'+l+'</div></div>';}
+
+/* ═══ EXPORTS ═══ */
+window.expExcel=function(){
+  if(!_proy)return;var pr=_proy,c=pr.c;
+  var wb=XLSX.utils.book_new();
+  var data=[
+    ['REPORTE PROYECCIÓN RED GLP — ARAUCANA DE GASES S.A. E.S.P.'],[],
+    ['Municipio',c.nombre],['Departamento',c.dpto],['Tipo área',pr.p.tipo],
+    ['Horizonte',pr.p.hor+' años'],['Cobertura',pr.p.cob+'%'],
+    ['Presión',pr.presion_txt],['Material',pr.p.mat],[],
+    ['DEMOGRAFÍA'],['Población actual',pr.pop_act],['Población futura',pr.pop_fut],
+    ['Pob. beneficiada',pr.pop_cob],['Viviendas',pr.viviendas],[],
+    ['USUARIOS'],['Residencial',pr.u_res],['Comercial',pr.u_com],
+    ['Industrial',pr.u_ind],['Total',pr.u_tot],[],
+    ['DEMANDA GLP'],['Caudal máx. total (m³/h)',+pr.Q_tot.toFixed(2)],
+    ['Caudal en masa (kg/h)',+pr.Q_kgh.toFixed(2)],['Plantas',pr.n_pla],[],
+    ['RED DE TUBERÍAS'],
+    ['Troncal DN'+pr.dn_t+' (km)',+pr.L_trunk.toFixed(3)],
+    ['Secundaria DN'+pr.dn_s+' (km)',+pr.L_sec.toFixed(3)],
+    ['Distribución DN'+pr.dn_d+' (km)',+pr.L_dist.toFixed(3)],
+    ['Longitud total (km)',+pr.L_tot.toFixed(2)],[],
+    ['ELEMENTOS DE RED'],['Plantas',pr.n_pla],['ERMs',pr.n_erm],
+    ['Válvulas',pr.n_val],['Acometidas',pr.n_aco],[],
+    ['CANTIDADES MATERIAL (m)'],
+    ['Tubería DN'+pr.dn_t,pr.m_t],['Tubería DN'+pr.dn_s,pr.m_s],
+    ['Tubería DN'+pr.dn_d,pr.m_d],['Total',pr.m_t+pr.m_s+pr.m_d],[],
+    ['INVERSIÓN (COP Millones)'],
+    ['Red tuberías',+pr.I_red.toFixed(1)],['Plantas',+pr.I_pla.toFixed(1)],
+    ['ERMs',+pr.I_erm.toFixed(1)],['Válvulas',+pr.I_val.toFixed(1)],
+    ['Acometidas',+pr.I_aco.toFixed(1)],['Ing.+Contingencias',+pr.I_ing.toFixed(1)],
+    ['TOTAL',+pr.I_tot.toFixed(1)],
+    ['Costo por usuario (COP)',Math.round(pr.I_tot*1e6/pr.u_tot)],
+  ];
+  var ws=XLSX.utils.aoa_to_sheet(data);ws['!cols']=[{wch:38},{wch:22}];
+  XLSX.utils.book_append_sheet(wb,ws,'Proyección GLP');
+  XLSX.writeFile(wb,'Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'.xlsx');
+};
+
+window.expJPEG=function(){
+  if(!_proy)return;
+  var cv=document.getElementById('mapa-canvas');
+  var a=document.createElement('a');
+  a.download='Mapa_GLP_'+_proy.c.nombre.replace(/ /g,'_')+'.jpg';
+  a.href=cv.toDataURL('image/jpeg',0.92);a.click();
+};
+
+window.expPDF=function(){
+  if(!_proy)return;var pr=_proy,c=pr.c;
+  var cv=document.getElementById('mapa-canvas');
+  var img=cv.toDataURL('image/jpeg',0.85);
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  var W=297,H=210;
+  // Fondo
+  doc.setFillColor(0,8,20);doc.rect(0,0,W,H,'F');
+  // Título
+  doc.setTextColor(124,77,255);doc.setFontSize(13);doc.setFont(undefined,'bold');
+  doc.text('PROYECCIÓN RED GLP — '+c.nombre.toUpperCase()+', '+c.dpto.toUpperCase(),14,14);
+  doc.setFontSize(7.5);doc.setTextColor(160,180,170);doc.setFont(undefined,'normal');
+  doc.text('Araucana de Gases S.A. E.S.P.  ·  '+new Date().toLocaleDateString('es-CO')+'  ·  Cobertura: '+pr.p.cob+'%  ·  Horizonte: '+pr.p.hor+' años  ·  '+pr.presion_txt,14,20);
+  // Mapa
+  var mW=155,mH=mW*(cv.height/cv.width);
+  doc.addImage(img,'JPEG',14,24,mW,Math.min(mH,H-28));
+  // Reporte columna derecha
+  var rx=174,ry=26;
+  doc.setFontSize(7);
+  var fields=[
+    ['INDICADORES CLAVE',''],['Usuarios proyect.',fmt(pr.u_tot)],
+    ['Caudal diseño',fmt(pr.Q_tot,1)+' m³/h'],['Long. total red',fmt(pr.L_tot,1)+' km'],
+    ['Área cobertura',fmt(pr.area_cob,1)+' km²'],['',''],
+    ['RED DE TUBERÍAS',''],
+    ['Troncal DN'+pr.dn_t,fmt(pr.L_trunk,2)+' km'],
+    ['Secundaria DN'+pr.dn_s,fmt(pr.L_sec,2)+' km'],
+    ['Distribución DN'+pr.dn_d,fmt(pr.L_dist,2)+' km'],['',''],
+    ['ELEMENTOS',''],['Plantas',pr.n_pla+' ud.'],['ERMs',fmt(pr.n_erm)+' ud.'],
+    ['Válvulas',fmt(pr.n_val)+' ud.'],['Acometidas',fmt(pr.n_aco)+' ud.'],['',''],
+    ['INVERSIÓN TOTAL',''],['',fmtM(pr.I_tot)],['Costo/usuario','COP $'+fmt(pr.I_tot*1e6/pr.u_tot)],
+  ];
+  var cy2=ry;
+  fields.forEach(function(f){
+    if(f[0]&&!f[1]){
+      doc.setTextColor(124,77,255);doc.setFont(undefined,'bold');
+      doc.text(f[0],rx,cy2);cy2+=5;
+    } else if(f[0]&&f[1]){
+      doc.setTextColor(200,220,210);doc.setFont(undefined,'normal');
+      doc.text(f[0],rx,cy2);doc.text(f[1],W-8,cy2,{align:'right'});cy2+=4;
+    } else {cy2+=2;}
+  });
+  doc.save('Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'.pdf');
+};
+</script>
+</body>
+</html>
