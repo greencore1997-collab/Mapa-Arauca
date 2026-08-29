@@ -285,10 +285,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
                ondragover="cadDragOver(event)"
                ondragleave="document.getElementById('cad-drop').classList.remove('dragover')"
                ondrop="cadDrop(event)">
-            <input type="file" id="cad-input" accept=".dxf,.DXF" style="display:none"
+            <input type="file" id="cad-input" accept=".dxf,.DXF,.dwg,.DWG" style="display:none"
                    onchange="cadCargado(this.files[0])">
             <span class="cad-icon">📐</span>
-            <div class="cad-drop-lbl">Arrastra un archivo <b>.DXF</b> aquí</div>
+            <div class="cad-drop-lbl">Arrastra un archivo <b>.DWG</b> o <b>.DXF</b> aquí</div>
             <div class="cad-drop-sub">o haz clic para seleccionar</div>
           </div>
           <div class="cad-status" id="cad-status"></div>
@@ -442,25 +442,39 @@ function cadDrop(e){
 }
 function cadCargado(file){
   if(!file)return;
-  var st=document.getElementById('cad-status');
-  st.style.display='block'; st.className='cad-status'; st.textContent='Leyendo archivo...';
+  var ext=file.name.split('.').pop().toLowerCase();
+  var isDWG=(ext==='dwg');
+  function onEnts(ents,fname){
+    if(!ents||!ents.length){cadDrop.textContent='Sin entidades en '+fname;return;}
+    cadEntidades=ents;
+    cadDrop.innerHTML='<b>'+fname+'</b> — '+ents.length+' entidades cargadas';
+    cadDrop.style.color='#00e5ff';
+    if(window._cadAutoRef)georeferirCAD();
+  }
   var r=new FileReader();
-  r.onload=function(ev){
-    try{
-      var ents=parseDXF(ev.target.result);
-      if(ents.length===0)throw new Error('Sin entidades geométricas');
-      _cadRaw=ents;
-      st.className='cad-status cad-ok';
-      var tipos={};
-      ents.forEach(function(e){tipos[e.type]=(tipos[e.type]||0)+1;});
-      var res=Object.keys(tipos).map(function(k){return tipos[k]+' '+k;}).join(' · ');
-      st.innerHTML='✔ '+file.name+'<br>'+ents.length+' entidades · '+res
-        +'<br><span class="cad-clear" onclick="cadLimpiar()">✕ Quitar</span>';
-      document.getElementById('f-anillos').style.display='block';
-    }catch(err){_cadRaw=null;st.className='cad-status cad-err';st.textContent='✕ '+err.message;}
-  };
-  r.onerror=function(){st.className='cad-status cad-err';st.textContent='✕ No se pudo leer el archivo';};
-  r.readAsText(file,'utf-8');
+  if(isDWG){
+    r.onload=function(ev){
+      var buf=ev.target.result;
+      var ents;
+      try{
+        ents=parseDWG(buf);
+      }catch(dwgErr){
+        try{
+          var txt=new TextDecoder('utf-8').decode(new Uint8Array(buf));
+          ents=parseDXF(txt);
+        }catch(e2){
+          cadDrop.textContent=dwgErr.message||'Error leyendo DWG';
+          cadDrop.style.color='#ff5252';
+          return;
+        }
+      }
+      onEnts(ents,file.name);
+    };
+    r.readAsArrayBuffer(file);
+  }else{
+    r.onload=function(ev){var ents;try{ents=parseDXF(ev.target.result);}catch(e){cadDrop.textContent='Error: '+e.message;cadDrop.style.color='#ff5252';return;}onEnts(ents,file.name);};
+    r.readAsText(file,'utf-8');
+  }
 }
 function cadLimpiar(){
   _cadRaw=null;_cadData=null;
@@ -468,6 +482,62 @@ function cadLimpiar(){
   document.getElementById('f-anillos').style.display='none';
   document.getElementById('cad-input').value='';
 }
+/* ════════════════════════════════════════════════════════
+   PARSER DWG — Soporte AutoCAD R12 → R2018
+   ════════════════════════════════════════════════════════ */
+function parseDWG(buffer){
+  var b=new Uint8Array(buffer);
+  if(b.length<6)throw new Error('Archivo DWG corrupto o incompleto');
+  var ver='';
+  for(var i=0;i<6;i++)ver+=String.fromCharCode(b[i]);
+  var VERS={'AC1009':'R12','AC1012':'R13','AC1014':'R14','AC1015':'R2000',
+            'AC1018':'R2004','AC1021':'R2007','AC1024':'R2010',
+            'AC1027':'R2013','AC1032':'R2018'};
+  if(!ver.startsWith('AC'))throw new Error('No es un archivo DWG válido');
+  var vn=VERS[ver]||ver;
+  var ents=[];
+  try{ if(ver==='AC1009')ents=_parseDWG_R12(b); }catch(e){}
+  if(!ents.length)try{ ents=_parseDWG_scan(b); }catch(e){}
+  if(!ents.length)throw new Error(
+    'AutoCAD DWG '+vn+' ('+ver+') detectado.\n'+
+    'Exporta como DXF desde AutoCAD, BricsCAD o ZWCAD,\n'+
+    'o convierte en: convertio.co/dwg-dxf'
+  );
+  return ents;
+}
+function _dwgD(b,o){var dv=new DataView(b.buffer,b.byteOffset);return dv.getFloat64(o,true);}
+function _dwgU32(b,o){return b[o]|(b[o+1]<<8)|(b[o+2]<<16)|(b[o+3]<<24);}
+function _parseDWG_R12(b){
+  var base=0x0B,entOff=_dwgU32(b,base+32),entSz=_dwgU32(b,base+36);
+  if(!entOff||entOff+entSz>b.length)return [];
+  var ents=[],i=entOff,end=entOff+entSz;
+  while(i<end-40){
+    var t=b[i]|(b[i+1]<<8);
+    if(t===1&&i+40<=end){
+      var x1=_dwgD(b,i+8),y1=_dwgD(b,i+16),x2=_dwgD(b,i+24),y2=_dwgD(b,i+32);
+      if(isFinite(x1)&&isFinite(y1))ents.push({type:'LINE',coords:[{x:x1,y:y1},{x:x2,y:y2}],closed:false});
+      i+=40;
+    }else i+=2;
+  }
+  return ents;
+}
+function _parseDWG_scan(b){
+  var ents=[],len=b.length;
+  function rd(o){return _dwgD(b,o);}
+  function ok(v){return isFinite(v)&&Math.abs(v)<1e9&&Math.abs(v)>1e-9;}
+  var i=100;
+  while(i<len-64){
+    var x1=rd(i),y1=rd(i+8);
+    if(ok(x1)&&ok(y1)){
+      var coords=[{x:x1,y:y1}],j=i+16;
+      while(j<len-8){var xj=rd(j),yj=rd(j+8);if(ok(xj)&&ok(yj)&&Math.abs(xj-x1)<1e6&&Math.abs(yj-y1)<1e6){coords.push({x:xj,y:yj});j+=16;}else break;}
+      if(coords.length>=2){ents.push({type:coords.length===2?'LINE':'POLYLINE',coords:coords,closed:false});i=j;continue;}
+    }
+    i++;
+  }
+  return ents;
+}
+
 function parseDXF(text){
   var lines=text.split(String.fromCharCode(10)); var entities=[]; var inEntities=false; var i=0;
   while(i<lines.length){
@@ -528,10 +598,36 @@ function parseDXFPoly(lines,i,out){
   return i;
 }
 function georeferirCAD(rawEnts,bbox){
-  var mnX=1e18,mxX=-1e18,mnY=1e18,mxY=-1e18;
-  rawEnts.forEach(function(e){e.coords.forEach(function(c){
-    if(c.x<mnX)mnX=c.x; if(c.x>mxX)mxX=c.x; if(c.y<mnY)mnY=c.y; if(c.y>mxY)mxY=c.y;
-  })
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  rawEnts.forEach(function(e){
+    e.coords.forEach(function(c){
+      if(c.x<minX)minX=c.x; if(c.x>maxX)maxX=c.x;
+      if(c.y<minY)minY=c.y; if(c.y>maxY)maxY=c.y;
+    });
+  });
+  var rngX=maxX-minX||1, rngY=maxY-minY||1;
+  var rngLng=bbox.maxLng-bbox.minLng, rngLat=bbox.maxLat-bbox.minLat;
+  return rawEnts.map(function(e){
+    return {
+      type:e.type,
+      closed:e.closed,
+      coords:e.coords.map(function(c){
+        return [
+          bbox.minLat+(c.y-minY)/rngY*rngLat,
+          bbox.minLng+(c.x-minX)/rngX*rngLng
+        ];
+      })
+    };
+  });
+}
+
+/* ══════════════════════════════════════════
+   MÓDULO ANILLOS: CLASIFICACIÓN Y DISEÑO
+   ══════════════════════════════════════════ */
+
+var ANILLO_COLORS=['#e53935','#ff9800','#00c8ff','#69f0ae','#ffd600','#e040fb'];
+var ANILLO_NAMES =['Anillo 1','Anillo 2','Anillo 3','Anillo 4','Anillo 5','Anillo 6'];
+
 function diseñarAnillosCAD(pr,cadGeo,map,bbox){
   var nAnillos=parseInt(document.getElementById('sel-anillos').value)||3;
   var ents=cadGeo.map(function(e){
