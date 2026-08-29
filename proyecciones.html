@@ -890,7 +890,7 @@ window.toggleVista=function(modo){
   }
 };
 
-/* ═══ VISTA SATELITAL ═══ */
+/* ═══ VISTA SATELITAL CON DATOS REALES OSM ═══ */
 function calcZoom(lado_km){
   if(lado_km<0.5)return 17; if(lado_km<1)return 16; if(lado_km<2)return 15;
   if(lado_km<4)return 14;   if(lado_km<8)return 13; if(lado_km<15)return 12;
@@ -901,192 +901,128 @@ function dibujarSatelital(pr){
   if(!pr.c.lat){alert('Sin coordenadas para este municipio.');return;}
   var lat0=pr.c.lat, lng0=pr.c.lng;
   var lado_km=Math.sqrt(pr.area_cob);
-
-  // Limpiar mapa anterior
   if(_lmap){_lmap.remove();_lmap=null;}
-
   var mapDiv=document.getElementById('sat-map');
   _lmap=L.map(mapDiv,{center:[lat0,lng0],zoom:calcZoom(lado_km),zoomControl:true,attributionControl:true});
-
-  // Tile satelital ESRI
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
     attribution:'© Esri · Maxar · Earthstar Geographics',maxZoom:20
   }).addTo(_lmap);
-
-  // Capa de etiquetas encima
   L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
-    attribution:'',maxZoom:20,opacity:0.8,pane:'markerPane'
+    attribution:'',maxZoom:20,opacity:0.75
   }).addTo(_lmap);
-
-  // ══ Generar red en coordenadas geográficas ══
-  var den=pr.p.den;
   var dLat=1/111.32;
   var dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
+  var half=lado_km*0.58;
+  var bbox={minLat:lat0-half*dLat,maxLat:lat0+half*dLat,minLng:lng0-half*dLng,maxLng:lng0+half*dLng};
+  var loadDiv=document.createElement('div');
+  loadDiv.id='sat-osm-load';
+  loadDiv.style.cssText='position:absolute;inset:0;z-index:1000;background:rgba(0,8,24,0.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;';
+  loadDiv.innerHTML='<div style="width:34px;height:34px;border:3px solid rgba(124,77,255,0.18);border-top-color:#7c4dff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>'
+    +'<div style="font-family:Orbitron,monospace;font-size:8px;letter-spacing:2px;color:rgba(124,77,255,0.75);" id="osm-load-txt">LEYENDO OCUPACIÓN URBANA (OSM)...</div>'
+    +'<div style="font-size:9px;color:rgba(180,200,190,0.4);">Analizando distribución de construcciones</div>';
+  mapDiv.appendChild(loadDiv);
+  var areaGrande=pr.area_cob>40;
+  var hwFilter=areaGrande?'"highway"~"motorway|trunk|primary|secondary"':'"highway"~"motorway|trunk|primary|secondary|tertiary|residential|unclassified"';
+  var q='[out:json][timeout:30];(way['+hwFilter+']('+bbox.minLat.toFixed(6)+','+bbox.minLng.toFixed(6)+','+bbox.maxLat.toFixed(6)+','+bbox.maxLng.toFixed(6)+'););out geom;';
+  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(osmData){var ld=document.getElementById('sat-osm-load');if(ld)ld.remove();generarRedOSM(osmData,pr,_lmap,bbox);})
+    .catch(function(err){console.warn('Overpass falló:',err);var ld=document.getElementById('sat-osm-load');if(ld){document.getElementById('osm-load-txt').textContent='Sin conexión OSM · usando cuadrícula estimada';setTimeout(function(){if(ld)ld.remove();generarRedGrid(pr,_lmap,bbox);},1500);}});
+}
 
-  var half=lado_km*0.55;
-  var minLat=lat0-half*dLat, maxLat=lat0+half*dLat;
-  var minLng=lng0-half*dLng, maxLng=lng0+half*dLng;
+function generarRedOSM(osmData,pr,map,bbox){
+  var ways=osmData.elements||[];
+  var TRUNK={motorway:1,trunk:1,primary:1};
+  var SEC={secondary:1,tertiary:1};
+  var trunkWays=[],secWays=[],distWays=[];
+  var nodeUsage={};
+  ways.forEach(function(way){
+    if(!way.geometry||!way.tags||way.geometry.length<2)return;
+    var ht=way.tags.highway;
+    var coords=way.geometry.map(function(n){return[n.lat,n.lon];});
+    if(TRUNK[ht]){trunkWays.push(coords);registrarNodos(coords,nodeUsage,2);}
+    else if(SEC[ht]){secWays.push(coords);registrarNodos(coords,nodeUsage,1);}
+    else{distWays.push(coords);}
+  });
+  distWays.forEach(function(c){L.polyline(c,{color:'#69f0ae',weight:1.8,opacity:0.6}).addTo(map);});
+  secWays.forEach(function(c){L.polyline(c,{color:'#ff9800',weight:2.8,opacity:0.88}).addTo(map);});
+  trunkWays.forEach(function(c){L.polyline(c,{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);});
+  var intersecciones=[];
+  Object.keys(nodeUsage).forEach(function(k){if(nodeUsage[k]>=3){var p=k.split(',');intersecciones.push([parseFloat(p[0]),parseFloat(p[1])]);}});
+  if(intersecciones.length<pr.n_erm*2){intersecciones=[];Object.keys(nodeUsage).forEach(function(k){if(nodeUsage[k]>=2){var p=k.split(',');intersecciones.push([parseFloat(p[0]),parseFloat(p[1])]);}});}
+  var ermStep=Math.max(1,Math.floor(intersecciones.length/pr.n_erm));
+  var ermCnt=0;
+  intersecciones.forEach(function(pt,i){if(i%ermStep===0&&ermCnt<pr.n_erm){L.circleMarker(pt,{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(ermCnt+1)+'</b><br>Presión: '+pr.p.pres+'<br>Usuarios ~'+Math.round(pr.u_tot/pr.n_erm)).addTo(map);ermCnt++;}});
+  if(ermCnt<pr.n_erm&&trunkWays.length>0){var eStep=Math.max(1,Math.floor(trunkWays.length/(pr.n_erm-ermCnt)));trunkWays.forEach(function(coords,i){if(ermCnt>=pr.n_erm)return;if(i%eStep===0){var mid=coords[Math.floor(coords.length/2)];L.circleMarker(mid,{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(ermCnt+1)+'</b>').addTo(map);ermCnt++;}});}
+  var maxVal=Math.min(pr.n_val,60);var valStep=Math.max(1,Math.floor(trunkWays.length/maxVal));var valCnt=0;
+  trunkWays.forEach(function(coords,i){if(valCnt>=maxVal)return;if(i%valStep===0){var m=coords[Math.floor(coords.length/2)];L.circleMarker(m,{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.88}).bindPopup('<b>Válvula</b>').addTo(map);valCnt++;}});
+  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.12;var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.12;
+  var entradaTrunk=trunkWays.length>0?trunkWays[0][0]:secWays.length>0?secWays[0][0]:[pr.c.lat,pr.c.lng];
+  L.polyline([[pLat,pLng],entradaTrunk],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(map);
+  var plantIcon=L.divIcon({className:'',html:'<div style="width:26px;height:26px;background:#ffd600;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 14px rgba(255,214,0,0.9);">⭐</div>',iconSize:[26,26],iconAnchor:[13,13]});
+  L.marker([pLat,pLng],{icon:plantIcon}).bindPopup('<b>Planta GLP</b><br>'+pr.n_pla+' unidad(es) · Q: '+fmt(pr.Q_pla,1)+' m³/h c/u').addTo(map);
+  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],{color:'rgba(124,77,255,0.55)',weight:2,fillColor:'rgba(124,77,255,0.03)',dashArray:'8,4'}).addTo(map);
+  agregarLeyendasSat(pr,map,'OSM · '+(trunkWays.length+secWays.length+distWays.length)+' tramos de vía reales');
+  map.invalidateSize();
+}
 
-  // Espaciado avenidas
+function registrarNodos(coords,mapa,peso){
+  coords.forEach(function(c){var k=c[0].toFixed(5)+','+c[1].toFixed(5);mapa[k]=(mapa[k]||0)+peso;});
+}
+
+function generarRedGrid(pr,map,bbox){
+  var lat0=(bbox.minLat+bbox.maxLat)/2,lng0=(bbox.minLng+bbox.maxLng)/2;
+  var dLat=1/111.32,dLng=1/(111.32*Math.cos(lat0*Math.PI/180));
+  var den=pr.p.den;
   var av_km=den==='alta'?0.25:den==='media'?0.40:0.65;
   var st_km=den==='alta'?0.08:den==='media'?0.13:0.22;
+  var avH=[],avV=[];
+  for(var lt=bbox.minLat;lt<=bbox.maxLat+1e-9;lt+=av_km*dLat)avH.push(+lt.toFixed(7));
+  for(var lg=bbox.minLng;lg<=bbox.maxLng+1e-9;lg+=av_km*dLng)avV.push(+lg.toFixed(7));
+  var midH=avH[Math.floor(avH.length/2)]||lat0;var midV=avV[Math.floor(avV.length/2)]||lng0;
+  for(var lt2=bbox.minLat;lt2<=bbox.maxLat+1e-9;lt2+=st_km*dLat){if(Math.abs(lt2-midH)<st_km*dLat*0.4)continue;L.polyline([[lt2,bbox.minLng],[lt2,bbox.maxLng]],{color:'#69f0ae',weight:1.8,opacity:0.6}).addTo(map);}
+  avH.forEach(function(lt3){if(Math.abs(lt3-midH)<av_km*dLat*0.4)return;L.polyline([[lt3,bbox.minLng],[lt3,bbox.maxLng]],{color:'#ff9800',weight:2.8,opacity:0.88}).addTo(map);});
+  L.polyline([[midH,bbox.minLng],[midH,bbox.maxLng]],{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);
+  L.polyline([[bbox.minLat,midV],[bbox.maxLat,midV]],{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);
+  var pLat=bbox.minLat-(bbox.maxLat-bbox.minLat)*0.12;var pLng=bbox.minLng-(bbox.maxLng-bbox.minLng)*0.12;
+  L.polyline([[pLat,pLng],[midH,bbox.minLng]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.8}).addTo(map);
+  var pIcon=L.divIcon({className:'',html:'<div style="width:24px;height:24px;background:#ffd600;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 12px rgba(255,214,0,0.9);">⭐</div>',iconSize:[24,24],iconAnchor:[12,12]});
+  L.marker([pLat,pLng],{icon:pIcon}).bindPopup('<b>Planta GLP</b>').addTo(map);
+  var eStep=Math.max(1,Math.floor((avH.length*avV.length)/pr.n_erm));var eCnt=0,idx=0;
+  avH.forEach(function(lt4){avV.forEach(function(lg2){if(idx%eStep===0&&eCnt<pr.n_erm){L.circleMarker([lt4,lg2],{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95}).bindPopup('<b>ERM #'+(eCnt+1)+'</b>').addTo(map);eCnt++;}idx++;});});
+  L.polygon([[bbox.minLat,bbox.minLng],[bbox.minLat,bbox.maxLng],[bbox.maxLat,bbox.maxLng],[bbox.maxLat,bbox.minLng]],{color:'rgba(124,77,255,0.55)',weight:2,fillColor:'rgba(124,77,255,0.03)',dashArray:'8,4'}).addTo(map);
+  agregarLeyendasSat(pr,map,'Cuadrícula estimada (sin conexión OSM)');
+  map.invalidateSize();
+}
 
-  var avH=[], avV=[];
-  for(var lt=minLat;lt<=maxLat+1e-9;lt+=av_km*dLat)avH.push(parseFloat(lt.toFixed(7)));
-  for(var lg=minLng;lg<=maxLng+1e-9;lg+=av_km*dLng)avV.push(parseFloat(lg.toFixed(7)));
-
-  // Troncal central
-  var midH=avH[Math.floor(avH.length/2)]; if(!midH)midH=lat0;
-  var midV=avV[Math.floor(avV.length/2)]; if(!midV)midV=lng0;
-
-  // ─ Distribución (verde fino)
-  var dStyle={color:'#69f0ae',weight:1.8,opacity:0.65};
-  for(var lt=minLat;lt<=maxLat+1e-9;lt+=st_km*dLat){
-    if(Math.abs(lt-midH)<st_km*dLat*0.4)continue;
-    L.polyline([[lt,minLng],[lt,maxLng]],dStyle).addTo(_lmap);
-  }
-  for(var lg=minLng;lg<=maxLng+1e-9;lg+=st_km*dLng){
-    if(Math.abs(lg-midV)<st_km*dLng*0.4)continue;
-    L.polyline([[minLat,lg],[maxLat,lg]],dStyle).addTo(_lmap);
-  }
-
-  // ─ Secundaria (naranja)
-  var sStyle={color:'#ff9800',weight:2.8,opacity:0.88};
-  avH.forEach(function(lt){
-    if(Math.abs(lt-midH)<av_km*dLat*0.4)return;
-    L.polyline([[lt,minLng],[lt,maxLng]],sStyle).addTo(_lmap);
-  });
-  avV.forEach(function(lg){
-    if(Math.abs(lg-midV)<av_km*dLng*0.4)return;
-    L.polyline([[minLat,lg],[maxLat,lg]],sStyle).addTo(_lmap);
-  });
-
-  // ─ Troncal (rojo grueso)
-  var tStyle={color:'#e53935',weight:4.5,opacity:0.95};
-  L.polyline([[midH,minLng-av_km*dLng*0.4],[midH,maxLng]],tStyle).addTo(_lmap);
-  L.polyline([[minLat,midV],[maxLat,midV]],tStyle).addTo(_lmap);
-
-  // ─ Planta (exterior esquina SO)
-  var pLat=minLat-av_km*dLat*0.45, pLng=minLng-av_km*dLng*0.45;
-  L.polyline([[pLat,pLng],[midH,minLng]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(_lmap);
-  L.polyline([[pLat,pLng],[minLat,midV]],{color:'#e53935',weight:2.5,dashArray:'8,5',opacity:0.82}).addTo(_lmap);
-
-  // Icono planta personalizado
-  var plantIcon=L.divIcon({className:'',html:
-    '<div style="width:22px;height:22px;background:#ffd600;border:2px solid #fff;border-radius:50%;'
-    +'display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 0 10px rgba(255,214,0,0.8);">⭐</div>',
-    iconSize:[22,22],iconAnchor:[11,11]
-  });
-  L.marker([pLat,pLng],{icon:plantIcon})
-   .bindPopup('<b>⭐ Planta GLP</b><br>'+pr.n_pla+' unidad(es)<br>Caudal: '+fmt(pr.Q_pla,1)+' m³/h c/u')
-   .addTo(_lmap);
-
-  // ─ ERMs (círculos púrpura) en intersecciones
-  var ermCnt=0;
-  var ermStep=Math.max(1,Math.floor((avH.length*avV.length)/pr.n_erm));
-  var idx=0;
-  avH.forEach(function(lt){
-    avV.forEach(function(lg){
-      if(idx%ermStep===0&&ermCnt<pr.n_erm){
-        L.circleMarker([lt,lg],{radius:7,color:'#fff',weight:1.8,fillColor:'#7c4dff',fillOpacity:0.95,
-          className:'erm-marker'})
-         .bindPopup('<b>🔵 Estación ERM #'+(ermCnt+1)+'</b><br>Red: '+pr.p.pres+' presión<br>Material: '+pr.p.mat)
-         .addTo(_lmap);
-        ermCnt++;
-      }
-      idx++;
-    });
-  });
-
-  // ─ Válvulas (cuadrados cyan) a lo largo del troncal
-  var valStep=Math.max(1,Math.floor(avV.length/Math.min(Math.floor(pr.n_val/2)+1,avV.length)));
-  avV.forEach(function(lg,i){
-    if(i%valStep===0){
-      L.circleMarker([midH,lg],{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.85})
-       .bindPopup('<b>🔷 Válvula de seccionamiento</b>')
-       .addTo(_lmap);
-    }
-  });
-  avH.forEach(function(lt,i){
-    if(i%valStep===0){
-      L.circleMarker([lt,midV],{radius:4,color:'#00c8ff',weight:2,fillColor:'#00c8ff',fillOpacity:0.85})
-       .addTo(_lmap);
-    }
-  });
-
-  // ─ Polígono del área de cobertura (borde)
-  var bounds=[[minLat,minLng],[minLat,maxLng],[maxLat,maxLng],[maxLat,minLng]];
-  L.polygon(bounds,{color:'rgba(124,77,255,0.6)',weight:2,fillColor:'rgba(124,77,255,0.04)',dashArray:'8,4'}).addTo(_lmap);
-
-  // ─ Leyenda Leaflet
+function agregarLeyendasSat(pr,map,fuente){
   var leyenda=L.control({position:'bottomleft'});
   leyenda.onAdd=function(){
     var div=L.DomUtil.create('div','sat-legend');
-    div.innerHTML=
-      '<div class="sat-legend-title">LEYENDA RED GLP</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#e53935;"></div>Red troncal</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#ff9800;height:2px;"></div>Red secundaria</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Planta almacen.</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#7c4dff;"></div>Estación ERM</div>'+
-      '<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#00c8ff;width:8px;height:8px;border-radius:2px;"></div>Válvula secciona.</div>';
+    div.innerHTML='<div class="sat-legend-title">LEYENDA RED GLP</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#e53935;"></div>Red troncal</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#ff9800;height:2px;"></div>Red secundaria</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-line" style="background:#69f0ae;height:1.5px;"></div>Distribución</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#ffd600;"></div>Planta almacenamiento</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#7c4dff;"></div>Estación ERM</div>'
+      +'<div class="sat-leg-row"><div class="sat-leg-dot" style="background:#00c8ff;width:8px;height:8px;border-radius:2px;"></div>Válvula</div>'
+      +'<div style="margin-top:6px;font-size:7px;color:rgba(124,77,255,0.4);font-family:Orbitron,monospace;">'+fuente+'</div>';
     return div;
   };
-  leyenda.addTo(_lmap);
-
-  // Info panel derecho
+  leyenda.addTo(map);
   var info=L.control({position:'topright'});
   info.onAdd=function(){
     var div=L.DomUtil.create('div','sat-legend');
-    div.innerHTML=
-      '<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+'</div>'+
-      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Usuarios</span><b style="color:#7c4dff">'+fmt(pr.u_tot)+'</b></div>'+
-      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Caudal</span><b style="color:#7c4dff">'+fmt(pr.Q_tot,1)+' m³/h</b></div>'+
-      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">Red total</span><b style="color:#7c4dff">'+fmt(pr.L_tot,1)+' km</b></div>'+
-      '<div class="sat-leg-row" style="justify-content:space-between;gap:14px;"><span style="color:rgba(180,200,190,0.5)">ERMs</span><b style="color:#7c4dff">'+pr.n_erm+' ud.</b></div>';
+    div.innerHTML='<div class="sat-legend-title">'+pr.c.nombre.toUpperCase()+' · '+pr.c.dpto.toUpperCase()+'</div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Usuarios</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.u_tot)+'</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Caudal</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.Q_tot,1)+' m³/h</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Red total</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+fmt(pr.L_tot,1)+' km</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">ERMs</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+pr.n_erm+' ud.</b></div>'
+      +'<div class="sat-leg-row" style="justify-content:space-between;gap:16px;"><span style="color:rgba(180,200,190,0.5)">Cobertura</span><b style="color:#7c4dff;font-family:Orbitron,monospace;font-size:9px;">'+pr.p.cob+'%</b></div>';
     return div;
   };
-  info.addTo(_lmap);
-
-  _lmap.invalidateSize();
+  info.addTo(map);
 }
-
-window.expExcel=function(){
-  if(!_proy)return;var pr=_proy,c=pr.c;
-  var wb=XLSX.utils.book_new();
-  var data=[
-    ['REPORTE PROYECCIÓN RED GLP — ARAUCANA DE GASES S.A. E.S.P.'],[],
-    ['Municipio',c.nombre],['Departamento',c.dpto],['Tipo área',pr.p.tipo],
-    ['Horizonte',pr.p.hor+' años'],['Cobertura',pr.p.cob+'%'],
-    ['Presión',pr.presion_txt],['Material',pr.p.mat],[],
-    ['DEMOGRAFÍA'],['Población actual',pr.pop_act],['Población futura',pr.pop_fut],
-    ['Pob. beneficiada',pr.pop_cob],['Viviendas',pr.viviendas],[],
-    ['USUARIOS'],['Residencial',pr.u_res],['Comercial',pr.u_com],
-    ['Industrial',pr.u_ind],['Total',pr.u_tot],[],
-    ['DEMANDA GLP'],['Caudal máx. total (m³/h)',+pr.Q_tot.toFixed(2)],
-    ['Caudal en masa (kg/h)',+pr.Q_kgh.toFixed(2)],['Plantas',pr.n_pla],[],
-    ['RED DE TUBERÍAS'],
-    ['Troncal DN'+pr.dn_t+' (km)',+pr.L_trunk.toFixed(3)],
-    ['Secundaria DN'+pr.dn_s+' (km)',+pr.L_sec.toFixed(3)],
-    ['Distribución DN'+pr.dn_d+' (km)',+pr.L_dist.toFixed(3)],
-    ['Longitud total (km)',+pr.L_tot.toFixed(2)],[],
-    ['ELEMENTOS DE RED'],['Plantas',pr.n_pla],['ERMs',pr.n_erm],
-    ['Válvulas',pr.n_val],['Acometidas',pr.n_aco],[],
-    ['CANTIDADES MATERIAL (m)'],
-    ['Tubería DN'+pr.dn_t,pr.m_t],['Tubería DN'+pr.dn_s,pr.m_s],
-    ['Tubería DN'+pr.dn_d,pr.m_d],['Total',pr.m_t+pr.m_s+pr.m_d],[],
-    ['INVERSIÓN (COP Millones)'],
-    ['Red tuberías',+pr.I_red.toFixed(1)],['Plantas',+pr.I_pla.toFixed(1)],
-    ['ERMs',+pr.I_erm.toFixed(1)],['Válvulas',+pr.I_val.toFixed(1)],
-    ['Acometidas',+pr.I_aco.toFixed(1)],['Ing.+Contingencias',+pr.I_ing.toFixed(1)],
-    ['TOTAL',+pr.I_tot.toFixed(1)],
-    ['Costo por usuario (COP)',Math.round(pr.I_tot*1e6/pr.u_tot)],
-  ];
-  var ws=XLSX.utils.aoa_to_sheet(data);ws['!cols']=[{wch:38},{wch:22}];
-  XLSX.utils.book_append_sheet(wb,ws,'Proyección GLP');
-  XLSX.writeFile(wb,'Proyeccion_GLP_'+c.nombre.replace(/ /g,'_')+'.xlsx');
-};
-
 window.expJPEG=function(){
   if(!_proy)return;
   var nombre=_proy.c.nombre.replace(/ /g,'_');
