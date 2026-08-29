@@ -469,9 +469,7 @@ function cadLimpiar(){
   document.getElementById('cad-input').value='';
 }
 function parseDXF(text){
-  var lines=text.split(/
-?
-/); var entities=[]; var inEntities=false; var i=0;
+  var lines=text.split(String.fromCharCode(10)); var entities=[]; var inEntities=false; var i=0;
   while(i<lines.length){
     var code=lines[i]?lines[i].trim():''; var val=lines[i+1]?lines[i+1].trim():'';
     if(code==='2'&&val==='ENTITIES'){inEntities=true;i+=2;continue;}
