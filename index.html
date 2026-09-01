@@ -2275,6 +2275,7 @@
                 _capaReporteActual = null;
                 generarReporte();
             }
+            _appendGasToReport();
             panel.classList.add('visible');
             backdrop.classList.add('visible');
             return;
@@ -2565,109 +2566,6 @@
                 html += '<td style="text-align:center">' + acumPct + '%</td></tr>';
             });
             html += '</table></div>';
-        }
-
-        /* ── RED DE GAS ── */
-        if (_redGasData && _redGasData.features && _redGasData.features.length > 0) {
-            var gasFeats = _redGasData.features;
-
-            // Acumular por tipo y estado
-            var gasTipo   = {};  // { 'TPE3/4': {count:N, lon:M}, ... }
-            var gasEstado = {};  // { 'INSTALADO': {count:N, lon:M}, ... }
-            var gasTotalLon = 0;
-            var gasTotalSeg = gasFeats.length;
-
-            gasFeats.forEach(function(f) {
-                var p    = f.properties;
-                var tipo = p.tipo   || 'Sin tipo';
-                var est  = p.estado || 'Sin estado';
-                var lon  = p.longitud_m || 0;
-
-                if (!gasTipo[tipo])   gasTipo[tipo]   = {count:0, lon:0};
-                if (!gasEstado[est])  gasEstado[est]  = {count:0, lon:0};
-                gasTipo[tipo].count++;   gasTipo[tipo].lon   += lon;
-                gasEstado[est].count++;  gasEstado[est].lon  += lon;
-                gasTotalLon += lon;
-            });
-
-            var gasTotalKm = (gasTotalLon / 1000).toFixed(2);
-            var gasInst    = gasEstado['INSTALADO'] || {count:0, lon:0};
-            var gasInstKm  = (gasInst.lon / 1000).toFixed(2);
-            var gasProyKm  = ((gasTotalLon - gasInst.lon) / 1000).toFixed(2);
-
-            html += '<div class="rep-section" style="border-top:2px solid rgba(255,140,0,0.25);padding-top:20px">';
-            html += '<h3 style="color:#ffb300;text-shadow:0 0 8px rgba(255,160,0,0.35)">🔶 RED DE DISTRIBUCIÓN DE GAS</h3>';
-
-            // KPIs principales
-            html += '<div class="rep-kpi-grid">';
-            html += '<div class="rep-kpi" style="border-left-color:#f90"><span class="num" style="color:#f90">' + gasTotalSeg + '</span><span class="lbl">Segmentos de tubería registrados</span></div>';
-            html += '<div class="rep-kpi" style="border-left-color:#f90"><span class="num" style="color:#f90">' + gasTotalKm + ' km</span><span class="lbl">Longitud total de red</span></div>';
-            html += '<div class="rep-kpi" style="border-left-color:#4caf50"><span class="num" style="color:#4caf50">' + gasInstKm + ' km</span><span class="lbl">Red instalada</span></div>';
-            html += '<div class="rep-kpi" style="border-left-color:#ef5350"><span class="num" style="color:#ef5350">' + gasProyKm + ' km</span><span class="lbl">Red proyectada / programada</span></div>';
-            html += '</div>';
-
-            // Por tipo de tubería
-            var COLORES_GAS = {'TPE1':'#e53935','TPE2':'#fb8c00','TPE3':'#fdd835','TPE3/4':'#43a047','TPE4':'#1e88e5','Sin tipo':'#90a4ae'};
-            var tipoEntries = Object.entries(gasTipo).sort(function(a,b){ return b[1].lon - a[1].lon; });
-            var maxTipoLon  = tipoEntries[0][1].lon;
-
-            html += '<div class="rep-section"><h3 style="color:#ffb300">📏 Longitud por Diámetro de Tubería</h3>';
-            tipoEntries.forEach(function(e) {
-                var color   = COLORES_GAS[e[0]] || '#90a4ae';
-                var km      = (e[1].lon / 1000).toFixed(2);
-                var pct     = ((e[1].lon / maxTipoLon) * 100).toFixed(0);
-                var pctTotal= ((e[1].lon / gasTotalLon) * 100).toFixed(1);
-                html += '<div class="rep-bar-row">';
-                html += '<div class="rep-bar-label" title="' + e[0] + '" style="color:' + color + ';font-weight:bold">' + e[0] + '</div>';
-                html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:' + pct + '%;background:' + color + '"><span>' + pctTotal + '% · ' + km + ' km</span></div></div>';
-                html += '<div class="rep-bar-count" style="color:' + color + '">' + e[1].count + '</div>';
-                html += '</div>';
-            });
-            html += '</div>';
-
-            // Por estado
-            var estEntries = Object.entries(gasEstado).sort(function(a,b){ return b[1].count - a[1].count; });
-            var COLORES_EST = {'INSTALADO':'#4caf50','PROYECTADO':'#29b6f6','PROGRAMADO':'#ffa726','PROYECTO':'#ab47bc','Sin estado':'#90a4ae'};
-            html += '<div class="rep-section"><h3 style="color:#ffb300">🏗️ Estado de la Red</h3>';
-            html += '<div class="rep-concepto-grid">';
-            estEntries.forEach(function(e) {
-                var color = COLORES_EST[e[0]] || '#90a4ae';
-                var km    = (e[1].lon / 1000).toFixed(2);
-                var pct   = ((e[1].count / gasTotalSeg) * 100).toFixed(1);
-                html += '<div class="rep-concepto-card" style="background:' + color + '18;border:2px solid ' + color + '">';
-                html += '<span class="num" style="color:' + color + '">' + e[1].count + '</span>';
-                html += '<span class="lbl" style="color:' + color + '">' + e[0] + '<br>';
-                html += '<em style="font-weight:400">' + km + ' km &nbsp;·&nbsp; ' + pct + '%</em></span>';
-                html += '</div>';
-            });
-            html += '</div></div>';
-
-            // Tabla resumen por tipo
-            html += '<div class="rep-section"><h3 style="color:#ffb300">📋 Tabla Resumen por Tipo de Tubería</h3>';
-            html += '<table class="rep-table">';
-            html += '<tr><th>Tipo</th><th>Diámetro</th><th>Segmentos</th><th>Longitud (km)</th><th>% Red total</th></tr>';
-            var DIAM = {'TPE1':'1"','TPE2':'2"','TPE3':'3"','TPE3/4':'3/4"','TPE4':'4"','Sin tipo':'—'};
-            tipoEntries.forEach(function(e) {
-                var color = COLORES_GAS[e[0]] || '#90a4ae';
-                var km    = (e[1].lon / 1000).toFixed(2);
-                var pct   = ((e[1].lon / gasTotalLon) * 100).toFixed(1);
-                var dot   = '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + color + ';margin-right:6px"></span>';
-                html += '<tr><td>' + dot + '<b style="color:' + color + '">' + e[0] + '</b></td>';
-                html += '<td style="text-align:center">' + (DIAM[e[0]] || '—') + '</td>';
-                html += '<td style="text-align:center;font-weight:bold">' + e[1].count + '</td>';
-                html += '<td style="text-align:center">' + km + '</td>';
-                html += '<td style="text-align:center">' + pct + '%</td></tr>';
-            });
-            // Totales
-            html += '<tr style="background:rgba(255,140,0,0.1);font-weight:bold">';
-            html += '<td colspan="2" style="color:#f90">TOTAL RED</td>';
-            html += '<td style="text-align:center;color:#f90">' + gasTotalSeg + '</td>';
-            html += '<td style="text-align:center;color:#f90">' + gasTotalKm + '</td>';
-            html += '<td style="text-align:center;color:#f90">100%</td></tr>';
-            html += '</table></div>';
-
-            html += '<div style="font-size:9px;color:#888;margin-top:4px;font-style:italic">* Estadísticas generadas desde la capa Red de Gas activa en el mapa</div>';
-            html += '</div>';
         }
 
         body.innerHTML = html;
@@ -3034,6 +2932,12 @@
                     style: _estiloTuberia,
                     onEachFeature: _popupTuberia
                 }).addTo(map);
+
+                // Si el panel de reporte ya está abierto, agregar sección de gas
+                var repPanel = document.getElementById('reporte-overlay');
+                if (repPanel && repPanel.classList.contains('visible')) {
+                    _appendGasToReport();
+                }
             })
             .catch(function(err){
                 load.textContent = '❌ Error al cargar redes_gas.geojson';
@@ -3044,6 +2948,106 @@
             });
     }
     /* ===== FIN RED DE GAS ===== */
+
+    /* Agrega bloque de estadísticas de gas al panel de reporte activo */
+    function _appendGasToReport() {
+        if (!_redGasData || !_redGasData.features || _redGasData.features.length === 0) return;
+        var body = document.getElementById('reporte-body');
+        if (!body) return;
+
+        var gasFeats = _redGasData.features;
+        var gasTipo   = {};
+        var gasEstado = {};
+        var gasTotalLon = 0;
+        var gasTotalSeg = gasFeats.length;
+
+        gasFeats.forEach(function(f) {
+            var p    = f.properties;
+            var tipo = p.tipo   || 'Sin tipo';
+            var est  = p.estado || 'Sin estado';
+            var lon  = p.longitud_m || 0;
+            if (!gasTipo[tipo])   gasTipo[tipo]   = {count:0, lon:0};
+            if (!gasEstado[est])  gasEstado[est]  = {count:0, lon:0};
+            gasTipo[tipo].count++;   gasTipo[tipo].lon   += lon;
+            gasEstado[est].count++;  gasEstado[est].lon  += lon;
+            gasTotalLon += lon;
+        });
+
+        var gasTotalKm = (gasTotalLon / 1000).toFixed(2);
+        var gasInst    = gasEstado['INSTALADO'] || {count:0, lon:0};
+        var gasInstKm  = (gasInst.lon / 1000).toFixed(2);
+        var gasProyKm  = ((gasTotalLon - gasInst.lon) / 1000).toFixed(2);
+
+        var COLORES_GAS = {'TPE1':'#e53935','TPE2':'#fb8c00','TPE3':'#fdd835','TPE3/4':'#43a047','TPE4':'#1e88e5','Sin tipo':'#90a4ae'};
+        var DIAM = {'TPE1':'1"','TPE2':'2"','TPE3':'3"','TPE3/4':'3/4"','TPE4':'4"','Sin tipo':'—'};
+        var COLORES_EST = {'INSTALADO':'#4caf50','PROYECTADO':'#29b6f6','PROGRAMADO':'#ffa726','PROYECTO':'#ab47bc','Sin estado':'#90a4ae'};
+
+        var tipoEntries = Object.entries(gasTipo).sort(function(a,b){ return b[1].lon - a[1].lon; });
+        var estEntries  = Object.entries(gasEstado).sort(function(a,b){ return b[1].count - a[1].count; });
+        var maxTipoLon  = tipoEntries.length ? tipoEntries[0][1].lon : 1;
+
+        var html = '<div class="rep-section" style="border-top:2px solid rgba(255,140,0,0.25);padding-top:20px">';
+        html += '<h3 style="color:#ffb300;text-shadow:0 0 8px rgba(255,160,0,0.35)">🔶 RED DE DISTRIBUCIÓN DE GAS</h3>';
+
+        html += '<div class="rep-kpi-grid">';
+        html += '<div class="rep-kpi" style="border-left-color:#f90"><span class="num" style="color:#f90">' + gasTotalSeg + '</span><span class="lbl">Segmentos registrados</span></div>';
+        html += '<div class="rep-kpi" style="border-left-color:#f90"><span class="num" style="color:#f90">' + gasTotalKm + ' km</span><span class="lbl">Longitud total de red</span></div>';
+        html += '<div class="rep-kpi" style="border-left-color:#4caf50"><span class="num" style="color:#4caf50">' + gasInstKm + ' km</span><span class="lbl">Red instalada</span></div>';
+        html += '<div class="rep-kpi" style="border-left-color:#ef5350"><span class="num" style="color:#ef5350">' + gasProyKm + ' km</span><span class="lbl">Red proyectada/programada</span></div>';
+        html += '</div>';
+
+        html += '<div class="rep-section"><h3 style="color:#ffb300">📏 Longitud por Diámetro</h3>';
+        tipoEntries.forEach(function(e) {
+            var color   = COLORES_GAS[e[0]] || '#90a4ae';
+            var km      = (e[1].lon / 1000).toFixed(2);
+            var pct     = ((e[1].lon / maxTipoLon) * 100).toFixed(0);
+            var pctTotal= ((e[1].lon / gasTotalLon) * 100).toFixed(1);
+            html += '<div class="rep-bar-row">';
+            html += '<div class="rep-bar-label" style="color:' + color + ';font-weight:bold">' + e[0] + '</div>';
+            html += '<div class="rep-bar-track"><div class="rep-bar-fill" style="width:' + pct + '%;background:' + color + '"><span>' + pctTotal + '% · ' + km + ' km</span></div></div>';
+            html += '<div class="rep-bar-count" style="color:' + color + '">' + e[1].count + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        html += '<div class="rep-section"><h3 style="color:#ffb300">🏗️ Estado de la Red</h3>';
+        html += '<div class="rep-concepto-grid">';
+        estEntries.forEach(function(e) {
+            var color = COLORES_EST[e[0]] || '#90a4ae';
+            var km    = (e[1].lon / 1000).toFixed(2);
+            var pct   = ((e[1].count / gasTotalSeg) * 100).toFixed(1);
+            html += '<div class="rep-concepto-card" style="background:' + color + '18;border:2px solid ' + color + '">';
+            html += '<span class="num" style="color:' + color + '">' + e[1].count + '</span>';
+            html += '<span class="lbl" style="color:' + color + '">' + e[0] + '<br><em style="font-weight:400">' + km + ' km · ' + pct + '%</em></span>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+
+        html += '<div class="rep-section"><h3 style="color:#ffb300">📋 Tabla Resumen por Tipo</h3>';
+        html += '<table class="rep-table">';
+        html += '<tr><th>Tipo</th><th>Diámetro</th><th>Segmentos</th><th>Longitud (km)</th><th>% Red</th></tr>';
+        tipoEntries.forEach(function(e) {
+            var color = COLORES_GAS[e[0]] || '#90a4ae';
+            var km    = (e[1].lon / 1000).toFixed(2);
+            var pct   = ((e[1].lon / gasTotalLon) * 100).toFixed(1);
+            var dot   = '<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + color + ';margin-right:6px"></span>';
+            html += '<tr><td>' + dot + '<b style="color:' + color + '">' + e[0] + '</b></td>';
+            html += '<td style="text-align:center">' + (DIAM[e[0]] || '—') + '</td>';
+            html += '<td style="text-align:center;font-weight:bold">' + e[1].count + '</td>';
+            html += '<td style="text-align:center">' + km + '</td>';
+            html += '<td style="text-align:center">' + pct + '%</td></tr>';
+        });
+        html += '<tr style="background:rgba(255,140,0,0.1);font-weight:bold">';
+        html += '<td colspan="2" style="color:#f90">TOTAL RED</td>';
+        html += '<td style="text-align:center;color:#f90">' + gasTotalSeg + '</td>';
+        html += '<td style="text-align:center;color:#f90">' + gasTotalKm + '</td>';
+        html += '<td style="text-align:center;color:#f90">100%</td></tr>';
+        html += '</table></div>';
+        html += '<div style="font-size:9px;color:#888;margin-top:4px;font-style:italic">* Estadísticas desde la capa Red de Gas activa en el mapa</div>';
+        html += '</div>';
+
+        body.innerHTML += html;
+    }
 
     function toggleMobile() {
         var btn = document.getElementById('btn-mobile');
