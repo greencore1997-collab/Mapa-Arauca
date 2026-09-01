@@ -364,6 +364,43 @@
         #btn-limpiar:hover { background:rgba(210,30,30,0.95); box-shadow:0 0 24px rgba(255,60,60,0.6); transform:scale(1.04); }
         body.mobile-mode #btn-limpiar { top:212px; left:10px; }
 
+        /* REDES DE GAS BUTTON */
+        #btn-redes {
+            position:absolute; top:255px; left:10px; z-index:900;
+            background:rgba(0,12,35,0.82); color:#f90;
+            border:none; border-left:3px solid #f90;
+            border-top:1px solid rgba(255,160,0,0.35);
+            border-right:1px solid rgba(255,160,0,0.15);
+            border-bottom:1px solid rgba(255,160,0,0.15);
+            padding:7px 12px; border-radius:8px; font-size:10px; font-weight:bold;
+            cursor:pointer; letter-spacing:0.8px;
+            box-shadow:0 0 16px rgba(255,140,0,0.3); transition:all 0.25s;
+            backdrop-filter:blur(6px); font-family:'Orbitron',monospace;
+            display:flex; align-items:center; gap:5px;
+        }
+        #btn-redes:hover { background:rgba(0,25,60,0.95); box-shadow:0 0 26px rgba(255,160,0,0.55); }
+        #btn-redes.activo { background:rgba(255,140,0,0.18); border-color:#ffb300; color:#ffb300;
+            box-shadow:0 0 22px rgba(255,180,0,0.5), inset 0 0 12px rgba(255,140,0,0.12); }
+        body.mobile-mode #btn-redes { top:255px; left:10px; }
+
+        /* REDES LEGEND PANEL */
+        #redes-legend {
+            display:none; position:absolute; top:255px; left:55px; z-index:899;
+            background:rgba(0,8,28,0.94); border:1px solid rgba(255,140,0,0.35);
+            border-left:3px solid #f90; border-radius:0 8px 8px 0;
+            padding:10px 14px; min-width:200px;
+            box-shadow:4px 0 18px rgba(255,130,0,0.18);
+            backdrop-filter:blur(6px);
+        }
+        #redes-legend h4 {
+            color:#ffb300; font-size:9px; font-family:'Orbitron',monospace;
+            letter-spacing:1.5px; margin:0 0 8px; text-transform:uppercase;
+        }
+        .rleg-row { display:flex; align-items:center; gap:7px; margin:4px 0; font-size:10px; color:#e0c88a; }
+        .rleg-line { width:24px; height:3px; border-radius:2px; flex-shrink:0; }
+        .rleg-dash { background:repeating-linear-gradient(90deg,currentColor 0,currentColor 4px,transparent 4px,transparent 8px); }
+        #redes-loading { color:#ffb300; font-size:10px; font-family:'Orbitron',monospace; letter-spacing:1px; padding:5px 0; }
+
         /* MODAL LIMPIAR */
         #modal-limpiar {
             display:none; position:fixed; top:0; left:0; width:100%; height:100%;
@@ -1012,6 +1049,22 @@
         <div class="opc-item" onclick="actualizarKML()"><span class="opc-icon">&#128506;</span>Cargar KML</div>
     </div>
     <button id="btn-limpiar" onclick="limpiarGeovisor()" title="Limpiar todos los datos cargados">🗑️ LIMPIAR</button>
+    <button id="btn-redes" onclick="toggleRedGas()" title="Activar/desactivar Red de Tuberías de Gas">🔶 REDES GAS</button>
+    <div id="redes-legend">
+        <h4>🔶 RED DE TUBERÍAS GAS</h4>
+        <div id="redes-loading" style="display:none">⏳ Cargando...</div>
+        <div id="redes-leyenda-contenido">
+            <div class="rleg-row"><span class="rleg-line" style="background:#e53935"></span>TPE1 — 1"</div>
+            <div class="rleg-row"><span class="rleg-line" style="background:#fb8c00"></span>TPE2 — 2"</div>
+            <div class="rleg-row"><span class="rleg-line" style="background:#fdd835"></span>TPE3 — 3"</div>
+            <div class="rleg-row"><span class="rleg-line" style="background:#43a047"></span>TPE3/4 — 3/4"</div>
+            <div class="rleg-row"><span class="rleg-line" style="background:#1e88e5"></span>TPE4 — 4"</div>
+            <div style="border-top:1px solid rgba(255,160,0,0.2);margin:6px 0 4px"></div>
+            <div class="rleg-row"><span class="rleg-line" style="background:#aaa"></span>Instalado</div>
+            <div class="rleg-row"><span class="rleg-line rleg-dash" style="color:#aaa;height:0;border-top:2px dashed #aaa"></span>Proyectado/Programado</div>
+            <div id="redes-stats" style="margin-top:7px;font-size:9px;color:#f90;font-family:'Orbitron',monospace;letter-spacing:0.5px"></div>
+        </div>
+    </div>
 
     <!-- Modal confirmación limpiar -->
     <div id="modal-limpiar">
@@ -2768,6 +2821,118 @@
 
     
     var _mobileMode = false;
+
+    /* ===== RED DE GAS ===== */
+    var _redGasLayer = null;
+    var _redGasActiva = false;
+    var _redGasData = null;
+
+    var _COLORES_TUBO = {
+        'TPE1':  '#e53935',  // rojo   - 1"
+        'TPE2':  '#fb8c00',  // naranja - 2"
+        'TPE3':  '#fdd835',  // amarillo - 3"
+        'TPE3/4':'#43a047',  // verde   - 3/4"  (mayoría de la red)
+        'TPE4':  '#1e88e5',  // azul    - 4"
+        '':      '#90a4ae'   // gris    - sin tipo
+    };
+
+    function _estiloTuberia(feature) {
+        var tipo   = feature.properties.tipo   || '';
+        var estado = feature.properties.estado || '';
+        var color  = _COLORES_TUBO[tipo] || '#90a4ae';
+        var instalado = (estado === 'INSTALADO');
+        return {
+            color:     color,
+            weight:    tipo === 'TPE1' || tipo === 'TPE4' ? 3 : tipo === 'TPE2' || tipo === 'TPE3' ? 2.5 : 1.8,
+            opacity:   instalado ? 0.85 : 0.6,
+            dashArray: instalado ? null : '6,5'
+        };
+    }
+
+    function _popupTuberia(feature, layer) {
+        var p = feature.properties;
+        var colorTipo = _COLORES_TUBO[p.tipo] || '#90a4ae';
+        var estadoIcon = p.estado === 'INSTALADO' ? '✅' : p.estado ? '🔧' : '';
+        layer.bindPopup(
+            '<div style="font-size:11px;min-width:170px">' +
+            '<b style="color:' + colorTipo + ';font-size:13px">◼ ' + (p.tipo || 'Desconocido') + '</b><br>' +
+            estadoIcon + ' <b>' + (p.estado || '—') + '</b><br>' +
+            (p.barrio ? '<span style="color:#888">📍 ' + p.barrio + '</span><br>' : '') +
+            (p.polivalvula ? '🔵 Polivalvula: <b>' + p.polivalvula + '</b><br>' : '') +
+            (p.longitud_m ? '📏 ' + p.longitud_m.toFixed(1) + ' m' : '') +
+            '</div>',
+            {maxWidth: 220}
+        );
+        layer.on('mouseover', function(){ layer.setStyle({opacity:1, weight: (layer.options.weight||2)+1}); });
+        layer.on('mouseout',  function(){ layer.setStyle(_estiloTuberia(feature)); });
+    }
+
+    function toggleRedGas() {
+        var btn    = document.getElementById('btn-redes');
+        var legend = document.getElementById('redes-legend');
+        var load   = document.getElementById('redes-loading');
+
+        if (_redGasActiva) {
+            // Desactivar
+            if (_redGasLayer) { map.removeLayer(_redGasLayer); }
+            _redGasActiva = false;
+            btn.classList.remove('activo');
+            btn.innerHTML = '🔶 REDES GAS';
+            legend.style.display = 'none';
+            return;
+        }
+
+        // Activar
+        _redGasActiva = true;
+        btn.classList.add('activo');
+        btn.innerHTML = '🔶 REDES GAS ✔';
+        legend.style.display = 'block';
+
+        if (_redGasData) {
+            // Ya cargado — solo agregar al mapa
+            _redGasLayer = L.geoJSON(_redGasData, {
+                style: _estiloTuberia,
+                onEachFeature: _popupTuberia
+            }).addTo(map);
+            return;
+        }
+
+        // Primera carga
+        load.style.display = 'block';
+        document.getElementById('redes-leyenda-contenido').style.opacity = '0.4';
+
+        fetch('redes_gas.geojson')
+            .then(function(r){ return r.json(); })
+            .then(function(data) {
+                _redGasData = data;
+                load.style.display = 'none';
+                document.getElementById('redes-leyenda-contenido').style.opacity = '1';
+
+                // Estadísticas rápidas
+                var conteo = {};
+                data.features.forEach(function(f){
+                    var t = f.properties.tipo || 'Sin tipo';
+                    conteo[t] = (conteo[t]||0) + 1;
+                });
+                var statsHtml = Object.keys(conteo).sort().map(function(t){
+                    return '<span style="color:' + (_COLORES_TUBO[t]||'#aaa') + '">■</span> ' + t + ': ' + conteo[t];
+                }).join(' &nbsp;·&nbsp; ');
+                document.getElementById('redes-stats').innerHTML = statsHtml + '<br><b>' + data.features.length + '</b> segmentos totales';
+
+                _redGasLayer = L.geoJSON(data, {
+                    style: _estiloTuberia,
+                    onEachFeature: _popupTuberia
+                }).addTo(map);
+            })
+            .catch(function(err){
+                load.textContent = '❌ Error al cargar redes_gas.geojson';
+                console.error('RedGas:', err);
+                _redGasActiva = false;
+                btn.classList.remove('activo');
+                btn.innerHTML = '🔶 REDES GAS';
+            });
+    }
+    /* ===== FIN RED DE GAS ===== */
 
     function toggleMobile() {
         var btn = document.getElementById('btn-mobile');
