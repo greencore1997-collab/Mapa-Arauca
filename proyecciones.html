@@ -129,6 +129,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .rv.trunk{color:#e53935;} .rv.sec{color:#ff9800;} .rv.dist{color:#69f0ae;} .rv.inv{color:#ffd600;}
 
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(124,77,255,0.28);border-radius:3px;}
+
 /* CAD UPLOAD */
 .cad-drop{border:1.5px dashed rgba(0,200,255,0.3);border-radius:8px;padding:12px 10px;text-align:center;cursor:pointer;transition:all 0.25s;background:rgba(0,200,255,0.03);position:relative;}
 .cad-drop:hover,.cad-drop.dragover{border-color:rgba(0,200,255,0.65);background:rgba(0,200,255,0.08);box-shadow:0 0 14px rgba(0,200,255,0.12);}
@@ -140,6 +141,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .cad-err{background:rgba(229,57,53,0.08);color:#e53935;border:1px solid rgba(229,57,53,0.22);}
 .cad-clear{font-size:7px;color:rgba(229,57,53,0.55);cursor:pointer;display:inline-block;margin-top:3px;letter-spacing:0.5px;}
 .cad-clear:hover{color:#e53935;}
+/* Anillos colors */
 .anillo-badge{display:inline-flex;align-items:center;gap:5px;font-size:7.5px;padding:2px 7px;border-radius:4px;margin:2px 2px;font-family:'Orbitron',monospace;letter-spacing:0.5px;border-width:1px;border-style:solid;}
 .a0{color:#e53935;border-color:rgba(229,57,53,0.3);background:rgba(229,57,53,0.07);}
 .a1{color:#ff9800;border-color:rgba(255,152,0,0.3);background:rgba(255,152,0,0.07);}
@@ -147,8 +149,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .a3{color:#69f0ae;border-color:rgba(105,240,174,0.3);background:rgba(105,240,174,0.07);}
 .a4{color:#ffd600;border-color:rgba(255,214,0,0.3);background:rgba(255,214,0,0.07);}
 .a5{color:#e040fb;border-color:rgba(224,64,251,0.3);background:rgba(224,64,251,0.07);}
+/* polivalvula legend dot */
 .pv-diamond{width:10px;height:10px;background:#fff;transform:rotate(45deg);flex-shrink:0;border:1px solid rgba(255,255,255,0.5);}
-
 
 /* TOGGLE VISTA */
 #vista-toggle{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:none;background:rgba(0,8,24,0.9);border:1px solid rgba(124,77,255,0.25);border-radius:8px;padding:3px;gap:2px;display:none;flex-direction:row;}
@@ -279,7 +281,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
       <div class="cp-sec">
         <div class="cp-sec-title">RESPALDO CAD (OPCIONAL)</div>
         <div class="cp-f">
-          <label class="cp-lbl">PLANO DXF DEL ÁREA URBANA</label>
+          <label class="cp-lbl">PLANO CAD DEL ÁREA URBANA</label>
           <div class="cad-drop" id="cad-drop"
                onclick="document.getElementById('cad-input').click()"
                ondragover="cadDragOver(event)"
@@ -385,7 +387,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 </div>
 
 <script>
-
 /* ═══ DATOS CIUDADES ═══ */
 var CIUDADES=[
   {id:'arauca',     nombre:'Arauca',               dpto:'Arauca',             pop:96000,   area_urb:12,  ppv:3.2,crec:2.2, lat:7.0852,  lng:-70.7516},
@@ -394,7 +395,7 @@ var CIUDADES=[
   {id:'tame',       nombre:'Tame',                  dpto:'Arauca',             pop:28000,   area_urb:3.5, ppv:3.5,crec:1.6, lat:6.4666,  lng:-71.7294},
   {id:'fortul',     nombre:'Fortul',                dpto:'Arauca',             pop:16000,   area_urb:1.8, ppv:3.5,crec:1.5, lat:6.7742,  lng:-71.7654},
   {id:'rondon',     nombre:'Puerto Rondón',         dpto:'Arauca',             pop:5500,    area_urb:0.7, ppv:3.6,crec:1.2, lat:6.2883,  lng:-70.9597},
-  {id:'cravo',      nombre:'Cravo Norte',           dpto:'Arauca',             por:4000,    area_urb:0.5, ppv:3.7,crec:1.0, lat:6.3162,  lng:-70.2083},
+  {id:'cravo',      nombre:'Cravo Norte',           dpto:'Arauca',             pop:4000,    area_urb:0.5, ppv:3.7,crec:1.0, lat:6.3162,  lng:-70.2083},
   {id:'bogota',     nombre:'Bogotá D.C.',           dpto:'Cundinamarca',       pop:7412566, area_urb:307, ppv:2.8,crec:1.1, lat:4.7110,  lng:-74.0721},
   {id:'medellin',   nombre:'Medellín',              dpto:'Antioquia',          pop:2533424, area_urb:105, ppv:2.6,crec:0.9, lat:6.2476,  lng:-75.5659},
   {id:'cali',       nombre:'Cali',                  dpto:'Valle del Cauca',    pop:2471474, area_urb:120, ppv:2.9,crec:1.0, lat:3.4516,  lng:-76.5320},
@@ -975,7 +976,7 @@ function iniciarPreIntro(){
   var ctx=cv.getContext('2d');
   var cols=Math.floor(cv.width/14);
   var drops=Array(cols).fill(0).map(function(){return (Math.random()*cv.height/14)|0;});
-  var chars='GLP·CH₄·C�CH₈·DN·PE100·BAR·MPa·KM·M³·GAS·RED·VIA·ARAUCA·0123456789ABCDEF';
+  var chars='GLP·CH₄·C₃H₈·DN·PE100·BAR·MPa·KM·M³·GAS·RED·VIA·ARAUCA·0123456789ABCDEF';
   function draw(){
     ctx.fillStyle='rgba(0,8,20,0.08)';ctx.fillRect(0,0,cv.width,cv.height);
     ctx.font='13px monospace';
@@ -1293,7 +1294,7 @@ function dibujarMapa(pr){
 
 function roundRect(ctx,x,y,w,h,r,fill,stroke){
   ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,x,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
   ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
   ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
   ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
@@ -1323,7 +1324,7 @@ function mostrarReporte(pr){
     rw('Municipio',c.nombre+', '+c.dpto),
     rw('Tipo área',pr.p.tipo.charAt(0).toUpperCase()+pr.p.tipo.slice(1)),
     rw('Horizonte',pr.p.hor+' años'),
-    rw('Presión'(pr.presion_txt),
+    rw('Presión',pr.presion_txt),
     rw('Material',pr.p.mat),
     rw('Fecha',new Date().toLocaleDateString('es-CO')),
   ]);
@@ -1563,7 +1564,7 @@ function generarRedOSM(osmData,pr,map,bbox){
     L.polyline(c,{color:'#ff9800',weight:2.8,opacity:0.88}).addTo(map);
   });
 
-  // ─ Capa 3: Troncal (rojo grueso) ‒ sigue vías principales
+  // ─ Capa 3: Troncal (rojo grueso) — sigue vías principales
   trunkWays.forEach(function(c){
     L.polyline(c,{color:'#e53935',weight:4.5,opacity:0.95}).addTo(map);
   });
