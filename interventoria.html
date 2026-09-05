@@ -127,14 +127,28 @@
     .btn-del  { background: rgba(244,67,54,0.1); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3) !important; }
     .btn-del:hover  { background: rgba(244,67,54,0.22); }
 
-    /* PDF VIEWER */
-    #pdf-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.88); flex-direction: column; }
-    #pdf-overlay.visible { display: flex; }
-    .pdf-header { background: rgba(15,0,35,0.97); border-bottom: 1px solid rgba(156,39,176,0.25); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .pdf-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; }
-    #btn-cerrar-pdf { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; padding: 7px 16px; border-radius: 8px; cursor: pointer; background: rgba(156,39,176,0.15); border: 1px solid rgba(156,39,176,0.4); color: #ce93d8; font-weight: bold; }
-    #btn-cerrar-pdf:hover { background: rgba(156,39,176,0.3); }
-    #pdf-frame { flex: 1; width: 100%; border: none; }
+    /* ── VISOR GENÉRICO (PDF / EXCEL) ── */
+    #visor-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(2,0,12,0.97); flex-direction: column; }
+    #visor-overlay.visible { display: flex; }
+    .visor-header { background: rgba(15,0,35,0.98); border-bottom: 1px solid rgba(156,39,176,0.25); padding: 11px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .visor-icon { font-size: 20px; }
+    .visor-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .visor-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-visor { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; border: none; }
+    .btn-vdes  { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; }
+    .btn-vdes:hover  { background: rgba(0,200,255,0.22); }
+    .btn-vcer  { background: rgba(156,39,176,0.12); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
+    .btn-vcer:hover  { background: rgba(156,39,176,0.28); }
+    /* PDF frame */
+    #pdf-frame { flex: 1; width: 100%; border: none; background: #111; }
+    /* Excel table viewer */
+    #xls-viewer { flex: 1; overflow: auto; padding: 0; display: none; }
+    #xls-viewer table { border-collapse: collapse; font-size: 12px; width: max-content; min-width: 100%; }
+    #xls-viewer th { background: rgba(156,39,176,0.2); color: #ce93d8; padding: 8px 14px; text-align: left; font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; border: 1px solid rgba(156,39,176,0.2); position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+    #xls-viewer td { padding: 7px 14px; color: #d1c4e9; border: 1px solid rgba(156,39,176,0.08); white-space: nowrap; }
+    #xls-viewer tr:nth-child(even) td { background: rgba(156,39,176,0.04); }
+    #xls-viewer tr:hover td { background: rgba(156,39,176,0.1); }
+    #xls-loading { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #9575cd; }
 
     /* Nota */
     .int-nota { background: rgba(156,39,176,0.06); border-left: 3px solid #9c27b0; border-radius: 0 10px 10px 0; padding: 13px 16px; font-size: 11px; color: #b39ddb; line-height: 1.8; }
@@ -240,13 +254,19 @@
     </div><!-- /int-body -->
 </div><!-- /main-panel -->
 
-<!-- ── PDF VIEWER ── -->
-<div id="pdf-overlay">
-    <div class="pdf-header">
-        <div class="pdf-title" id="pdf-viewer-title">—</div>
-        <button id="btn-cerrar-pdf" onclick="cerrarPdf()">✕ CERRAR</button>
+<!-- ── VISOR UNIVERSAL ── -->
+<div id="visor-overlay">
+    <div class="visor-header">
+        <div class="visor-icon" id="visor-icon">📄</div>
+        <div class="visor-title" id="visor-title">—</div>
+        <div class="visor-actions">
+            <button class="btn-visor btn-vdes" id="btn-visor-dl" onclick="visorDescargar()">⬇ DESCARGAR</button>
+            <button class="btn-visor btn-vcer" onclick="cerrarVisor()">✕ CERRAR</button>
+        </div>
     </div>
     <iframe id="pdf-frame" src=""></iframe>
+    <div id="xls-loading">⏳ Cargando tabla...</div>
+    <div id="xls-viewer"></div>
 </div>
 
 <script>
@@ -372,42 +392,126 @@ function procesarFiles(files, tipo) {
 }
 
 function renderArchivos(tipo) {
-    var arr = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
+    var arr  = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
     var elId = tipo==='pdf' ? 'lista-pdf' : 'lista-xls';
-    var el = document.getElementById(elId);
-    if (!arr.length) { el.innerHTML='<p class="empty-msg">'+(tipo==='pdf'?'No hay mapas cargados aún.':'No hay reportes cargados aún.')+'</p>'; return; }
-    el.innerHTML = arr.map(function(f,i){
+    var el   = document.getElementById(elId);
+    if (!arr.length) {
+        el.innerHTML = '<p class="empty-msg">' + (tipo==='pdf' ? 'No hay mapas cargados aún.' : 'No hay reportes cargados aún.') + '</p>';
+        return;
+    }
+    el.innerHTML = arr.map(function(f, i) {
         var icon = tipo==='pdf' ? '📄' : '📊';
-        var btnVer = tipo==='pdf'
-            ? '<button class="btn-file btn-ver" onclick="verPdf('+i+')">👁 VER</button>'
-            : '<button class="btn-file btn-ver" onclick="descargarArchivo('+i+',\'xls\')">⬇ DESCARGAR</button>';
-        return '<div class="file-item">'+
-            '<div class="file-icon">'+icon+'</div>'+
-            '<div class="file-info"><div class="file-name">'+f.nombre+'</div>'+
-            '<div class="file-meta">'+f.size+' · Cargado: '+f.fecha+'</div></div>'+
-            '<div class="file-actions">'+btnVer+
-            '<button class="btn-file btn-del" onclick="eliminarArchivo('+i+',\''+tipo+'\')">🗑</button>'+
-            '</div></div>';
+        return '<div class="file-item">' +
+            '<div class="file-icon">' + icon + '</div>' +
+            '<div class="file-info">' +
+                '<div class="file-name">' + f.nombre + '</div>' +
+                '<div class="file-meta">' + f.size + ' · Cargado: ' + f.fecha + '</div>' +
+            '</div>' +
+            '<div class="file-actions">' +
+                '<button class="btn-file btn-ver" onclick="abrirVisor(' + i + ',\'' + tipo + '\')">👁 ABRIR</button>' +
+                '<button class="btn-file btn-ver" style="background:rgba(0,200,255,0.1);color:#00c8ff;border-color:rgba(0,200,255,0.3)!important" onclick="descargarArchivo(' + i + ',\'' + tipo + '\')">⬇ DESCARGAR</button>' +
+                '<button class="btn-file btn-del" onclick="eliminarArchivo(' + i + ',\'' + tipo + '\')">🗑</button>' +
+            '</div>' +
+        '</div>';
     }).join('');
 }
 
-function verPdf(i) {
-    var f = _PERFILES[_perfil].pdfs[i];
-    document.getElementById('pdf-viewer-title').textContent = f.nombre;
-    document.getElementById('pdf-frame').src = f.data;
-    document.getElementById('pdf-overlay').classList.add('visible');
+/* ── VISOR UNIVERSAL ── */
+var _visorActual = null;
+
+function abrirVisor(i, tipo) {
+    var f = tipo==='pdf' ? _PERFILES[_perfil].pdfs[i] : _PERFILES[_perfil].excels[i];
+    _visorActual = { f: f, tipo: tipo };
+    var overlay = document.getElementById('visor-overlay');
+    document.getElementById('visor-title').textContent = f.nombre;
+    document.getElementById('visor-icon').textContent  = tipo==='pdf' ? '📄' : '📊';
+
+    var frame  = document.getElementById('pdf-frame');
+    var xlsDiv = document.getElementById('xls-viewer');
+    var xlsLoad= document.getElementById('xls-loading');
+
+    if (tipo === 'pdf') {
+        frame.style.display  = 'block';
+        xlsDiv.style.display = 'none';
+        xlsLoad.style.display= 'none';
+        frame.src = f.data;
+    } else {
+        frame.style.display  = 'none';
+        xlsDiv.style.display = 'none';
+        xlsLoad.style.display= 'flex';
+        xlsDiv.innerHTML = '';
+        // Usar SheetJS para parsear
+        var script = document.getElementById('sheetjs-script');
+        if (!script) {
+            script = document.createElement('script');
+            script.id  = 'sheetjs-script';
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            script.onload = function() { _renderXls(f); };
+            document.head.appendChild(script);
+        } else {
+            _renderXls(f);
+        }
+    }
+    overlay.classList.add('visible');
 }
-function cerrarPdf() {
-    document.getElementById('pdf-overlay').classList.remove('visible');
+
+function _renderXls(f) {
+    var xlsDiv  = document.getElementById('xls-viewer');
+    var xlsLoad = document.getElementById('xls-loading');
+    try {
+        // data URL → base64 → ArrayBuffer
+        var base64 = f.data.split(',')[1];
+        var bin    = atob(base64);
+        var buf    = new Uint8Array(bin.length);
+        for (var i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i);
+        var wb   = XLSX.read(buf, { type:'array' });
+        var ws   = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+
+        if (!rows.length) { xlsDiv.innerHTML='<p class="empty-msg">Hoja vacía.</p>'; }
+        else {
+            var html = '<table><thead><tr>' +
+                rows[0].map(function(h){ return '<th>' + h + '</th>'; }).join('') +
+                '</tr></thead><tbody>' +
+                rows.slice(1).map(function(r){
+                    return '<tr>' + r.map(function(c){ return '<td>' + c + '</td>'; }).join('') + '</tr>';
+                }).join('') +
+                '</tbody></table>';
+            xlsDiv.innerHTML = html;
+        }
+        xlsLoad.style.display = 'none';
+        xlsDiv.style.display  = 'block';
+    } catch(e) {
+        xlsLoad.style.display = 'none';
+        xlsDiv.style.display  = 'block';
+        xlsDiv.innerHTML = '<p class="empty-msg" style="color:#ef9a9a">❌ No se pudo leer el archivo: ' + e.message + '</p>';
+    }
+}
+
+function cerrarVisor() {
+    document.getElementById('visor-overlay').classList.remove('visible');
     document.getElementById('pdf-frame').src = '';
+    document.getElementById('xls-viewer').innerHTML = '';
+    _visorActual = null;
 }
+
+function visorDescargar() {
+    if (!_visorActual) return;
+    descargarArchivo_direct(_visorActual.f);
+}
+
 function descargarArchivo(i, tipo) {
-    var f = tipo==='xls' ? _PERFILES[_perfil].excels[i] : _PERFILES[_perfil].pdfs[i];
-    var a = document.createElement('a'); a.href=f.data; a.download=f.nombre; a.click();
+    var f = tipo==='pdf' ? _PERFILES[_perfil].pdfs[i] : _PERFILES[_perfil].excels[i];
+    descargarArchivo_direct(f);
 }
+
+function descargarArchivo_direct(f) {
+    var a = document.createElement('a'); a.href = f.data; a.download = f.nombre; a.click();
+}
+
 function eliminarArchivo(i, tipo) {
-    if (tipo==='pdf') _PERFILES[_perfil].pdfs.splice(i,1);
-    else _PERFILES[_perfil].excels.splice(i,1);
+    if (tipo==='pdf') _PERFILES[_perfil].pdfs.splice(i, 1);
+    else _PERFILES[_perfil].excels.splice(i, 1);
     renderArchivos(tipo);
 }
 
