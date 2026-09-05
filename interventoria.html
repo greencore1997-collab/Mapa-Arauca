@@ -74,47 +74,8 @@
     .int-section { margin-bottom: 30px; }
     .int-section-title { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.16); padding-bottom: 9px; margin-bottom: 16px; }
 
-    /* KPIs */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 13px; }
-    .kpi-card { background: rgba(156,39,176,0.07); border: 1px solid rgba(156,39,176,0.2); border-left: 4px solid #9c27b0; border-radius: 12px; padding: 16px 18px; }
-    .kpi-num { font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900; color: #e1bee7; display: block; line-height: 1; }
-    .kpi-lbl { font-size: 10px; color: #9575cd; margin-top: 5px; display: block; }
-
-    /* Form registros */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
-    .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-label { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: #9575cd; text-transform: uppercase; }
-    .form-input, .form-select, .form-textarea { background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.3); border-radius: 8px; padding: 9px 12px; color: #e1bee7; font-size: 12px; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #9c27b0; box-shadow: 0 0 10px rgba(156,39,176,0.16); }
-    .form-select option { background: #1a003a; }
-    .form-textarea { resize: vertical; min-height: 75px; }
-    .form-full { grid-column: 1 / -1; }
-    .btn-primary { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 9px; padding: 11px 24px; font-size: 9px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 14px rgba(156,39,176,0.26); transition: all 0.2s; margin-top: 6px; }
-    .btn-primary:hover { box-shadow: 0 0 26px rgba(180,60,220,0.42); }
-    .form-msg { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; margin-top: 8px; min-height: 14px; }
-    .form-msg.ok { color: #81c784; } .form-msg.err { color: #ef9a9a; }
-
-    /* Registros */
-    .reg-item { background: rgba(156,39,176,0.05); border: 1px solid rgba(156,39,176,0.12); border-left: 3px solid #9c27b0; border-radius: 10px; padding: 12px 15px; margin-bottom: 8px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; }
-    .reg-fecha { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; color: #9575cd; white-space: nowrap; }
-    .reg-desc { font-size: 12px; color: #d1c4e9; line-height: 1.5; }
-    .reg-desc strong { color: #ce93d8; }
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: bold; }
-    .badge-ok   { background: rgba(76,175,80,0.13);  color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
-    .badge-warn { background: rgba(255,152,0,0.13);  color: #ffb74d; border: 1px solid rgba(255,152,0,0.3); }
-    .badge-bad  { background: rgba(244,67,54,0.13);  color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3); }
-
-    /* ── ZONA DE CARGA (PDF / EXCEL) ── */
-    .upload-zone { border: 2px dashed rgba(156,39,176,0.35); border-radius: 14px; padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.25s; position: relative; background: rgba(156,39,176,0.03); }
-    .upload-zone:hover, .upload-zone.drag-over { border-color: #9c27b0; background: rgba(156,39,176,0.08); box-shadow: 0 0 24px rgba(156,39,176,0.18); }
-    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon { font-size: 36px; margin-bottom: 10px; }
-    .upload-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; text-transform: uppercase; margin-bottom: 6px; }
-    .upload-sub { font-size: 11px; color: rgba(149,117,205,0.55); }
-
     /* Lista archivos */
-    .file-list { margin-top: 20px; }
+    .file-list { margin-top: 4px; }
     .file-item { background: rgba(156,39,176,0.06); border: 1px solid rgba(156,39,176,0.16); border-radius: 10px; padding: 13px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; }
     .file-icon { font-size: 24px; flex-shrink: 0; }
     .file-info { flex: 1; }
@@ -124,8 +85,8 @@
     .btn-file { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; padding: 6px 12px; border-radius: 7px; cursor: pointer; border: none; font-weight: bold; transition: all 0.2s; }
     .btn-ver  { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
     .btn-ver:hover  { background: rgba(156,39,176,0.3); }
-    .btn-del  { background: rgba(244,67,54,0.1); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3) !important; }
-    .btn-del:hover  { background: rgba(244,67,54,0.22); }
+    .btn-dl   { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; }
+    .btn-dl:hover   { background: rgba(0,200,255,0.22); }
 
     /* ── VISOR GENÉRICO (PDF / EXCEL) ── */
     #visor-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(2,0,12,0.97); flex-direction: column; }
@@ -149,11 +110,9 @@
     #xls-viewer tr:nth-child(even) td { background: rgba(156,39,176,0.04); }
     #xls-viewer tr:hover td { background: rgba(156,39,176,0.1); }
     #xls-loading { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #9575cd; }
+    #xls-error { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 1.5px; color: #ef9a9a; padding: 24px; text-align: center; }
 
-    /* Nota */
-    .int-nota { background: rgba(156,39,176,0.06); border-left: 3px solid #9c27b0; border-radius: 0 10px 10px 0; padding: 13px 16px; font-size: 11px; color: #b39ddb; line-height: 1.8; }
-
-    .empty-msg { color: rgba(149,117,205,0.4); font-size: 11px; text-align: center; padding: 28px 0; }
+    .empty-msg { color: rgba(149,117,205,0.4); font-size: 11px; text-align: center; padding: 28px 0; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -224,30 +183,20 @@
         <!-- ══ TAB: MAPAS PDF ══ -->
         <div id="tab-mapas" class="tab-content activo">
             <div class="int-section">
-                <div class="int-section-title">🗺️ Cargar Mapas en PDF</div>
-                <div class="upload-zone" id="zone-pdf"
-                     ondragover="dragOver(event,'zone-pdf')" ondragleave="dragLeave('zone-pdf')" ondrop="dropFile(event,'pdf')">
-                    <input type="file" accept=".pdf" multiple onchange="cargarArchivos(event,'pdf')" />
-                    <div class="upload-icon">📄</div>
-                    <div class="upload-title">Arrastra tus mapas aquí o haz clic</div>
-                    <div class="upload-sub">Formatos aceptados: PDF · Pueden cargarse varios a la vez</div>
+                <div class="int-section-title">🗺️ Mapas Disponibles</div>
+                <div class="file-list" id="lista-pdf">
+                    <p class="empty-msg">No hay mapas disponibles aún.</p>
                 </div>
-                <div class="file-list" id="lista-pdf"><p class="empty-msg">No hay mapas cargados aún.</p></div>
             </div>
         </div>
 
         <!-- ══ TAB: REPORTES EXCEL ══ -->
         <div id="tab-reportes" class="tab-content">
             <div class="int-section">
-                <div class="int-section-title">📊 Cargar Reportes Excel</div>
-                <div class="upload-zone" id="zone-xls"
-                     ondragover="dragOver(event,'zone-xls')" ondragleave="dragLeave('zone-xls')" ondrop="dropFile(event,'xls')">
-                    <input type="file" accept=".xlsx,.xls,.csv" multiple onchange="cargarArchivos(event,'xls')" />
-                    <div class="upload-icon">📊</div>
-                    <div class="upload-title">Arrastra tus reportes aquí o haz clic</div>
-                    <div class="upload-sub">Formatos aceptados: XLSX · XLS · CSV · Pueden cargarse varios a la vez</div>
+                <div class="int-section-title">📊 Reportes Disponibles</div>
+                <div class="file-list" id="lista-xls">
+                    <p class="empty-msg">No hay reportes disponibles aún.</p>
                 </div>
-                <div class="file-list" id="lista-xls"><p class="empty-msg">No hay reportes cargados aún.</p></div>
             </div>
         </div>
 
@@ -264,13 +213,14 @@
             <button class="btn-visor btn-vcer" onclick="cerrarVisor()">✕ CERRAR</button>
         </div>
     </div>
-    <iframe id="pdf-frame" src=""></iframe>
+    <iframe id="pdf-frame" src="about:blank"></iframe>
     <div id="xls-loading">⏳ Cargando tabla...</div>
+    <div id="xls-error">❌ No se pudo cargar el archivo.</div>
     <div id="xls-viewer"></div>
 </div>
 
 <script>
-/* ── FONDO ── */
+/* ── FONDO ANIMADO ── */
 (function(){
     var c=document.getElementById('bg-canvas'),ctx=c.getContext('2d'),W,H,pts=[];
     function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; }
@@ -285,12 +235,37 @@
     draw();
 })();
 
+/* ════════════════════════════════════════════════
+   CATÁLOGO DE ARCHIVOS POR PERFIL
+   Para agregar archivos, añadir entradas aquí.
+   Cada entrada: { nombre, desc, url }
+   ════════════════════════════════════════════════ */
+var _CATALOGO = {
+    'SAHAD': {
+        pdfs: [
+            /* Ejemplo (descomentar cuando el archivo esté en GitHub):
+            { nombre:'Mapa Red Primaria.pdf', desc:'Red primaria de distribución', url:'https://araucanadegas.github.io/mapas/mapa-red-primaria.pdf' }
+            */
+        ],
+        excels: [
+            /* Ejemplo:
+            { nombre:'Reporte Junio 2025.xlsx', desc:'Seguimiento obras junio', url:'https://araucanadegas.github.io/reportes/reporte-jun-2025.xlsx' }
+            */
+        ]
+    },
+    'MIA': {
+        pdfs: [],
+        excels: []
+    }
+};
+
 /* ── DATOS ── */
 var _PERFILES = {
-    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷',   registros:[], pdfs:[], excels:[] },
-    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️', registros:[], pdfs:[], excels:[] }
+    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'   },
+    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️' }
 };
 var _perfil = null;
+var _visorActual = null;
 
 /* ── SELECTOR ── */
 function seleccionarInterventor(nombre) {
@@ -320,7 +295,8 @@ function validarLogin() {
         document.getElementById('panel-nombre').textContent = _perfil;
         document.getElementById('main-panel').classList.add('visible');
         cambiarTab('mapas', document.querySelector('.tab-btn'));
-        renderArchivos('pdf'); renderArchivos('xls');
+        renderArchivos('pdf');
+        renderArchivos('xls');
     } else {
         err.textContent = '⚠ Contraseña incorrecta';
         document.getElementById('login-password').value = '';
@@ -343,60 +319,14 @@ function cambiarTab(nombre, btn) {
     if (btn) btn.classList.add('activo');
 }
 
-/* ── REGISTROS ── */
-var BADGE = { ok:'<span class="badge badge-ok">✅ Aprobado</span>', warn:'<span class="badge badge-warn">⚠️ Con observación</span>', bad:'<span class="badge badge-bad">❌ Rechazado</span>' };
-
-function agregarRegistro() {
-    var fecha=document.getElementById('f-fecha').value, tipo=document.getElementById('f-tipo').value,
-        result=document.getElementById('f-resultado').value, sector=document.getElementById('f-sector').value.trim(),
-        contrat=document.getElementById('f-contratista').value.trim(), ubic=document.getElementById('f-ubicacion').value.trim(),
-        desc=document.getElementById('f-descripcion').value.trim(), msg=document.getElementById('form-msg');
-    if (!fecha||!tipo||!result||!desc) { msg.className='form-msg err'; msg.textContent='⚠ Complete: fecha, tipo, resultado y descripción.'; setTimeout(function(){ msg.textContent=''; },3000); return; }
-    _PERFILES[_perfil].registros.unshift({fecha,tipo,result,sector,contrat,ubic,desc,id:Date.now()});
-    ['f-tipo','f-resultado','f-sector','f-contratista','f-ubicacion','f-descripcion'].forEach(function(id){ document.getElementById(id).value=''; });
-    msg.className='form-msg ok'; msg.textContent='✅ Registro guardado.'; setTimeout(function(){ msg.textContent=''; },2500);
-    renderRegistros(); actualizarKPIs();
-}
-function renderRegistros() {
-    var regs=_PERFILES[_perfil].registros, el=document.getElementById('lista-registros');
-    if (!regs.length) { el.innerHTML='<p class="empty-msg">No hay registros aún.</p>'; return; }
-    el.innerHTML=regs.map(function(r,i){ return '<div class="reg-item"><div class="reg-fecha">'+r.fecha+'<br>#'+(regs.length-i)+'</div><div class="reg-desc"><strong>'+r.tipo+'</strong>'+(r.sector?' · '+r.sector:'')+(r.ubic?' · '+r.ubic:'')+(r.contrat?' · <em>'+r.contrat+'</em>':'')+'<br><span style="color:#b39ddb">'+r.desc+'</span></div><div>'+(BADGE[r.result]||'')+'</div></div>'; }).join('');
-}
-function actualizarKPIs() {
-    var regs=_PERFILES[_perfil].registros;
-    document.getElementById('kpi-total').textContent=regs.length;
-    document.getElementById('kpi-ok').textContent=regs.filter(function(r){return r.result==='ok';}).length;
-    document.getElementById('kpi-warn').textContent=regs.filter(function(r){return r.result==='warn';}).length;
-    document.getElementById('kpi-bad').textContent=regs.filter(function(r){return r.result==='bad';}).length;
-}
-
-/* ── ARCHIVOS (PDF / EXCEL) ── */
-function fmtSize(bytes) { if(bytes<1024) return bytes+'B'; if(bytes<1048576) return (bytes/1024).toFixed(1)+'KB'; return (bytes/1048576).toFixed(1)+'MB'; }
-function fmtFecha() { return new Date().toLocaleDateString('es-CO'); }
-
-function cargarArchivos(e, tipo) { procesarFiles(e.target.files, tipo); e.target.value=''; }
-function dropFile(e, tipo) { e.preventDefault(); dragLeave(tipo==='pdf'?'zone-pdf':'zone-xls'); procesarFiles(e.dataTransfer.files, tipo); }
-function dragOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
-function dragLeave(id) { document.getElementById(id).classList.remove('drag-over'); }
-
-function procesarFiles(files, tipo) {
-    Array.from(files).forEach(function(file) {
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-            var arr = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
-            arr.unshift({ nombre:file.name, size:fmtSize(file.size), fecha:fmtFecha(), data:ev.target.result, id:Date.now()+Math.random() });
-            renderArchivos(tipo);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
+/* ── RENDER LISTAS ── */
 function renderArchivos(tipo) {
-    var arr  = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
+    var arr  = tipo==='pdf' ? _CATALOGO[_perfil].pdfs : _CATALOGO[_perfil].excels;
     var elId = tipo==='pdf' ? 'lista-pdf' : 'lista-xls';
     var el   = document.getElementById(elId);
-    if (!arr.length) {
-        el.innerHTML = '<p class="empty-msg">' + (tipo==='pdf' ? 'No hay mapas cargados aún.' : 'No hay reportes cargados aún.') + '</p>';
+    if (!el) return;
+    if (!arr || !arr.length) {
+        el.innerHTML = '<p class="empty-msg">' + (tipo==='pdf' ? 'No hay mapas disponibles aún.' : 'No hay reportes disponibles aún.') + '</p>';
         return;
     }
     el.innerHTML = arr.map(function(f, i) {
@@ -404,118 +334,116 @@ function renderArchivos(tipo) {
         return '<div class="file-item">' +
             '<div class="file-icon">' + icon + '</div>' +
             '<div class="file-info">' +
-                '<div class="file-name">' + f.nombre + '</div>' +
-                '<div class="file-meta">' + f.size + ' · Cargado: ' + f.fecha + '</div>' +
+                '<div class="file-name">' + _esc(f.nombre) + '</div>' +
+                (f.desc ? '<div class="file-meta">' + _esc(f.desc) + '</div>' : '') +
             '</div>' +
             '<div class="file-actions">' +
                 '<button class="btn-file btn-ver" onclick="abrirVisor(' + i + ',\'' + tipo + '\')">👁 ABRIR</button>' +
-                '<button class="btn-file btn-ver" style="background:rgba(0,200,255,0.1);color:#00c8ff;border-color:rgba(0,200,255,0.3)!important" onclick="descargarArchivo(' + i + ',\'' + tipo + '\')">⬇ DESCARGAR</button>' +
-                '<button class="btn-file btn-del" onclick="eliminarArchivo(' + i + ',\'' + tipo + '\')">🗑</button>' +
+                '<a class="btn-file btn-dl" href="' + _esc(f.url) + '" download="' + _esc(f.nombre) + '" target="_blank">⬇ DESCARGAR</a>' +
             '</div>' +
         '</div>';
     }).join('');
 }
 
-/* ── VISOR UNIVERSAL ── */
-var _visorActual = null;
+function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+/* ── VISOR UNIVERSAL ── */
 function abrirVisor(i, tipo) {
-    var f = tipo==='pdf' ? _PERFILES[_perfil].pdfs[i] : _PERFILES[_perfil].excels[i];
+    var f = tipo==='pdf' ? _CATALOGO[_perfil].pdfs[i] : _CATALOGO[_perfil].excels[i];
+    if (!f) return;
     _visorActual = { f: f, tipo: tipo };
-    var overlay = document.getElementById('visor-overlay');
+
+    var overlay  = document.getElementById('visor-overlay');
+    var frame    = document.getElementById('pdf-frame');
+    var xlsDiv   = document.getElementById('xls-viewer');
+    var xlsLoad  = document.getElementById('xls-loading');
+    var xlsErr   = document.getElementById('xls-error');
+
     document.getElementById('visor-title').textContent = f.nombre;
     document.getElementById('visor-icon').textContent  = tipo==='pdf' ? '📄' : '📊';
 
-    var frame  = document.getElementById('pdf-frame');
-    var xlsDiv = document.getElementById('xls-viewer');
-    var xlsLoad= document.getElementById('xls-loading');
+    // Resetear todos los paneles internos
+    frame.style.display   = 'none';
+    xlsDiv.style.display  = 'none';
+    xlsLoad.style.display = 'none';
+    xlsErr.style.display  = 'none';
+    xlsDiv.innerHTML      = '';
+    frame.src             = 'about:blank';
+
+    overlay.classList.add('visible');
 
     if (tipo === 'pdf') {
-        frame.style.display  = 'block';
-        xlsDiv.style.display = 'none';
-        xlsLoad.style.display= 'none';
-        frame.src = f.data;
+        /* Los PDFs se sirven desde GitHub Pages (URL https://...)
+           El iframe puede mostrar URLs HTTPS directamente sin bloqueo. */
+        frame.style.display = 'block';
+        frame.src = f.url;
     } else {
-        frame.style.display  = 'none';
-        xlsDiv.style.display = 'none';
-        xlsLoad.style.display= 'flex';
-        xlsDiv.innerHTML = '';
-        // Usar SheetJS para parsear
-        var script = document.getElementById('sheetjs-script');
-        if (!script) {
-            script = document.createElement('script');
-            script.id  = 'sheetjs-script';
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-            script.onload = function() { _renderXls(f); };
-            document.head.appendChild(script);
-        } else {
-            _renderXls(f);
-        }
+        /* Excel / CSV: cargar con SheetJS via fetch desde la URL */
+        xlsLoad.style.display = 'flex';
+        _cargarSheetJS(function() {
+            fetch(f.url)
+                .then(function(r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.arrayBuffer();
+                })
+                .then(function(buf) {
+                    try {
+                        var wb   = XLSX.read(new Uint8Array(buf), { type:'array' });
+                        var ws   = wb.Sheets[wb.SheetNames[0]];
+                        var rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+                        xlsLoad.style.display = 'none';
+                        if (!rows.length) {
+                            xlsDiv.innerHTML = '<p class="empty-msg">Hoja vacía.</p>';
+                        } else {
+                            xlsDiv.innerHTML =
+                                '<table><thead><tr>' +
+                                rows[0].map(function(h){ return '<th>' + _esc(String(h)) + '</th>'; }).join('') +
+                                '</tr></thead><tbody>' +
+                                rows.slice(1).map(function(r){
+                                    return '<tr>' + r.map(function(c){ return '<td>' + _esc(String(c)) + '</td>'; }).join('') + '</tr>';
+                                }).join('') +
+                                '</tbody></table>';
+                        }
+                        xlsDiv.style.display = 'block';
+                    } catch(e) {
+                        xlsLoad.style.display = 'none';
+                        xlsErr.style.display  = 'flex';
+                        xlsErr.textContent    = '❌ No se pudo leer el archivo: ' + e.message;
+                    }
+                })
+                .catch(function(e) {
+                    xlsLoad.style.display = 'none';
+                    xlsErr.style.display  = 'flex';
+                    xlsErr.textContent    = '❌ Error al descargar: ' + e.message;
+                });
+        });
     }
-    overlay.classList.add('visible');
 }
 
-function _renderXls(f) {
-    var xlsDiv  = document.getElementById('xls-viewer');
-    var xlsLoad = document.getElementById('xls-loading');
-    try {
-        // data URL → base64 → ArrayBuffer
-        var base64 = f.data.split(',')[1];
-        var bin    = atob(base64);
-        var buf    = new Uint8Array(bin.length);
-        for (var i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i);
-        var wb   = XLSX.read(buf, { type:'array' });
-        var ws   = wb.Sheets[wb.SheetNames[0]];
-        var rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
-
-        if (!rows.length) { xlsDiv.innerHTML='<p class="empty-msg">Hoja vacía.</p>'; }
-        else {
-            var html = '<table><thead><tr>' +
-                rows[0].map(function(h){ return '<th>' + h + '</th>'; }).join('') +
-                '</tr></thead><tbody>' +
-                rows.slice(1).map(function(r){
-                    return '<tr>' + r.map(function(c){ return '<td>' + c + '</td>'; }).join('') + '</tr>';
-                }).join('') +
-                '</tbody></table>';
-            xlsDiv.innerHTML = html;
-        }
-        xlsLoad.style.display = 'none';
-        xlsDiv.style.display  = 'block';
-    } catch(e) {
-        xlsLoad.style.display = 'none';
-        xlsDiv.style.display  = 'block';
-        xlsDiv.innerHTML = '<p class="empty-msg" style="color:#ef9a9a">❌ No se pudo leer el archivo: ' + e.message + '</p>';
-    }
+function _cargarSheetJS(cb) {
+    if (window.XLSX) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = cb;
+    s.onerror = function(){ alert('No se pudo cargar SheetJS'); };
+    document.head.appendChild(s);
 }
 
 function cerrarVisor() {
     document.getElementById('visor-overlay').classList.remove('visible');
-    document.getElementById('pdf-frame').src = '';
+    document.getElementById('pdf-frame').src = 'about:blank';
     document.getElementById('xls-viewer').innerHTML = '';
     _visorActual = null;
 }
 
 function visorDescargar() {
     if (!_visorActual) return;
-    descargarArchivo_direct(_visorActual.f);
+    var a = document.createElement('a');
+    a.href = _visorActual.f.url;
+    a.download = _visorActual.f.nombre;
+    a.target = '_blank';
+    a.click();
 }
-
-function descargarArchivo(i, tipo) {
-    var f = tipo==='pdf' ? _PERFILES[_perfil].pdfs[i] : _PERFILES[_perfil].excels[i];
-    descargarArchivo_direct(f);
-}
-
-function descargarArchivo_direct(f) {
-    var a = document.createElement('a'); a.href = f.data; a.download = f.nombre; a.click();
-}
-
-function eliminarArchivo(i, tipo) {
-    if (tipo==='pdf') _PERFILES[_perfil].pdfs.splice(i, 1);
-    else _PERFILES[_perfil].excels.splice(i, 1);
-    renderArchivos(tipo);
-}
-
-window.addEventListener('load', function(){ document.getElementById('login-password').focus(); });
 </script>
 </body>
 </html>
