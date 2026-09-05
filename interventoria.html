@@ -10,130 +10,143 @@
     body { background: #04000f; color: #e1bee7; font-family: Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
     #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-    /* ── PANTALLAS ── */
     .screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
     .screen.oculto { display: none; }
 
-    /* ── SELECTOR DE INTERVENTOR ── */
-    #screen-selector { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); flex-direction: column; gap: 36px; }
+    /* ── SELECTOR ── */
+    #screen-selector { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); flex-direction: column; gap: 32px; }
     .sel-header { text-align: center; }
     .sel-icon { font-size: 40px; margin-bottom: 10px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
     .sel-title { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
     .sel-sub { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(156,39,176,0.55); margin-top: 6px; }
     .sel-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
-    .sel-card {
-        background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97));
-        border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0;
-        border-radius: 16px; padding: 36px 44px; min-width: 200px;
-        text-align: center; cursor: pointer;
-        box-shadow: 0 0 40px rgba(100,0,180,0.15);
-        transition: all 0.25s; position: relative; z-index: 1;
-    }
-    .sel-card:hover { border-color: rgba(180,60,220,0.7); box-shadow: 0 0 60px rgba(156,39,176,0.35); transform: translateY(-4px); }
+    .sel-card { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 36px 44px; min-width: 200px; text-align: center; cursor: pointer; box-shadow: 0 0 40px rgba(100,0,180,0.12); transition: all 0.25s; position: relative; z-index: 1; }
+    .sel-card:hover { border-color: rgba(180,60,220,0.7); box-shadow: 0 0 60px rgba(156,39,176,0.32); transform: translateY(-4px); }
     .sel-card-avatar { font-size: 52px; margin-bottom: 14px; filter: drop-shadow(0 0 12px rgba(180,60,220,0.4)); }
     .sel-card-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #e1bee7; text-transform: uppercase; }
-    .sel-card-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.6); margin-top: 6px; }
+    .sel-card-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.55); margin-top: 6px; }
     .sel-back { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; transition: color 0.2s; }
     .sel-back:hover { color: #ce93d8; }
 
-    /* ── LOGIN INTERVENTOR ── */
+    /* ── LOGIN ── */
     #screen-login { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); }
-    .login-box {
-        background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97));
-        border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0;
-        border-radius: 16px; padding: 44px 48px; width: 360px;
-        box-shadow: 0 0 80px rgba(140,0,200,0.28); text-align: center; position: relative; z-index: 1;
-    }
+    .login-box { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 44px 48px; width: 360px; box-shadow: 0 0 80px rgba(140,0,200,0.25); text-align: center; position: relative; z-index: 1; }
     .login-avatar { font-size: 52px; margin-bottom: 10px; filter: drop-shadow(0 0 16px rgba(180,60,220,0.5)); }
     .login-name { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #e1bee7; text-transform: uppercase; margin-bottom: 4px; }
-    .login-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(149,117,205,0.55); margin-bottom: 30px; }
+    .login-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(149,117,205,0.5); margin-bottom: 28px; }
     .login-label { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: #9575cd; text-align: left; margin-bottom: 8px; display: block; text-transform: uppercase; }
-    #login-password {
-        width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.4);
-        border-radius: 10px; padding: 12px 16px; color: #e1bee7; font-size: 18px;
-        font-family: 'Orbitron', monospace; letter-spacing: 4px; outline: none;
-        text-align: center; margin-bottom: 10px; transition: border-color 0.25s, box-shadow 0.25s;
-    }
-    #login-password:focus { border-color: #9c27b0; box-shadow: 0 0 18px rgba(156,39,176,0.3); }
+    #login-password { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.4); border-radius: 10px; padding: 12px 16px; color: #e1bee7; font-size: 18px; font-family: 'Orbitron', monospace; letter-spacing: 4px; outline: none; text-align: center; margin-bottom: 10px; transition: border-color 0.25s, box-shadow 0.25s; }
+    #login-password:focus { border-color: #9c27b0; box-shadow: 0 0 18px rgba(156,39,176,0.28); }
     #login-password::placeholder { letter-spacing: 1px; font-size: 10px; color: rgba(149,117,205,0.4); }
     #login-error { color: #ef9a9a; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; min-height: 16px; margin-bottom: 14px; }
-    #btn-login {
-        width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff;
-        border: none; border-radius: 10px; padding: 13px; font-size: 11px; font-weight: bold;
-        font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer;
-        box-shadow: 0 0 20px rgba(156,39,176,0.35); transition: all 0.2s; margin-bottom: 14px;
-    }
-    #btn-login:hover { box-shadow: 0 0 32px rgba(180,60,220,0.55); }
+    #btn-login { width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 11px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 20px rgba(156,39,176,0.32); transition: all 0.2s; margin-bottom: 14px; }
+    #btn-login:hover { box-shadow: 0 0 32px rgba(180,60,220,0.5); }
     .login-back-btn { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; transition: color 0.2s; }
     .login-back-btn:hover { color: #ce93d8; }
 
     /* ── PANEL PRINCIPAL ── */
     #main-panel { display: none; position: relative; z-index: 10; min-height: 100vh; flex-direction: column; }
     #main-panel.visible { display: flex; }
-    .int-header {
-        background: rgba(15,0,35,0.95); border-bottom: 1px solid rgba(156,39,176,0.22);
-        padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
-        position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
-    }
+
+    .int-header { background: rgba(15,0,35,0.96); border-bottom: 1px solid rgba(156,39,176,0.2); padding: 13px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
     .int-header-left { display: flex; align-items: center; gap: 14px; }
-    .int-header-avatar { font-size: 28px; filter: drop-shadow(0 0 8px rgba(180,60,220,0.4)); }
-    .int-header-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
-    .int-header-sub { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.55); margin-top: 2px; }
+    .int-header-avatar { font-size: 26px; }
+    .int-header-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
+    .int-header-sub { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-top: 2px; }
     .int-header-right { display: flex; align-items: center; gap: 10px; }
-    .btn-header { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; font-weight: bold; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; }
-    .btn-inicio { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.22) !important; color: #00c8ff; text-decoration: none; display: inline-block; }
-    .btn-inicio:hover { background: rgba(0,200,255,0.18); }
-    .btn-sesion { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.3) !important; color: #ce93d8; }
+    .btn-hdr { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; font-weight: bold; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-block; }
+    .btn-inicio { background: rgba(0,200,255,0.07); border: 1px solid rgba(0,200,255,0.22) !important; color: #00c8ff; }
+    .btn-inicio:hover { background: rgba(0,200,255,0.16); }
+    .btn-sesion { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.28) !important; color: #ce93d8; }
     .btn-sesion:hover { background: rgba(156,39,176,0.22); }
 
-    /* Body */
+    /* ── TABS ── */
+    .tabs-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(156,39,176,0.2); background: rgba(10,0,25,0.6); padding: 0 28px; position: sticky; top: 56px; z-index: 40; backdrop-filter: blur(8px); }
+    .tab-btn { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: rgba(149,117,205,0.5); background: none; border: none; border-bottom: 3px solid transparent; padding: 14px 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: #ce93d8; }
+    .tab-btn.activo { color: #ce93d8; border-bottom-color: #9c27b0; }
+
+    /* ── BODY / TABS CONTENT ── */
     .int-body { padding: 28px 32px; flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
-    .int-section { margin-bottom: 32px; }
-    .int-section-title { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.18); padding-bottom: 9px; margin-bottom: 16px; }
+    .tab-content { display: none; }
+    .tab-content.activo { display: block; }
+
+    .int-section { margin-bottom: 30px; }
+    .int-section-title { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.16); padding-bottom: 9px; margin-bottom: 16px; }
 
     /* KPIs */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
-    .kpi-card { background: rgba(156,39,176,0.07); border: 1px solid rgba(156,39,176,0.22); border-left: 4px solid #9c27b0; border-radius: 12px; padding: 18px 20px; transition: box-shadow 0.2s; }
-    .kpi-card:hover { box-shadow: 0 4px 24px rgba(156,39,176,0.18); }
-    .kpi-num { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900; color: #e1bee7; display: block; line-height: 1; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 13px; }
+    .kpi-card { background: rgba(156,39,176,0.07); border: 1px solid rgba(156,39,176,0.2); border-left: 4px solid #9c27b0; border-radius: 12px; padding: 16px 18px; }
+    .kpi-num { font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900; color: #e1bee7; display: block; line-height: 1; }
     .kpi-lbl { font-size: 10px; color: #9575cd; margin-top: 5px; display: block; }
 
-    /* Formulario */
+    /* Form registros */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-label { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: #9575cd; text-transform: uppercase; }
-    .form-input, .form-select, .form-textarea { background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.32); border-radius: 8px; padding: 9px 12px; color: #e1bee7; font-size: 12px; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #9c27b0; box-shadow: 0 0 10px rgba(156,39,176,0.18); }
+    .form-input, .form-select, .form-textarea { background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.3); border-radius: 8px; padding: 9px 12px; color: #e1bee7; font-size: 12px; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #9c27b0; box-shadow: 0 0 10px rgba(156,39,176,0.16); }
     .form-select option { background: #1a003a; }
     .form-textarea { resize: vertical; min-height: 75px; }
     .form-full { grid-column: 1 / -1; }
-    #btn-registrar { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 9px; padding: 11px 26px; font-size: 9px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 14px rgba(156,39,176,0.28); transition: all 0.2s; margin-top: 6px; }
-    #btn-registrar:hover { box-shadow: 0 0 26px rgba(180,60,220,0.45); }
-    #form-msg { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; margin-top: 8px; min-height: 14px; }
-    #form-msg.ok { color: #81c784; } #form-msg.err { color: #ef9a9a; }
+    .btn-primary { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 9px; padding: 11px 24px; font-size: 9px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 14px rgba(156,39,176,0.26); transition: all 0.2s; margin-top: 6px; }
+    .btn-primary:hover { box-shadow: 0 0 26px rgba(180,60,220,0.42); }
+    .form-msg { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; margin-top: 8px; min-height: 14px; }
+    .form-msg.ok { color: #81c784; } .form-msg.err { color: #ef9a9a; }
 
     /* Registros */
-    .reg-item { background: rgba(156,39,176,0.05); border: 1px solid rgba(156,39,176,0.13); border-left: 3px solid #9c27b0; border-radius: 10px; padding: 13px 16px; margin-bottom: 9px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; }
+    .reg-item { background: rgba(156,39,176,0.05); border: 1px solid rgba(156,39,176,0.12); border-left: 3px solid #9c27b0; border-radius: 10px; padding: 12px 15px; margin-bottom: 8px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; }
     .reg-fecha { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; color: #9575cd; white-space: nowrap; }
     .reg-desc { font-size: 12px; color: #d1c4e9; line-height: 1.5; }
     .reg-desc strong { color: #ce93d8; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: bold; }
+    .badge-ok   { background: rgba(76,175,80,0.13);  color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
+    .badge-warn { background: rgba(255,152,0,0.13);  color: #ffb74d; border: 1px solid rgba(255,152,0,0.3); }
+    .badge-bad  { background: rgba(244,67,54,0.13);  color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3); }
 
-    /* Badges */
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; }
-    .badge-ok   { background: rgba(76,175,80,0.13);  color: #81c784; border: 1px solid rgba(76,175,80,0.32); }
-    .badge-warn { background: rgba(255,152,0,0.13);  color: #ffb74d; border: 1px solid rgba(255,152,0,0.32); }
-    .badge-bad  { background: rgba(244,67,54,0.13);  color: #ef9a9a; border: 1px solid rgba(244,67,54,0.32); }
+    /* ── ZONA DE CARGA (PDF / EXCEL) ── */
+    .upload-zone { border: 2px dashed rgba(156,39,176,0.35); border-radius: 14px; padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.25s; position: relative; background: rgba(156,39,176,0.03); }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: #9c27b0; background: rgba(156,39,176,0.08); box-shadow: 0 0 24px rgba(156,39,176,0.18); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; text-transform: uppercase; margin-bottom: 6px; }
+    .upload-sub { font-size: 11px; color: rgba(149,117,205,0.55); }
+
+    /* Lista archivos */
+    .file-list { margin-top: 20px; }
+    .file-item { background: rgba(156,39,176,0.06); border: 1px solid rgba(156,39,176,0.16); border-radius: 10px; padding: 13px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; }
+    .file-icon { font-size: 24px; flex-shrink: 0; }
+    .file-info { flex: 1; }
+    .file-name { font-size: 13px; color: #e1bee7; font-weight: bold; word-break: break-all; }
+    .file-meta { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; color: rgba(149,117,205,0.55); margin-top: 3px; }
+    .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-file { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; padding: 6px 12px; border-radius: 7px; cursor: pointer; border: none; font-weight: bold; transition: all 0.2s; }
+    .btn-ver  { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
+    .btn-ver:hover  { background: rgba(156,39,176,0.3); }
+    .btn-del  { background: rgba(244,67,54,0.1); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3) !important; }
+    .btn-del:hover  { background: rgba(244,67,54,0.22); }
+
+    /* PDF VIEWER */
+    #pdf-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.88); flex-direction: column; }
+    #pdf-overlay.visible { display: flex; }
+    .pdf-header { background: rgba(15,0,35,0.97); border-bottom: 1px solid rgba(156,39,176,0.25); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .pdf-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; }
+    #btn-cerrar-pdf { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; padding: 7px 16px; border-radius: 8px; cursor: pointer; background: rgba(156,39,176,0.15); border: 1px solid rgba(156,39,176,0.4); color: #ce93d8; font-weight: bold; }
+    #btn-cerrar-pdf:hover { background: rgba(156,39,176,0.3); }
+    #pdf-frame { flex: 1; width: 100%; border: none; }
 
     /* Nota */
     .int-nota { background: rgba(156,39,176,0.06); border-left: 3px solid #9c27b0; border-radius: 0 10px 10px 0; padding: 13px 16px; font-size: 11px; color: #b39ddb; line-height: 1.8; }
+
+    .empty-msg { color: rgba(149,117,205,0.4); font-size: 11px; text-align: center; padding: 28px 0; }
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- ── SELECTOR DE INTERVENTOR ── -->
+<!-- ── SELECTOR DE PERFIL ── -->
 <div id="screen-selector" class="screen">
     <div class="sel-header">
         <div class="sel-icon">🔐</div>
@@ -155,7 +168,7 @@
     <a href="index.html" class="sel-back">← Volver al inicio</a>
 </div>
 
-<!-- ── LOGIN INTERVENTOR ── -->
+<!-- ── LOGIN ── -->
 <div id="screen-login" class="screen oculto">
     <div class="login-box">
         <div class="login-avatar" id="login-avatar">👷</div>
@@ -181,108 +194,109 @@
             </div>
         </div>
         <div class="int-header-right">
-            <a href="index.html" class="btn-header btn-inicio">🏠 INICIO</a>
-            <button class="btn-header btn-sesion" onclick="cerrarSesion()">🔒 CERRAR SESIÓN</button>
+            <a href="index.html" class="btn-hdr btn-inicio">🏠 INICIO</a>
+            <button class="btn-hdr btn-sesion" onclick="cerrarSesion()">🔒 CERRAR SESIÓN</button>
         </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-bar">
+        <button class="tab-btn activo" onclick="cambiarTab('registros', this)">📋 REGISTROS</button>
+        <button class="tab-btn" onclick="cambiarTab('mapas', this)">🗺️ MAPAS PDF</button>
+        <button class="tab-btn" onclick="cambiarTab('reportes', this)">📊 REPORTES EXCEL</button>
     </div>
 
     <div class="int-body">
 
-        <!-- KPIs -->
-        <div class="int-section">
-            <div class="int-section-title">📊 Resumen de mi Interventoría</div>
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <span class="kpi-num" id="kpi-total">0</span>
-                    <span class="kpi-lbl">Registros totales</span>
+        <!-- ══ TAB: REGISTROS ══ -->
+        <div id="tab-registros" class="tab-content activo">
+
+            <div class="int-section">
+                <div class="int-section-title">📊 Resumen</div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><span class="kpi-num" id="kpi-total">0</span><span class="kpi-lbl">Registros totales</span></div>
+                    <div class="kpi-card" style="border-left-color:#4caf50"><span class="kpi-num" id="kpi-ok" style="color:#81c784">0</span><span class="kpi-lbl">Aprobados</span></div>
+                    <div class="kpi-card" style="border-left-color:#ffa726"><span class="kpi-num" id="kpi-warn" style="color:#ffb74d">0</span><span class="kpi-lbl">Con observación</span></div>
+                    <div class="kpi-card" style="border-left-color:#ef5350"><span class="kpi-num" id="kpi-bad" style="color:#ef9a9a">0</span><span class="kpi-lbl">Rechazados</span></div>
                 </div>
-                <div class="kpi-card" style="border-left-color:#4caf50">
-                    <span class="kpi-num" id="kpi-ok" style="color:#81c784">0</span>
-                    <span class="kpi-lbl">Aprobados</span>
+            </div>
+
+            <div class="int-section">
+                <div class="int-section-title">📝 Nuevo Registro</div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">Fecha</label><input type="date" class="form-input" id="f-fecha" /></div>
+                    <div class="form-group"><label class="form-label">Tipo de actividad</label>
+                        <select class="form-select" id="f-tipo">
+                            <option value="">Seleccionar...</option>
+                            <option>Instalación de tubería</option><option>Prueba de presión</option>
+                            <option>Conexión de acometida</option><option>Revisión de polivalvula</option>
+                            <option>Inspección de zanja</option><option>Recibo de materiales</option>
+                            <option>Control de calidad de soldadura</option><option>Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Resultado</label>
+                        <select class="form-select" id="f-resultado">
+                            <option value="">Seleccionar...</option>
+                            <option value="ok">✅ Aprobado</option>
+                            <option value="warn">⚠️ Con observación</option>
+                            <option value="bad">❌ Rechazado</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Sector / Barrio</label><input type="text" class="form-input" id="f-sector" placeholder="Ej: La Alborada..." /></div>
+                    <div class="form-group"><label class="form-label">Contratista</label><input type="text" class="form-input" id="f-contratista" placeholder="Nombre o razón social" /></div>
+                    <div class="form-group"><label class="form-label">Ubicación / Referencia</label><input type="text" class="form-input" id="f-ubicacion" placeholder="Dirección o referencia" /></div>
+                    <div class="form-group form-full"><label class="form-label">Descripción / Observaciones</label><textarea class="form-textarea" id="f-descripcion" placeholder="Detalle de la actividad, hallazgos y acciones correctivas..."></textarea></div>
                 </div>
-                <div class="kpi-card" style="border-left-color:#ffa726">
-                    <span class="kpi-num" id="kpi-warn" style="color:#ffb74d">0</span>
-                    <span class="kpi-lbl">Con observación</span>
-                </div>
-                <div class="kpi-card" style="border-left-color:#ef5350">
-                    <span class="kpi-num" id="kpi-bad" style="color:#ef9a9a">0</span>
-                    <span class="kpi-lbl">Rechazados</span>
-                </div>
+                <button class="btn-primary" onclick="agregarRegistro()">➕ GUARDAR REGISTRO</button>
+                <div class="form-msg" id="form-msg"></div>
+            </div>
+
+            <div class="int-section">
+                <div class="int-section-title">📋 Historial</div>
+                <div id="lista-registros"><p class="empty-msg">No hay registros aún.</p></div>
             </div>
         </div>
 
-        <!-- FORMULARIO -->
-        <div class="int-section">
-            <div class="int-section-title">📝 Nuevo Registro</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Fecha de inspección</label>
-                    <input type="date" class="form-input" id="f-fecha" />
+        <!-- ══ TAB: MAPAS PDF ══ -->
+        <div id="tab-mapas" class="tab-content">
+            <div class="int-section">
+                <div class="int-section-title">🗺️ Cargar Mapas en PDF</div>
+                <div class="upload-zone" id="zone-pdf"
+                     ondragover="dragOver(event,'zone-pdf')" ondragleave="dragLeave('zone-pdf')" ondrop="dropFile(event,'pdf')">
+                    <input type="file" accept=".pdf" multiple onchange="cargarArchivos(event,'pdf')" />
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-title">Arrastra tus mapas aquí o haz clic</div>
+                    <div class="upload-sub">Formatos aceptados: PDF · Pueden cargarse varios a la vez</div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Tipo de actividad</label>
-                    <select class="form-select" id="f-tipo">
-                        <option value="">Seleccionar...</option>
-                        <option>Instalación de tubería</option>
-                        <option>Prueba de presión</option>
-                        <option>Conexión de acometida</option>
-                        <option>Revisión de polivalvula</option>
-                        <option>Inspección de zanja</option>
-                        <option>Recibo de materiales</option>
-                        <option>Control de calidad de soldadura</option>
-                        <option>Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Resultado</label>
-                    <select class="form-select" id="f-resultado">
-                        <option value="">Seleccionar...</option>
-                        <option value="ok">✅ Aprobado</option>
-                        <option value="warn">⚠️ Con observación</option>
-                        <option value="bad">❌ Rechazado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Sector / Barrio</label>
-                    <input type="text" class="form-input" id="f-sector" placeholder="Ej: La Alborada, Centro..." />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contratista</label>
-                    <input type="text" class="form-input" id="f-contratista" placeholder="Nombre o razón social" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ubicación / Referencia</label>
-                    <input type="text" class="form-input" id="f-ubicacion" placeholder="Dirección o punto de referencia" />
-                </div>
-                <div class="form-group form-full">
-                    <label class="form-label">Descripción / Observaciones</label>
-                    <textarea class="form-textarea" id="f-descripcion" placeholder="Detalle de la actividad inspeccionada, hallazgos y acciones correctivas si aplica..."></textarea>
-                </div>
-            </div>
-            <button id="btn-registrar" onclick="agregarRegistro()">➕ GUARDAR REGISTRO</button>
-            <div id="form-msg"></div>
-        </div>
-
-        <!-- HISTORIAL -->
-        <div class="int-section">
-            <div class="int-section-title">📋 Historial de Registros</div>
-            <div id="lista-registros">
-                <p style="color:rgba(149,117,205,0.4);font-size:11px;text-align:center;padding:28px 0">
-                    No hay registros aún. Usa el formulario de arriba para agregar el primero.
-                </p>
+                <div class="file-list" id="lista-pdf"><p class="empty-msg">No hay mapas cargados aún.</p></div>
             </div>
         </div>
 
-        <!-- NOTA -->
-        <div class="int-section">
-            <div class="int-section-title">ℹ️ Información</div>
-            <div class="int-nota">
-                ⚠️ <strong>Módulo de uso exclusivo del área de Interventoría — Araucana de Gases.</strong><br>
-                Los registros son independientes por perfil. Sesión activa: <span id="sesion-hora" style="color:#ce93d8"></span>
+        <!-- ══ TAB: REPORTES EXCEL ══ -->
+        <div id="tab-reportes" class="tab-content">
+            <div class="int-section">
+                <div class="int-section-title">📊 Cargar Reportes Excel</div>
+                <div class="upload-zone" id="zone-xls"
+                     ondragover="dragOver(event,'zone-xls')" ondragleave="dragLeave('zone-xls')" ondrop="dropFile(event,'xls')">
+                    <input type="file" accept=".xlsx,.xls,.csv" multiple onchange="cargarArchivos(event,'xls')" />
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">Arrastra tus reportes aquí o haz clic</div>
+                    <div class="upload-sub">Formatos aceptados: XLSX · XLS · CSV · Pueden cargarse varios a la vez</div>
+                </div>
+                <div class="file-list" id="lista-xls"><p class="empty-msg">No hay reportes cargados aún.</p></div>
             </div>
         </div>
 
+    </div><!-- /int-body -->
+</div><!-- /main-panel -->
+
+<!-- ── PDF VIEWER ── -->
+<div id="pdf-overlay">
+    <div class="pdf-header">
+        <div class="pdf-title" id="pdf-viewer-title">—</div>
+        <button id="btn-cerrar-pdf" onclick="cerrarPdf()">✕ CERRAR</button>
     </div>
+    <iframe id="pdf-frame" src=""></iframe>
 </div>
 
 <script>
@@ -294,8 +308,8 @@
     for(var i=0;i<55;i++) pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+.5});
     function draw(){
         ctx.clearRect(0,0,W,H);
-        pts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(156,39,176,0.32)'; ctx.fill(); });
-        pts.forEach(function(a,i){ pts.slice(i+1).forEach(function(b){ var dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy); if(d<140){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='rgba(156,39,176,'+(0.12*(1-d/140))+')'; ctx.lineWidth=.6; ctx.stroke(); } }); });
+        pts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(156,39,176,0.3)'; ctx.fill(); });
+        pts.forEach(function(a,i){ pts.slice(i+1).forEach(function(b){ var dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy); if(d<140){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='rgba(156,39,176,'+(0.11*(1-d/140))+')'; ctx.lineWidth=.6; ctx.stroke(); } }); });
         requestAnimationFrame(draw);
     }
     draw();
@@ -303,44 +317,42 @@
 
 /* ── DATOS ── */
 var _PERFILES = {
-    'SAHAD': { pass: 'SAHAD-INT1', avatar: '👷',   registros: [] },
-    'MIA':   { pass: 'MIA2026-',  avatar: '👷‍♀️', registros: [] }
+    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷',   registros:[], pdfs:[], excels:[] },
+    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️', registros:[], pdfs:[], excels:[] }
 };
-var _perfilActual = null;
+var _perfil = null;
 
 /* ── SELECTOR ── */
 function seleccionarInterventor(nombre) {
-    _perfilActual = nombre;
+    _perfil = nombre;
     var p = _PERFILES[nombre];
-    document.getElementById('login-avatar').textContent  = p.avatar;
-    document.getElementById('login-nombre').textContent  = nombre;
+    document.getElementById('login-avatar').textContent = p.avatar;
+    document.getElementById('login-nombre').textContent = nombre;
     document.getElementById('login-password').value = '';
     document.getElementById('login-error').textContent = '';
     document.getElementById('screen-selector').classList.add('oculto');
     document.getElementById('screen-login').classList.remove('oculto');
     setTimeout(function(){ document.getElementById('login-password').focus(); }, 100);
 }
-
 function volverSelector() {
     document.getElementById('screen-login').classList.add('oculto');
     document.getElementById('screen-selector').classList.remove('oculto');
-    _perfilActual = null;
+    _perfil = null;
 }
 
 /* ── LOGIN ── */
 function validarLogin() {
-    var pw  = document.getElementById('login-password').value;
+    var pw = document.getElementById('login-password').value;
     var err = document.getElementById('login-error');
-    var p   = _PERFILES[_perfilActual];
-    if (pw === p.pass) {
+    if (pw === _PERFILES[_perfil].pass) {
         document.getElementById('screen-login').classList.add('oculto');
-        // Configurar panel
-        document.getElementById('panel-avatar').textContent  = p.avatar;
-        document.getElementById('panel-nombre').textContent  = _perfilActual;
-        document.getElementById('sesion-hora').textContent   = new Date().toLocaleString('es-CO');
+        document.getElementById('panel-avatar').textContent = _PERFILES[_perfil].avatar;
+        document.getElementById('panel-nombre').textContent = _perfil;
         document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
         document.getElementById('main-panel').classList.add('visible');
+        cambiarTab('registros', document.querySelector('.tab-btn'));
         renderRegistros(); actualizarKPIs();
+        renderArchivos('pdf'); renderArchivos('xls');
     } else {
         err.textContent = '⚠ Contraseña incorrecta';
         document.getElementById('login-password').value = '';
@@ -348,71 +360,110 @@ function validarLogin() {
         setTimeout(function(){ err.textContent=''; }, 2500);
     }
 }
-
 function cerrarSesion() {
     document.getElementById('main-panel').classList.remove('visible');
     document.getElementById('screen-login').classList.add('oculto');
     document.getElementById('screen-selector').classList.remove('oculto');
-    _perfilActual = null;
+    _perfil = null;
+}
+
+/* ── TABS ── */
+function cambiarTab(nombre, btn) {
+    document.querySelectorAll('.tab-content').forEach(function(el){ el.classList.remove('activo'); });
+    document.querySelectorAll('.tab-btn').forEach(function(el){ el.classList.remove('activo'); });
+    document.getElementById('tab-' + nombre).classList.add('activo');
+    if (btn) btn.classList.add('activo');
 }
 
 /* ── REGISTROS ── */
-var BADGE = {
-    ok:   '<span class="badge badge-ok">✅ Aprobado</span>',
-    warn: '<span class="badge badge-warn">⚠️ Con observación</span>',
-    bad:  '<span class="badge badge-bad">❌ Rechazado</span>'
-};
+var BADGE = { ok:'<span class="badge badge-ok">✅ Aprobado</span>', warn:'<span class="badge badge-warn">⚠️ Con observación</span>', bad:'<span class="badge badge-bad">❌ Rechazado</span>' };
 
 function agregarRegistro() {
-    var fecha   = document.getElementById('f-fecha').value;
-    var tipo    = document.getElementById('f-tipo').value;
-    var result  = document.getElementById('f-resultado').value;
-    var sector  = document.getElementById('f-sector').value.trim();
-    var contrat = document.getElementById('f-contratista').value.trim();
-    var ubic    = document.getElementById('f-ubicacion').value.trim();
-    var desc    = document.getElementById('f-descripcion').value.trim();
-    var msg     = document.getElementById('form-msg');
-
-    if (!fecha || !tipo || !result || !desc) {
-        msg.className='err'; msg.textContent='⚠ Complete: fecha, tipo, resultado y descripción.';
-        setTimeout(function(){ msg.textContent=''; },3000); return;
-    }
-    _PERFILES[_perfilActual].registros.unshift({ fecha, tipo, result, sector, contrat, ubic, desc, id: Date.now() });
-
-    ['f-tipo','f-resultado','f-sector','f-contratista','f-ubicacion','f-descripcion']
-        .forEach(function(id){ document.getElementById(id).value=''; });
-    msg.className='ok'; msg.textContent='✅ Registro guardado.';
-    setTimeout(function(){ msg.textContent=''; },2500);
+    var fecha=document.getElementById('f-fecha').value, tipo=document.getElementById('f-tipo').value,
+        result=document.getElementById('f-resultado').value, sector=document.getElementById('f-sector').value.trim(),
+        contrat=document.getElementById('f-contratista').value.trim(), ubic=document.getElementById('f-ubicacion').value.trim(),
+        desc=document.getElementById('f-descripcion').value.trim(), msg=document.getElementById('form-msg');
+    if (!fecha||!tipo||!result||!desc) { msg.className='form-msg err'; msg.textContent='⚠ Complete: fecha, tipo, resultado y descripción.'; setTimeout(function(){ msg.textContent=''; },3000); return; }
+    _PERFILES[_perfil].registros.unshift({fecha,tipo,result,sector,contrat,ubic,desc,id:Date.now()});
+    ['f-tipo','f-resultado','f-sector','f-contratista','f-ubicacion','f-descripcion'].forEach(function(id){ document.getElementById(id).value=''; });
+    msg.className='form-msg ok'; msg.textContent='✅ Registro guardado.'; setTimeout(function(){ msg.textContent=''; },2500);
     renderRegistros(); actualizarKPIs();
 }
-
 function renderRegistros() {
-    var regs = _PERFILES[_perfilActual].registros;
-    var el   = document.getElementById('lista-registros');
-    if (!regs.length) {
-        el.innerHTML='<p style="color:rgba(149,117,205,0.4);font-size:11px;text-align:center;padding:28px 0">No hay registros aún.</p>';
-        return;
-    }
-    el.innerHTML = regs.map(function(r,i){
-        return '<div class="reg-item">' +
-            '<div class="reg-fecha">' + r.fecha + '<br>#' + (regs.length-i) + '</div>' +
-            '<div class="reg-desc"><strong>' + r.tipo + '</strong>' +
-            (r.sector  ? ' · ' + r.sector  : '') +
-            (r.ubic    ? ' · ' + r.ubic    : '') +
-            (r.contrat ? ' · <em>' + r.contrat + '</em>' : '') +
-            '<br><span style="color:#b39ddb">' + r.desc + '</span></div>' +
-            '<div>' + (BADGE[r.result]||'') + '</div>' +
-        '</div>';
+    var regs=_PERFILES[_perfil].registros, el=document.getElementById('lista-registros');
+    if (!regs.length) { el.innerHTML='<p class="empty-msg">No hay registros aún.</p>'; return; }
+    el.innerHTML=regs.map(function(r,i){ return '<div class="reg-item"><div class="reg-fecha">'+r.fecha+'<br>#'+(regs.length-i)+'</div><div class="reg-desc"><strong>'+r.tipo+'</strong>'+(r.sector?' · '+r.sector:'')+(r.ubic?' · '+r.ubic:'')+(r.contrat?' · <em>'+r.contrat+'</em>':'')+'<br><span style="color:#b39ddb">'+r.desc+'</span></div><div>'+(BADGE[r.result]||'')+'</div></div>'; }).join('');
+}
+function actualizarKPIs() {
+    var regs=_PERFILES[_perfil].registros;
+    document.getElementById('kpi-total').textContent=regs.length;
+    document.getElementById('kpi-ok').textContent=regs.filter(function(r){return r.result==='ok';}).length;
+    document.getElementById('kpi-warn').textContent=regs.filter(function(r){return r.result==='warn';}).length;
+    document.getElementById('kpi-bad').textContent=regs.filter(function(r){return r.result==='bad';}).length;
+}
+
+/* ── ARCHIVOS (PDF / EXCEL) ── */
+function fmtSize(bytes) { if(bytes<1024) return bytes+'B'; if(bytes<1048576) return (bytes/1024).toFixed(1)+'KB'; return (bytes/1048576).toFixed(1)+'MB'; }
+function fmtFecha() { return new Date().toLocaleDateString('es-CO'); }
+
+function cargarArchivos(e, tipo) { procesarFiles(e.target.files, tipo); e.target.value=''; }
+function dropFile(e, tipo) { e.preventDefault(); dragLeave(tipo==='pdf'?'zone-pdf':'zone-xls'); procesarFiles(e.dataTransfer.files, tipo); }
+function dragOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
+function dragLeave(id) { document.getElementById(id).classList.remove('drag-over'); }
+
+function procesarFiles(files, tipo) {
+    Array.from(files).forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            var arr = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
+            arr.unshift({ nombre:file.name, size:fmtSize(file.size), fecha:fmtFecha(), data:ev.target.result, id:Date.now()+Math.random() });
+            renderArchivos(tipo);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderArchivos(tipo) {
+    var arr = tipo==='pdf' ? _PERFILES[_perfil].pdfs : _PERFILES[_perfil].excels;
+    var elId = tipo==='pdf' ? 'lista-pdf' : 'lista-xls';
+    var el = document.getElementById(elId);
+    if (!arr.length) { el.innerHTML='<p class="empty-msg">'+(tipo==='pdf'?'No hay mapas cargados aún.':'No hay reportes cargados aún.')+'</p>'; return; }
+    el.innerHTML = arr.map(function(f,i){
+        var icon = tipo==='pdf' ? '📄' : '📊';
+        var btnVer = tipo==='pdf'
+            ? '<button class="btn-file btn-ver" onclick="verPdf('+i+')">👁 VER</button>'
+            : '<button class="btn-file btn-ver" onclick="descargarArchivo('+i+',\'xls\')">⬇ DESCARGAR</button>';
+        return '<div class="file-item">'+
+            '<div class="file-icon">'+icon+'</div>'+
+            '<div class="file-info"><div class="file-name">'+f.nombre+'</div>'+
+            '<div class="file-meta">'+f.size+' · Cargado: '+f.fecha+'</div></div>'+
+            '<div class="file-actions">'+btnVer+
+            '<button class="btn-file btn-del" onclick="eliminarArchivo('+i+',\''+tipo+'\')">🗑</button>'+
+            '</div></div>';
     }).join('');
 }
 
-function actualizarKPIs() {
-    var regs = _PERFILES[_perfilActual].registros;
-    document.getElementById('kpi-total').textContent = regs.length;
-    document.getElementById('kpi-ok').textContent    = regs.filter(function(r){ return r.result==='ok';   }).length;
-    document.getElementById('kpi-warn').textContent  = regs.filter(function(r){ return r.result==='warn'; }).length;
-    document.getElementById('kpi-bad').textContent   = regs.filter(function(r){ return r.result==='bad';  }).length;
+function verPdf(i) {
+    var f = _PERFILES[_perfil].pdfs[i];
+    document.getElementById('pdf-viewer-title').textContent = f.nombre;
+    document.getElementById('pdf-frame').src = f.data;
+    document.getElementById('pdf-overlay').classList.add('visible');
 }
+function cerrarPdf() {
+    document.getElementById('pdf-overlay').classList.remove('visible');
+    document.getElementById('pdf-frame').src = '';
+}
+function descargarArchivo(i, tipo) {
+    var f = tipo==='xls' ? _PERFILES[_perfil].excels[i] : _PERFILES[_perfil].pdfs[i];
+    var a = document.createElement('a'); a.href=f.data; a.download=f.nombre; a.click();
+}
+function eliminarArchivo(i, tipo) {
+    if (tipo==='pdf') _PERFILES[_perfil].pdfs.splice(i,1);
+    else _PERFILES[_perfil].excels.splice(i,1);
+    renderArchivos(tipo);
+}
+
+window.addEventListener('load', function(){ document.getElementById('login-password').focus(); });
 </script>
 </body>
 </html>
