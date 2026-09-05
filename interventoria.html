@@ -2,124 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Módulo de Interventoría · Araucana de Gases</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #04000f; color: #e1bee7; font-family: Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: #04000f; color: #e1bee7; font-family: Arial, sans-serif; min-height: 100vh; min-height: -webkit-fill-available; overflow-x: hidden; }
     #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-    .screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .screen.oculto { display: none; }
 
     /* ── SELECTOR ── */
-    #screen-selector { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); flex-direction: column; gap: 32px; }
+    #screen-selector { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); flex-direction: column; gap: 24px; }
     .sel-header { text-align: center; }
-    .sel-icon { font-size: 40px; margin-bottom: 10px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
-    .sel-title { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
-    .sel-sub { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(156,39,176,0.55); margin-top: 6px; }
-    .sel-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
-    .sel-card { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 36px 44px; min-width: 200px; text-align: center; cursor: pointer; box-shadow: 0 0 40px rgba(100,0,180,0.12); transition: all 0.25s; position: relative; z-index: 1; }
-    .sel-card:hover { border-color: rgba(180,60,220,0.7); box-shadow: 0 0 60px rgba(156,39,176,0.32); transform: translateY(-4px); }
-    .sel-card-avatar { font-size: 52px; margin-bottom: 14px; filter: drop-shadow(0 0 12px rgba(180,60,220,0.4)); }
-    .sel-card-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #e1bee7; text-transform: uppercase; }
-    .sel-card-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.55); margin-top: 6px; }
-    .sel-back { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; transition: color 0.2s; }
-    .sel-back:hover { color: #ce93d8; }
+    .sel-icon { font-size: 36px; margin-bottom: 8px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
+    .sel-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; }
+    .sel-sub { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 1.5px; color: rgba(156,39,176,0.55); margin-top: 5px; }
+    .sel-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 480px; }
+    .sel-card { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0; border-radius: 14px; padding: 28px 32px; flex: 1; min-width: 140px; text-align: center; cursor: pointer; box-shadow: 0 0 30px rgba(100,0,180,0.1); transition: all 0.22s; -webkit-tap-highlight-color: transparent; }
+    .sel-card:active { transform: scale(0.97); background: linear-gradient(160deg, rgba(20,0,45,0.97), rgba(35,0,70,0.97)); }
+    .sel-card-avatar { font-size: 44px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(180,60,220,0.35)); }
+    .sel-card-name { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 2.5px; color: #e1bee7; text-transform: uppercase; }
+    .sel-card-role { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-top: 5px; }
+    .sel-back { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; padding: 8px; -webkit-tap-highlight-color: transparent; }
 
     /* ── LOGIN ── */
     #screen-login { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); }
-    .login-box { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 44px 48px; width: 360px; box-shadow: 0 0 80px rgba(140,0,200,0.25); text-align: center; position: relative; z-index: 1; }
-    .login-avatar { font-size: 52px; margin-bottom: 10px; filter: drop-shadow(0 0 16px rgba(180,60,220,0.5)); }
-    .login-name { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #e1bee7; text-transform: uppercase; margin-bottom: 4px; }
-    .login-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(149,117,205,0.5); margin-bottom: 28px; }
-    .login-label { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: #9575cd; text-align: left; margin-bottom: 8px; display: block; text-transform: uppercase; }
-    #login-password { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.4); border-radius: 10px; padding: 12px 16px; color: #e1bee7; font-size: 18px; font-family: 'Orbitron', monospace; letter-spacing: 4px; outline: none; text-align: center; margin-bottom: 10px; transition: border-color 0.25s, box-shadow 0.25s; }
-    #login-password:focus { border-color: #9c27b0; box-shadow: 0 0 18px rgba(156,39,176,0.28); }
+    .login-box { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 36px 28px; width: 100%; max-width: 340px; box-shadow: 0 0 60px rgba(140,0,200,0.2); text-align: center; position: relative; z-index: 1; }
+    .login-avatar { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
+    .login-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #e1bee7; text-transform: uppercase; margin-bottom: 3px; }
+    .login-role { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-bottom: 24px; }
+    .login-label { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: #9575cd; text-align: left; margin-bottom: 7px; display: block; text-transform: uppercase; }
+    #login-password { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.4); border-radius: 10px; padding: 14px 16px; color: #e1bee7; font-size: 20px; font-family: 'Orbitron', monospace; letter-spacing: 4px; outline: none; text-align: center; margin-bottom: 10px; transition: border-color 0.25s, box-shadow 0.25s; -webkit-appearance: none; }
+    #login-password:focus { border-color: #9c27b0; box-shadow: 0 0 16px rgba(156,39,176,0.25); }
     #login-password::placeholder { letter-spacing: 1px; font-size: 10px; color: rgba(149,117,205,0.4); }
-    #login-error { color: #ef9a9a; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; min-height: 16px; margin-bottom: 14px; }
-    #btn-login { width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 11px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 20px rgba(156,39,176,0.32); transition: all 0.2s; margin-bottom: 14px; }
-    #btn-login:hover { box-shadow: 0 0 32px rgba(180,60,220,0.5); }
-    .login-back-btn { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; transition: color 0.2s; }
-    .login-back-btn:hover { color: #ce93d8; }
+    #login-error { color: #ef9a9a; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; min-height: 16px; margin-bottom: 12px; }
+    #btn-login { width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 10px; padding: 15px; font-size: 11px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 18px rgba(156,39,176,0.3); transition: all 0.2s; margin-bottom: 12px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    #btn-login:active { transform: scale(0.98); }
+    .login-back-btn { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; padding: 8px; -webkit-tap-highlight-color: transparent; }
 
     /* ── PANEL PRINCIPAL ── */
-    #main-panel { display: none; position: relative; z-index: 10; min-height: 100vh; flex-direction: column; }
+    #main-panel { display: none; position: relative; z-index: 10; min-height: 100vh; min-height: -webkit-fill-available; flex-direction: column; }
     #main-panel.visible { display: flex; }
 
-    .int-header { background: rgba(15,0,35,0.96); border-bottom: 1px solid rgba(156,39,176,0.2); padding: 13px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
-    .int-header-left { display: flex; align-items: center; gap: 14px; }
-    .int-header-avatar { font-size: 26px; }
-    .int-header-title { font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
-    .int-header-sub { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-top: 2px; }
-    .int-header-right { display: flex; align-items: center; gap: 10px; }
-    .btn-hdr { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; font-weight: bold; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-block; }
+    .int-header { background: rgba(15,0,35,0.97); border-bottom: 1px solid rgba(156,39,176,0.2); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .int-header-left { display: flex; align-items: center; gap: 10px; }
+    .int-header-avatar { font-size: 22px; }
+    .int-header-title { font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 900; letter-spacing: 2px; color: #ce93d8; text-transform: uppercase; }
+    .int-header-sub { font-family: 'Orbitron', monospace; font-size: 6.5px; letter-spacing: 1px; color: rgba(149,117,205,0.45); margin-top: 2px; }
+    .int-header-right { display: flex; align-items: center; gap: 6px; }
+    .btn-hdr { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 0.5px; font-weight: bold; padding: 7px 10px; border-radius: 8px; cursor: pointer; transition: all 0.18s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
     .btn-inicio { background: rgba(0,200,255,0.07); border: 1px solid rgba(0,200,255,0.22) !important; color: #00c8ff; }
-    .btn-inicio:hover { background: rgba(0,200,255,0.16); }
+    .btn-inicio:active { background: rgba(0,200,255,0.18); }
     .btn-sesion { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.28) !important; color: #ce93d8; }
-    .btn-sesion:hover { background: rgba(156,39,176,0.22); }
+    .btn-sesion:active { background: rgba(156,39,176,0.24); }
 
     /* ── TABS ── */
-    .tabs-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(156,39,176,0.2); background: rgba(10,0,25,0.6); padding: 0 28px; position: sticky; top: 56px; z-index: 40; backdrop-filter: blur(8px); }
-    .tab-btn { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; color: rgba(149,117,205,0.5); background: none; border: none; border-bottom: 3px solid transparent; padding: 14px 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-    .tab-btn:hover { color: #ce93d8; }
+    .tabs-bar { display: flex; border-bottom: 1px solid rgba(156,39,176,0.2); background: rgba(10,0,25,0.7); position: sticky; top: 52px; z-index: 40; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .tab-btn { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; color: rgba(149,117,205,0.5); background: none; border: none; border-bottom: 3px solid transparent; padding: 13px 0; flex: 1; cursor: pointer; transition: all 0.18s; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .tab-btn:active { background: rgba(156,39,176,0.06); }
     .tab-btn.activo { color: #ce93d8; border-bottom-color: #9c27b0; }
 
-    /* ── BODY / TABS CONTENT ── */
-    .int-body { padding: 28px 32px; flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+    /* ── BODY ── */
+    .int-body { padding: 18px 14px 32px; flex: 1; width: 100%; max-width: 700px; margin: 0 auto; }
     .tab-content { display: none; }
     .tab-content.activo { display: block; }
 
-    .int-section { margin-bottom: 30px; }
-    .int-section-title { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.16); padding-bottom: 9px; margin-bottom: 16px; }
+    .int-section-title { font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700; letter-spacing: 2px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.16); padding-bottom: 8px; margin-bottom: 14px; }
 
-    /* Lista archivos */
+    /* ── LISTA DE ARCHIVOS ── */
     .file-list { margin-top: 4px; }
-    .file-item { background: rgba(156,39,176,0.06); border: 1px solid rgba(156,39,176,0.16); border-radius: 10px; padding: 13px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; }
-    .file-icon { font-size: 24px; flex-shrink: 0; }
-    .file-info { flex: 1; }
-    .file-name { font-size: 13px; color: #e1bee7; font-weight: bold; word-break: break-all; }
-    .file-meta { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; color: rgba(149,117,205,0.55); margin-top: 3px; }
-    .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-file { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; padding: 6px 12px; border-radius: 7px; cursor: pointer; border: none; font-weight: bold; transition: all 0.2s; }
-    .btn-ver  { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
-    .btn-ver:hover  { background: rgba(156,39,176,0.3); }
-    .btn-dl   { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; }
-    .btn-dl:hover   { background: rgba(0,200,255,0.22); }
+    .file-item { background: rgba(156,39,176,0.06); border: 1px solid rgba(156,39,176,0.16); border-radius: 12px; padding: 13px 12px; margin-bottom: 10px; }
+    .file-item-top { display: flex; align-items: center; gap: 11px; }
+    .file-icon { font-size: 22px; flex-shrink: 0; }
+    .file-info { flex: 1; min-width: 0; }
+    .file-name { font-size: 13px; color: #e1bee7; font-weight: bold; word-break: break-word; line-height: 1.3; }
+    .file-meta { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.8px; color: rgba(149,117,205,0.55); margin-top: 3px; }
+    .file-actions { display: flex; gap: 7px; flex-shrink: 0; }
+    .btn-file { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.5px; padding: 8px 11px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
+    .btn-ver { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
+    .btn-ver:active { background: rgba(156,39,176,0.32); }
+    .btn-dl  { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-dl:active { background: rgba(0,200,255,0.22); }
 
-    /* ── VISOR GENÉRICO (PDF / EXCEL) ── */
-    #visor-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(2,0,12,0.97); flex-direction: column; }
+    /* ── CHECKBOX DE RECORRIDO ── */
+    .file-check-row { display: flex; align-items: center; gap: 9px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(156,39,176,0.1); }
+    .check-label { display: flex; align-items: center; gap: 9px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
+    .check-box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid rgba(156,39,176,0.5); background: rgba(156,39,176,0.06); display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0; }
+    .check-box.marcado { background: rgba(156,39,176,0.35); border-color: #ce93d8; }
+    .check-box.marcado::after { content: '✓'; color: #ce93d8; font-size: 14px; font-weight: bold; line-height: 1; }
+    .check-text { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1px; color: rgba(149,117,205,0.6); text-transform: uppercase; }
+    .check-label.marcado .check-text { color: #ce93d8; }
+    .check-date { font-family: 'Orbitron', monospace; font-size: 6.5px; letter-spacing: 0.5px; color: rgba(149,117,205,0.4); margin-left: auto; }
+
+    /* ── VISOR UNIVERSAL ── */
+    #visor-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(2,0,12,0.98); flex-direction: column; }
     #visor-overlay.visible { display: flex; }
-    .visor-header { background: rgba(15,0,35,0.98); border-bottom: 1px solid rgba(156,39,176,0.25); padding: 11px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
-    .visor-icon { font-size: 20px; }
-    .visor-title { font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #ce93d8; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .visor-actions { display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-visor { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; border: none; }
-    .btn-vdes  { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; }
-    .btn-vdes:hover  { background: rgba(0,200,255,0.22); }
-    .btn-vcer  { background: rgba(156,39,176,0.12); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
-    .btn-vcer:hover  { background: rgba(156,39,176,0.28); }
-    /* PDF frame */
+    .visor-header { background: rgba(15,0,35,0.99); border-bottom: 1px solid rgba(156,39,176,0.25); padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; min-height: 50px; }
+    .visor-icon { font-size: 18px; flex-shrink: 0; }
+    .visor-title { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1.5px; color: #ce93d8; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .visor-actions { display: flex; gap: 7px; flex-shrink: 0; }
+    .btn-visor { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.5px; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.18s; border: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
+    .btn-vdes { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; }
+    .btn-vcer { background: rgba(156,39,176,0.12); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
     #pdf-frame { flex: 1; width: 100%; border: none; background: #111; }
-    /* Excel table viewer */
-    #xls-viewer { flex: 1; overflow: auto; padding: 0; display: none; }
-    #xls-viewer table { border-collapse: collapse; font-size: 12px; width: max-content; min-width: 100%; }
-    #xls-viewer th { background: rgba(156,39,176,0.2); color: #ce93d8; padding: 8px 14px; text-align: left; font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; border: 1px solid rgba(156,39,176,0.2); position: sticky; top: 0; z-index: 2; white-space: nowrap; }
-    #xls-viewer td { padding: 7px 14px; color: #d1c4e9; border: 1px solid rgba(156,39,176,0.08); white-space: nowrap; }
+    #xls-viewer { flex: 1; overflow: auto; display: none; -webkit-overflow-scrolling: touch; }
+    #xls-viewer table { border-collapse: collapse; font-size: 11px; width: max-content; min-width: 100%; }
+    #xls-viewer th { background: rgba(156,39,176,0.2); color: #ce93d8; padding: 8px 12px; text-align: left; font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.8px; border: 1px solid rgba(156,39,176,0.2); position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+    #xls-viewer td { padding: 7px 12px; color: #d1c4e9; border: 1px solid rgba(156,39,176,0.08); white-space: nowrap; }
     #xls-viewer tr:nth-child(even) td { background: rgba(156,39,176,0.04); }
     #xls-viewer tr:hover td { background: rgba(156,39,176,0.1); }
     #xls-loading { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px; color: #9575cd; }
-    #xls-error { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 1.5px; color: #ef9a9a; padding: 24px; text-align: center; }
+    #xls-error { flex: 1; display: none; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; color: #ef9a9a; padding: 24px; text-align: center; }
 
-    .empty-msg { color: rgba(149,117,205,0.4); font-size: 11px; text-align: center; padding: 28px 0; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
+    .empty-msg { color: rgba(149,117,205,0.4); font-size: 11px; text-align: center; padding: 32px 0; font-family: 'Orbitron', monospace; letter-spacing: 1px; line-height: 2; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(30,0,60,0.97); border: 1px solid rgba(156,39,176,0.4); border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; color: #ce93d8; z-index: 99999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 380px) {
+        .sel-card { padding: 22px 18px; }
+        .sel-card-avatar { font-size: 36px; }
+        .int-body { padding: 14px 10px 28px; }
+        .btn-file { padding: 7px 9px; font-size: 7px; }
+        .file-name { font-size: 12px; }
+    }
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
+<div id="toast"></div>
 
-<!-- ── SELECTOR DE PERFIL ── -->
+<!-- ── SELECTOR ── -->
 <div id="screen-selector" class="screen">
     <div class="sel-header">
         <div class="sel-icon">🔐</div>
@@ -163,16 +181,15 @@
             <div class="int-header-avatar" id="panel-avatar">👷</div>
             <div>
                 <div class="int-header-title" id="panel-nombre">INTERVENTOR</div>
-                <div class="int-header-sub">Araucana de Gases · Control Técnico &amp; Seguimiento de Obra</div>
+                <div class="int-header-sub">Araucana de Gases · Control Técnico</div>
             </div>
         </div>
         <div class="int-header-right">
-            <a href="index.html" class="btn-hdr btn-inicio">🏠 INICIO</a>
-            <button class="btn-hdr btn-sesion" onclick="cerrarSesion()">🔒 CERRAR SESIÓN</button>
+            <a href="index.html" class="btn-hdr btn-inicio">🏠</a>
+            <button class="btn-hdr btn-sesion" onclick="cerrarSesion()">🔒 SALIR</button>
         </div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs-bar">
         <button class="tab-btn activo" onclick="cambiarTab('mapas', this)">🗺️ MAPAS PDF</button>
         <button class="tab-btn" onclick="cambiarTab('reportes', this)">📊 REPORTES EXCEL</button>
@@ -180,76 +197,75 @@
 
     <div class="int-body">
 
-        <!-- ══ TAB: MAPAS PDF ══ -->
+        <!-- TAB MAPAS -->
         <div id="tab-mapas" class="tab-content activo">
-            <div class="int-section">
-                <div class="int-section-title">🗺️ Mapas Disponibles</div>
-                <div class="file-list" id="lista-pdf">
-                    <p class="empty-msg">No hay mapas disponibles aún.</p>
-                </div>
+            <div class="int-section-title">🗺️ Mapas Disponibles</div>
+            <div class="file-list" id="lista-pdf">
+                <p class="empty-msg">No hay mapas disponibles aún.</p>
             </div>
         </div>
 
-        <!-- ══ TAB: REPORTES EXCEL ══ -->
+        <!-- TAB REPORTES -->
         <div id="tab-reportes" class="tab-content">
-            <div class="int-section">
-                <div class="int-section-title">📊 Reportes Disponibles</div>
-                <div class="file-list" id="lista-xls">
-                    <p class="empty-msg">No hay reportes disponibles aún.</p>
-                </div>
+            <div class="int-section-title">📊 Reportes Disponibles</div>
+            <div class="file-list" id="lista-xls">
+                <p class="empty-msg">No hay reportes disponibles aún.</p>
             </div>
         </div>
 
-    </div><!-- /int-body -->
-</div><!-- /main-panel -->
+    </div>
+</div>
 
-<!-- ── VISOR UNIVERSAL ── -->
+<!-- ── VISOR ── -->
 <div id="visor-overlay">
     <div class="visor-header">
         <div class="visor-icon" id="visor-icon">📄</div>
         <div class="visor-title" id="visor-title">—</div>
         <div class="visor-actions">
-            <button class="btn-visor btn-vdes" id="btn-visor-dl" onclick="visorDescargar()">⬇ DESCARGAR</button>
+            <button class="btn-visor btn-vdes" onclick="visorDescargar()">⬇</button>
             <button class="btn-visor btn-vcer" onclick="cerrarVisor()">✕ CERRAR</button>
         </div>
     </div>
     <iframe id="pdf-frame" src="about:blank"></iframe>
     <div id="xls-loading">⏳ Cargando tabla...</div>
-    <div id="xls-error">❌ No se pudo cargar el archivo.</div>
+    <div id="xls-error"></div>
     <div id="xls-viewer"></div>
 </div>
 
 <script>
-/* ── FONDO ANIMADO ── */
+/* ── FONDO ── */
 (function(){
     var c=document.getElementById('bg-canvas'),ctx=c.getContext('2d'),W,H,pts=[];
     function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; }
     resize(); window.addEventListener('resize',resize);
-    for(var i=0;i<55;i++) pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+.5});
+    for(var i=0;i<40;i++) pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,r:Math.random()*1.4+.4});
     function draw(){
         ctx.clearRect(0,0,W,H);
-        pts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(156,39,176,0.3)'; ctx.fill(); });
-        pts.forEach(function(a,i){ pts.slice(i+1).forEach(function(b){ var dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy); if(d<140){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='rgba(156,39,176,'+(0.11*(1-d/140))+')'; ctx.lineWidth=.6; ctx.stroke(); } }); });
+        pts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(156,39,176,0.25)'; ctx.fill(); });
+        pts.forEach(function(a,i){ pts.slice(i+1).forEach(function(b){ var dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy); if(d<130){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='rgba(156,39,176,'+(0.09*(1-d/130))+')'; ctx.lineWidth=.5; ctx.stroke(); } }); });
         requestAnimationFrame(draw);
     }
     draw();
 })();
 
-/* ════════════════════════════════════════════════
+/* ════════════════════════════════════════════
    CATÁLOGO DE ARCHIVOS POR PERFIL
-   Para agregar archivos, añadir entradas aquí.
-   Cada entrada: { nombre, desc, url }
-   ════════════════════════════════════════════════ */
+   Cada entrada: { id, nombre, desc, url }
+   • id:     clave única para el localStorage (no cambiar una vez creado)
+   • nombre: nombre a mostrar
+   • desc:   descripción breve (puede ser null)
+   • url:    URL completa del archivo en GitHub Pages
+   ════════════════════════════════════════════ */
 var _CATALOGO = {
     'SAHAD': {
         pdfs: [
-            /* Ejemplo (descomentar cuando el archivo esté en GitHub):
-            { nombre:'Mapa Red Primaria.pdf', desc:'Red primaria de distribución', url:'https://araucanadegas.github.io/mapas/mapa-red-primaria.pdf' }
+            /* Ejemplo — descomentar cuando el archivo esté publicado:
+            { id:'sahad-pdf-1', nombre:'Mapa Sector Norte.pdf', desc:'Sector norte · Arauca', url:'https://greencore1997-collab.github.io/Mapa-Arauca/archivos/sahad/mapa-norte.pdf' }
             */
         ],
         excels: [
             /* Ejemplo:
-            { nombre:'Reporte Junio 2025.xlsx', desc:'Seguimiento obras junio', url:'https://araucanadegas.github.io/reportes/reporte-jun-2025.xlsx' }
+            { id:'sahad-xls-1', nombre:'Reporte Agosto 2026.xlsx', desc:'Seguimiento obras agosto', url:'https://greencore1997-collab.github.io/Mapa-Arauca/archivos/sahad/reporte-ago-2026.xlsx' }
             */
         ]
     },
@@ -259,10 +275,10 @@ var _CATALOGO = {
     }
 };
 
-/* ── DATOS ── */
+/* ── AUTH ── */
 var _PERFILES = {
-    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'   },
-    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️' }
+    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'    },
+    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️'  }
 };
 var _perfil = null;
 var _visorActual = null;
@@ -271,13 +287,13 @@ var _visorActual = null;
 function seleccionarInterventor(nombre) {
     _perfil = nombre;
     var p = _PERFILES[nombre];
-    document.getElementById('login-avatar').textContent = p.avatar;
-    document.getElementById('login-nombre').textContent = nombre;
-    document.getElementById('login-password').value = '';
-    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-avatar').textContent  = p.avatar;
+    document.getElementById('login-nombre').textContent  = nombre;
+    document.getElementById('login-password').value      = '';
+    document.getElementById('login-error').textContent   = '';
     document.getElementById('screen-selector').classList.add('oculto');
     document.getElementById('screen-login').classList.remove('oculto');
-    setTimeout(function(){ document.getElementById('login-password').focus(); }, 100);
+    setTimeout(function(){ document.getElementById('login-password').focus(); }, 120);
 }
 function volverSelector() {
     document.getElementById('screen-login').classList.add('oculto');
@@ -287,12 +303,12 @@ function volverSelector() {
 
 /* ── LOGIN ── */
 function validarLogin() {
-    var pw = document.getElementById('login-password').value;
+    var pw  = document.getElementById('login-password').value;
     var err = document.getElementById('login-error');
     if (pw === _PERFILES[_perfil].pass) {
         document.getElementById('screen-login').classList.add('oculto');
-        document.getElementById('panel-avatar').textContent = _PERFILES[_perfil].avatar;
-        document.getElementById('panel-nombre').textContent = _perfil;
+        document.getElementById('panel-avatar').textContent  = _PERFILES[_perfil].avatar;
+        document.getElementById('panel-nombre').textContent  = _perfil;
         document.getElementById('main-panel').classList.add('visible');
         cambiarTab('mapas', document.querySelector('.tab-btn'));
         renderArchivos('pdf');
@@ -319,6 +335,51 @@ function cambiarTab(nombre, btn) {
     if (btn) btn.classList.add('activo');
 }
 
+/* ── LOCALSTORAGE CHECKS ── */
+function _lsKey(perfil, fileId) {
+    return 'int_check_' + perfil + '_' + fileId;
+}
+function _getCheck(perfil, fileId) {
+    try { return JSON.parse(localStorage.getItem(_lsKey(perfil, fileId)) || 'null'); } catch(e) { return null; }
+}
+function _setCheck(perfil, fileId, value) {
+    try {
+        if (value) {
+            localStorage.setItem(_lsKey(perfil, fileId), JSON.stringify({ marcado: true, fecha: _fmtFecha() }));
+        } else {
+            localStorage.removeItem(_lsKey(perfil, fileId));
+        }
+    } catch(e) {}
+}
+function _fmtFecha() {
+    var d = new Date();
+    return d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+}
+
+/* ── TOGGLE CHECK ── */
+function toggleCheck(fileId) {
+    var estado = _getCheck(_perfil, fileId);
+    var nuevo  = !estado;
+    _setCheck(_perfil, fileId, nuevo);
+    // Actualizar UI
+    var box  = document.getElementById('chk-box-'  + fileId);
+    var lbl  = document.getElementById('chk-lbl-'  + fileId);
+    var date = document.getElementById('chk-date-' + fileId);
+    if (!box) return;
+    if (nuevo) {
+        box.classList.add('marcado');
+        lbl.classList.add('marcado');
+        var info = _getCheck(_perfil, fileId);
+        if (date && info) date.textContent = info.fecha;
+        mostrarToast('✅ Mapa marcado como recorrido');
+    } else {
+        box.classList.remove('marcado');
+        lbl.classList.remove('marcado');
+        if (date) date.textContent = '';
+        mostrarToast('Mapa desmarcado');
+    }
+}
+
 /* ── RENDER LISTAS ── */
 function renderArchivos(tipo) {
     var arr  = tipo==='pdf' ? _CATALOGO[_perfil].pdfs : _CATALOGO[_perfil].excels;
@@ -326,43 +387,70 @@ function renderArchivos(tipo) {
     var el   = document.getElementById(elId);
     if (!el) return;
     if (!arr || !arr.length) {
-        el.innerHTML = '<p class="empty-msg">' + (tipo==='pdf' ? 'No hay mapas disponibles aún.' : 'No hay reportes disponibles aún.') + '</p>';
+        el.innerHTML = '<p class="empty-msg">' + (tipo==='pdf' ? 'No hay mapas<br>disponibles aún.' : 'No hay reportes<br>disponibles aún.') + '</p>';
         return;
     }
     el.innerHTML = arr.map(function(f, i) {
-        var icon = tipo==='pdf' ? '📄' : '📊';
+        var icon    = tipo==='pdf' ? '📄' : '📊';
+        var estado  = tipo==='pdf' ? _getCheck(_perfil, f.id) : null;
+        var marcado = estado && estado.marcado;
+
+        var checkHtml = tipo==='pdf' ? (
+            '<div class="file-check-row">' +
+            '<label class="check-label' + (marcado?' marcado':'') + '" id="chk-lbl-' + _esc(f.id) + '" onclick="toggleCheck(\'' + _esc(f.id) + '\')">' +
+            '<div class="check-box' + (marcado?' marcado':'') + '" id="chk-box-' + _esc(f.id) + '"></div>' +
+            '<span class="check-text">Mapa recorrido</span>' +
+            '</label>' +
+            '<span class="check-date" id="chk-date-' + _esc(f.id) + '">' + (marcado && estado.fecha ? estado.fecha : '') + '</span>' +
+            '</div>'
+        ) : '';
+
         return '<div class="file-item">' +
+            '<div class="file-item-top">' +
             '<div class="file-icon">' + icon + '</div>' +
             '<div class="file-info">' +
                 '<div class="file-name">' + _esc(f.nombre) + '</div>' +
                 (f.desc ? '<div class="file-meta">' + _esc(f.desc) + '</div>' : '') +
             '</div>' +
             '<div class="file-actions">' +
-                '<button class="btn-file btn-ver" onclick="abrirVisor(' + i + ',\'' + tipo + '\')">👁 ABRIR</button>' +
-                '<a class="btn-file btn-dl" href="' + _esc(f.url) + '" download="' + _esc(f.nombre) + '" target="_blank">⬇ DESCARGAR</a>' +
+                '<button class="btn-file btn-ver" onclick="abrirVisor(' + i + ',\'' + tipo + '\')">👁 VER</button>' +
+                '<a class="btn-file btn-dl" href="' + _esc(f.url) + '" download="' + _esc(f.nombre) + '" target="_blank">⬇</a>' +
             '</div>' +
-        '</div>';
+            '</div>' +
+            checkHtml +
+            '</div>';
     }).join('');
 }
 
-function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
-/* ── VISOR UNIVERSAL ── */
+/* ── TOAST ── */
+var _toastTimer = null;
+function mostrarToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* ── VISOR ── */
 function abrirVisor(i, tipo) {
     var f = tipo==='pdf' ? _CATALOGO[_perfil].pdfs[i] : _CATALOGO[_perfil].excels[i];
     if (!f) return;
     _visorActual = { f: f, tipo: tipo };
 
-    var overlay  = document.getElementById('visor-overlay');
-    var frame    = document.getElementById('pdf-frame');
-    var xlsDiv   = document.getElementById('xls-viewer');
-    var xlsLoad  = document.getElementById('xls-loading');
-    var xlsErr   = document.getElementById('xls-error');
+    var overlay = document.getElementById('visor-overlay');
+    var frame   = document.getElementById('pdf-frame');
+    var xlsDiv  = document.getElementById('xls-viewer');
+    var xlsLoad = document.getElementById('xls-loading');
+    var xlsErr  = document.getElementById('xls-error');
 
     document.getElementById('visor-title').textContent = f.nombre;
     document.getElementById('visor-icon').textContent  = tipo==='pdf' ? '📄' : '📊';
 
-    // Resetear todos los paneles internos
     frame.style.display   = 'none';
     xlsDiv.style.display  = 'none';
     xlsLoad.style.display = 'none';
@@ -373,34 +461,28 @@ function abrirVisor(i, tipo) {
     overlay.classList.add('visible');
 
     if (tipo === 'pdf') {
-        /* Los PDFs se sirven desde GitHub Pages (URL https://...)
-           El iframe puede mostrar URLs HTTPS directamente sin bloqueo. */
         frame.style.display = 'block';
         frame.src = f.url;
     } else {
-        /* Excel / CSV: cargar con SheetJS via fetch desde la URL */
         xlsLoad.style.display = 'flex';
         _cargarSheetJS(function() {
             fetch(f.url)
-                .then(function(r) {
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    return r.arrayBuffer();
-                })
-                .then(function(buf) {
+                .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); })
+                .then(function(buf){
                     try {
-                        var wb   = XLSX.read(new Uint8Array(buf), { type:'array' });
+                        var wb   = XLSX.read(new Uint8Array(buf), {type:'array'});
                         var ws   = wb.Sheets[wb.SheetNames[0]];
-                        var rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+                        var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
                         xlsLoad.style.display = 'none';
                         if (!rows.length) {
-                            xlsDiv.innerHTML = '<p class="empty-msg">Hoja vacía.</p>';
+                            xlsDiv.innerHTML = '<p style="color:rgba(149,117,205,0.5);text-align:center;padding:32px;font-family:Orbitron,monospace;font-size:10px;">Hoja vacía</p>';
                         } else {
                             xlsDiv.innerHTML =
                                 '<table><thead><tr>' +
-                                rows[0].map(function(h){ return '<th>' + _esc(String(h)) + '</th>'; }).join('') +
+                                rows[0].map(function(h){ return '<th>'+_esc(String(h))+'</th>'; }).join('') +
                                 '</tr></thead><tbody>' +
                                 rows.slice(1).map(function(r){
-                                    return '<tr>' + r.map(function(c){ return '<td>' + _esc(String(c)) + '</td>'; }).join('') + '</tr>';
+                                    return '<tr>'+r.map(function(c){ return '<td>'+_esc(String(c))+'</td>'; }).join('')+'</tr>';
                                 }).join('') +
                                 '</tbody></table>';
                         }
@@ -408,10 +490,10 @@ function abrirVisor(i, tipo) {
                     } catch(e) {
                         xlsLoad.style.display = 'none';
                         xlsErr.style.display  = 'flex';
-                        xlsErr.textContent    = '❌ No se pudo leer el archivo: ' + e.message;
+                        xlsErr.textContent    = '❌ No se pudo leer: ' + e.message;
                     }
                 })
-                .catch(function(e) {
+                .catch(function(e){
                     xlsLoad.style.display = 'none';
                     xlsErr.style.display  = 'flex';
                     xlsErr.textContent    = '❌ Error al descargar: ' + e.message;
@@ -424,7 +506,7 @@ function _cargarSheetJS(cb) {
     if (window.XLSX) { cb(); return; }
     var s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload = cb;
+    s.onload  = cb;
     s.onerror = function(){ alert('No se pudo cargar SheetJS'); };
     document.head.appendChild(s);
 }
@@ -439,9 +521,9 @@ function cerrarVisor() {
 function visorDescargar() {
     if (!_visorActual) return;
     var a = document.createElement('a');
-    a.href = _visorActual.f.url;
+    a.href     = _visorActual.f.url;
     a.download = _visorActual.f.nombre;
-    a.target = '_blank';
+    a.target   = '_blank';
     a.click();
 }
 </script>
