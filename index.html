@@ -408,116 +408,6 @@
         .rleg-dash { background:repeating-linear-gradient(90deg,currentColor 0,currentColor 4px,transparent 4px,transparent 8px); }
         #redes-loading { color:#ffb300; font-size:10px; font-family:'Orbitron',monospace; letter-spacing:1px; padding:5px 0; }
 
-        /* INTERVENTORÍA BUTTON */
-        #btn-interventoria {
-            position:absolute; top:300px; left:10px; z-index:900;
-            background:rgba(10,0,30,0.88); color:#ce93d8;
-            border:none; border-left:3px solid #9c27b0;
-            border-top:1px solid rgba(156,39,176,0.35);
-            border-right:1px solid rgba(156,39,176,0.15);
-            border-bottom:1px solid rgba(156,39,176,0.15);
-            padding:7px 12px; border-radius:8px; font-size:10px; font-weight:bold;
-            cursor:pointer; letter-spacing:0.8px;
-            box-shadow:0 0 16px rgba(156,39,176,0.3); transition:all 0.25s;
-            backdrop-filter:blur(6px); font-family:'Orbitron',monospace;
-            display:flex; align-items:center; gap:5px;
-        }
-        #btn-interventoria:hover { background:rgba(30,0,60,0.95); box-shadow:0 0 26px rgba(180,60,220,0.55); }
-        body.mobile-mode #btn-interventoria { top:300px; left:10px; }
-
-        /* INTERVENTORÍA LOGIN MODAL */
-        #modal-interventoria {
-            display:none; position:fixed; inset:0; z-index:9999;
-            background:rgba(0,0,0,0.72); backdrop-filter:blur(6px);
-            align-items:center; justify-content:center;
-        }
-        #modal-interventoria.visible { display:flex; }
-        .int-box {
-            background:linear-gradient(160deg,rgba(12,0,30,0.98),rgba(25,0,55,0.98));
-            border:1px solid rgba(156,39,176,0.5); border-left:4px solid #9c27b0;
-            border-radius:14px; padding:32px 36px; min-width:300px; max-width:360px;
-            box-shadow:0 0 50px rgba(140,0,200,0.35); text-align:center;
-            font-family:'Orbitron',monospace;
-        }
-        .int-box h3 {
-            color:#ce93d8; font-size:13px; letter-spacing:2px;
-            text-transform:uppercase; margin:0 0 6px;
-        }
-        .int-box p { color:#9575cd; font-size:10px; letter-spacing:1px; margin:0 0 22px; }
-        .int-box input[type="password"] {
-            width:100%; box-sizing:border-box;
-            background:rgba(255,255,255,0.06); border:1px solid rgba(156,39,176,0.5);
-            border-radius:8px; padding:10px 14px; color:#e1bee7;
-            font-size:13px; font-family:'Orbitron',monospace; letter-spacing:2px;
-            outline:none; text-align:center; margin-bottom:16px;
-            transition:border-color 0.2s;
-        }
-        .int-box input[type="password"]:focus { border-color:#9c27b0; }
-        .int-box input[type="password"]::placeholder { letter-spacing:1px; font-size:10px; color:#7e57c2; }
-        #int-error {
-            color:#ef9a9a; font-size:10px; letter-spacing:1px; margin-bottom:12px;
-            min-height:14px; font-family:'Orbitron',monospace;
-        }
-        .int-btns { display:flex; gap:10px; justify-content:center; }
-        .int-btns button {
-            padding:8px 20px; border-radius:8px; font-size:10px; font-weight:bold;
-            cursor:pointer; letter-spacing:1px; font-family:'Orbitron',monospace;
-            transition:all 0.2s; border:none;
-        }
-        #int-btn-ok {
-            background:#9c27b0; color:#fff;
-            box-shadow:0 0 14px rgba(156,39,176,0.45);
-        }
-        #int-btn-ok:hover { background:#ab47bc; box-shadow:0 0 22px rgba(180,60,220,0.6); }
-        #int-btn-cancel {
-            background:rgba(255,255,255,0.07); color:#9575cd;
-            border:1px solid rgba(156,39,176,0.3) !important;
-        }
-        #int-btn-cancel:hover { background:rgba(255,255,255,0.12); }
-
-        /* INTERVENTORÍA PANEL */
-        #panel-interventoria {
-            display:none; position:fixed; inset:0; z-index:8000;
-            background:rgba(5,0,18,0.97); backdrop-filter:blur(8px);
-            flex-direction:column; overflow:auto;
-        }
-        #panel-interventoria.visible { display:flex; }
-        .int-panel-header {
-            display:flex; align-items:center; justify-content:space-between;
-            padding:18px 28px; border-bottom:1px solid rgba(156,39,176,0.3);
-            background:rgba(20,0,45,0.9);
-        }
-        .int-panel-header h2 {
-            color:#ce93d8; font-size:14px; letter-spacing:3px;
-            text-transform:uppercase; margin:0; font-family:'Orbitron',monospace;
-        }
-        .int-panel-header span { color:#7e57c2; font-size:10px; font-family:'Orbitron',monospace; letter-spacing:1px; }
-        #int-close-panel {
-            background:rgba(156,39,176,0.15); border:1px solid rgba(156,39,176,0.4);
-            color:#ce93d8; padding:6px 14px; border-radius:8px; font-size:11px;
-            cursor:pointer; font-family:'Orbitron',monospace; letter-spacing:1px; font-weight:bold;
-        }
-        #int-close-panel:hover { background:rgba(156,39,176,0.3); }
-        .int-panel-body { padding:28px; flex:1; }
-        .int-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
-        .int-kpi {
-            background:rgba(156,39,176,0.1); border:1px solid rgba(156,39,176,0.3);
-            border-left:4px solid #9c27b0; border-radius:10px; padding:16px 18px;
-        }
-        .int-kpi .num { display:block; font-size:22px; font-weight:bold; color:#e1bee7; font-family:'Orbitron',monospace; }
-        .int-kpi .lbl { display:block; font-size:9px; color:#9575cd; letter-spacing:1px; margin-top:4px; text-transform:uppercase; }
-        .int-section { margin-bottom:28px; }
-        .int-section h3 { color:#ce93d8; font-size:10px; letter-spacing:2px; text-transform:uppercase; font-family:'Orbitron',monospace; margin:0 0 14px; border-bottom:1px solid rgba(156,39,176,0.2); padding-bottom:8px; }
-        .int-table { width:100%; border-collapse:collapse; font-size:11px; }
-        .int-table th { background:rgba(156,39,176,0.2); color:#ce93d8; padding:8px 12px; text-align:left; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid rgba(156,39,176,0.3); }
-        .int-table td { padding:9px 12px; color:#d1c4e9; border-bottom:1px solid rgba(156,39,176,0.1); font-size:11px; }
-        .int-table tr:hover td { background:rgba(156,39,176,0.08); }
-        .int-badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:9px; font-weight:bold; letter-spacing:0.5px; }
-        .int-badge.ok   { background:rgba(76,175,80,0.2);  color:#81c784; border:1px solid rgba(76,175,80,0.4); }
-        .int-badge.warn { background:rgba(255,152,0,0.2);  color:#ffb74d; border:1px solid rgba(255,152,0,0.4); }
-        .int-badge.bad  { background:rgba(244,67,54,0.2);  color:#ef9a9a; border:1px solid rgba(244,67,54,0.4); }
-        .int-nota { background:rgba(156,39,176,0.08); border-left:3px solid #9c27b0; border-radius:0 8px 8px 0; padding:12px 16px; font-size:10px; color:#b39ddb; line-height:1.7; margin-top:10px; }
-
         /* MODAL LIMPIAR */
         #modal-limpiar {
             display:none; position:fixed; top:0; left:0; width:100%; height:100%;
@@ -958,6 +848,14 @@
         }
         .ms-card.ms-proyecciones { border-color:rgba(124,77,255,0.18); }
         .ms-card.ms-proyecciones:hover { border-color:rgba(124,77,255,0.6); box-shadow:0 8px 40px rgba(124,77,255,0.25); }
+        .ms-card.ms-interventoria .ms-card-title { color:#ce93d8; }
+        .ms-card.ms-interventoria .ms-card-badge {
+            background:rgba(156,39,176,0.12); color:#ce93d8;
+            border:1px solid rgba(156,39,176,0.3);
+        }
+        .ms-card.ms-interventoria { border-color:rgba(156,39,176,0.18); }
+        .ms-card.ms-interventoria:hover { border-color:rgba(156,39,176,0.6); box-shadow:0 8px 40px rgba(156,39,176,0.25); }
+        .ms-card.ms-interventoria::before { background:radial-gradient(ellipse at 60% 40%,rgba(156,39,176,0.18),transparent 70%); }
         .ms-footer {
             position:relative; z-index:1; margin-top:40px;
             font-family:'Orbitron',monospace; font-size:8px; letter-spacing:3px;
@@ -1055,6 +953,12 @@
       <div class="ms-card-title">CENTRO DE<br>PROYECCIONES GLP</div>
       <div class="ms-card-desc">Diseño y proyección de redes de gas licuado para cualquier área urbana de Colombia. Reportes cuantificados con descarga.</div>
       <div class="ms-card-badge">NUEVO</div>
+    </a>
+    <a class="ms-card ms-interventoria" href="interventoria.html">
+      <div class="ms-card-icon">🔐</div>
+      <div class="ms-card-title">MÓDULO DE<br>INTERVENTORÍA</div>
+      <div class="ms-card-desc">Control técnico, seguimiento de obra y gestión de calidad para el área de Interventoría. Acceso restringido.</div>
+      <div class="ms-card-badge">RESTRINGIDO</div>
     </a>
   </div>
   <div class="ms-footer">SISTEMA DE INFORMACIÓN GEOGRÁFICA · v2026</div>
@@ -1181,92 +1085,6 @@
             <div class="rleg-row"><span class="rleg-line" style="background:#aaa"></span>Instalado</div>
             <div class="rleg-row"><span class="rleg-line rleg-dash" style="color:#aaa;height:0;border-top:2px dashed #aaa"></span>Proyectado/Programado</div>
             <div id="redes-stats" style="margin-top:7px;font-size:9px;color:#f90;font-family:'Orbitron',monospace;letter-spacing:0.5px"></div>
-        </div>
-    </div>
-
-    <!-- INTERVENTORÍA BUTTON -->
-    <button id="btn-interventoria" onclick="abrirInterventoria()" title="Módulo de Interventoría — acceso restringido">🔐 INTERVENTORÍA</button>
-
-    <!-- MODAL LOGIN INTERVENTORÍA -->
-    <div id="modal-interventoria">
-        <div class="int-box">
-            <h3>🔐 Interventoría</h3>
-            <p>Módulo de acceso restringido<br>Ingrese la contraseña para continuar</p>
-            <input type="password" id="int-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')validarInterventoria()" autocomplete="off" />
-            <div id="int-error"></div>
-            <div class="int-btns">
-                <button id="int-btn-ok" onclick="validarInterventoria()">INGRESAR</button>
-                <button id="int-btn-cancel" onclick="cerrarModalInterventoria()">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PANEL INTERVENTORÍA -->
-    <div id="panel-interventoria">
-        <div class="int-panel-header">
-            <div>
-                <h2>🔐 Módulo de Interventoría</h2>
-                <span>Araucana de Gases — Área Técnica &amp; Control de Calidad</span>
-            </div>
-            <button id="int-close-panel" onclick="cerrarPanelInterventoria()">✕ CERRAR</button>
-        </div>
-        <div class="int-panel-body">
-
-            <!-- KPIs -->
-            <div class="int-kpi-grid" id="int-kpi-container">
-                <!-- Generado por JS según datos del mapa -->
-            </div>
-
-            <!-- SECCIÓN: ESTADO DE CAPAS -->
-            <div class="int-section">
-                <h3>📡 Estado de Capas en el Mapa</h3>
-                <table class="int-table">
-                    <tr><th>Capa</th><th>Estado</th><th>Registros visibles</th></tr>
-                    <tr>
-                        <td>Cruces de Vía</td>
-                        <td id="int-est-cruces"><span class="int-badge ok">Activa</span></td>
-                        <td id="int-n-cruces">—</td>
-                    </tr>
-                    <tr>
-                        <td>Usuarios Georreferenciados</td>
-                        <td id="int-est-usuarios"><span class="int-badge ok">Activa</span></td>
-                        <td id="int-n-usuarios">—</td>
-                    </tr>
-                    <tr>
-                        <td>Acometidas</td>
-                        <td id="int-est-acometidas"><span class="int-badge ok">Activa</span></td>
-                        <td id="int-n-acometidas">—</td>
-                    </tr>
-                    <tr>
-                        <td>Polivalvulas</td>
-                        <td id="int-est-polivalvulas"><span class="int-badge ok">Activa</span></td>
-                        <td id="int-n-polivalvulas">—</td>
-                    </tr>
-                    <tr>
-                        <td>Red de Gas (Tuberías)</td>
-                        <td id="int-est-redes"><span class="int-badge ok">Activa</span></td>
-                        <td id="int-n-redes">—</td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- SECCIÓN: RED DE GAS -->
-            <div class="int-section" id="int-sec-redes" style="display:none">
-                <h3>🔶 Resumen Red de Distribución de Gas</h3>
-                <div id="int-redes-contenido"></div>
-            </div>
-
-            <!-- SECCIÓN: NOTAS TÉCNICAS -->
-            <div class="int-section">
-                <h3>📋 Notas de Control</h3>
-                <div class="int-nota">
-                    ⚠️ <strong>Este módulo es de uso exclusivo del área de Interventoría.</strong><br>
-                    La información aquí contenida refleja el estado actual de las capas cargadas en el Geovisor.<br>
-                    Para reportes oficiales, exporte los datos desde el panel estadístico (📊 REPORTE).<br>
-                    Sesión iniciada: <span id="int-timestamp" style="color:#ce93d8"></span>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -3145,132 +2963,6 @@
     }
     /* ===== FIN RED DE GAS ===== */
 
-    /* ===== MÓDULO INTERVENTORÍA ===== */
-    var _INT_PASS = 'INT2026.';
-    var _intAutenticado = false;
-
-    function abrirInterventoria() {
-        var modal = document.getElementById('modal-interventoria');
-        document.getElementById('int-password').value = '';
-        document.getElementById('int-error').textContent = '';
-        modal.classList.add('visible');
-        setTimeout(function(){ document.getElementById('int-password').focus(); }, 120);
-    }
-
-    function cerrarModalInterventoria() {
-        document.getElementById('modal-interventoria').classList.remove('visible');
-    }
-
-    function validarInterventoria() {
-        var pw = document.getElementById('int-password').value;
-        if (pw === _INT_PASS) {
-            cerrarModalInterventoria();
-            _intAutenticado = true;
-            _abrirPanelInterventoria();
-        } else {
-            var err = document.getElementById('int-error');
-            err.textContent = '⚠ Contraseña incorrecta';
-            document.getElementById('int-password').value = '';
-            document.getElementById('int-password').focus();
-            setTimeout(function(){ err.textContent = ''; }, 2500);
-        }
-    }
-
-    function _abrirPanelInterventoria() {
-        var panel = document.getElementById('panel-interventoria');
-        panel.classList.add('visible');
-        _actualizarDatosInterventoria();
-    }
-
-    function cerrarPanelInterventoria() {
-        document.getElementById('panel-interventoria').classList.remove('visible');
-        _intAutenticado = false;
-    }
-
-    function _actualizarDatosInterventoria() {
-        // Timestamp
-        var ahora = new Date();
-        document.getElementById('int-timestamp').textContent =
-            ahora.toLocaleDateString('es-CO') + ' — ' + ahora.toLocaleTimeString('es-CO');
-
-        // Estado y conteo de capas
-        var capas = ['cruces','usuarios','acometidas','polivalvulas'];
-        var totalRegistros = 0;
-
-        capas.forEach(function(c) {
-            var activa = capaActiva && capaActiva[c];
-            var est = document.getElementById('int-est-' + c);
-            var cnt = document.getElementById('int-n-' + c);
-            if (est) est.innerHTML = activa
-                ? '<span class="int-badge ok">Activa</span>'
-                : '<span class="int-badge warn">Inactiva</span>';
-
-            // Contar marcadores visibles por tipo
-            var n = 0;
-            if (activa && typeof allMarkers !== 'undefined') {
-                allMarkers.forEach(function(m) {
-                    if (map.hasLayer(m) && m._intCapa === c) n++;
-                });
-            }
-            if (cnt) cnt.textContent = activa ? (n > 0 ? n : '(capa activa)') : '—';
-            if (activa) totalRegistros += n;
-        });
-
-        // Red de gas
-        var redActiva = _redGasActiva && _redGasData;
-        var estR = document.getElementById('int-est-redes');
-        var cntR = document.getElementById('int-n-redes');
-        if (estR) estR.innerHTML = redActiva
-            ? '<span class="int-badge ok">Activa</span>'
-            : '<span class="int-badge warn">Inactiva</span>';
-        if (cntR) cntR.textContent = redActiva ? (_redGasData.features.length + ' segmentos') : '—';
-
-        // Sección resumen red de gas
-        var secRedes = document.getElementById('int-sec-redes');
-        var contenidoRedes = document.getElementById('int-redes-contenido');
-        if (redActiva && secRedes && contenidoRedes) {
-            secRedes.style.display = 'block';
-            var feats = _redGasData.features;
-            var totalLon = feats.reduce(function(a,f){ return a + (f.properties.longitud_m||0); }, 0);
-            var inst = feats.filter(function(f){ return f.properties.estado === 'INSTALADO'; });
-            var instLon = inst.reduce(function(a,f){ return a + (f.properties.longitud_m||0); }, 0);
-            contenidoRedes.innerHTML =
-                '<table class="int-table">' +
-                '<tr><th>Indicador</th><th>Valor</th></tr>' +
-                '<tr><td>Segmentos totales</td><td><strong>' + feats.length + '</strong></td></tr>' +
-                '<tr><td>Longitud total</td><td><strong>' + (totalLon/1000).toFixed(2) + ' km</strong></td></tr>' +
-                '<tr><td>Red instalada</td><td><strong>' + (instLon/1000).toFixed(2) + ' km</strong> <span class="int-badge ok">INSTALADO</span></td></tr>' +
-                '<tr><td>Red proyectada/programada</td><td><strong>' + ((totalLon-instLon)/1000).toFixed(2) + ' km</strong> <span class="int-badge warn">PENDIENTE</span></td></tr>' +
-                '</table>';
-        } else if (secRedes) {
-            secRedes.style.display = 'none';
-        }
-
-        // KPIs
-        var kpiEl = document.getElementById('int-kpi-container');
-        if (kpiEl) {
-            var nCruces = (typeof allMarkers !== 'undefined')
-                ? allMarkers.filter(function(m){ return map.hasLayer(m); }).length
-                : 0;
-            var gasKm = redActiva
-                ? (_redGasData.features.reduce(function(a,f){ return a+(f.properties.longitud_m||0); },0)/1000).toFixed(2)
-                : '—';
-            var capasActivas = ['cruces','usuarios','acometidas','polivalvulas']
-                .filter(function(c){ return capaActiva && capaActiva[c]; }).length
-                + (redActiva ? 1 : 0);
-
-            kpiEl.innerHTML =
-                _intKpi(capasActivas, 'Capas activas en el mapa') +
-                _intKpi(nCruces > 0 ? nCruces : '—', 'Puntos visibles (cruces)') +
-                _intKpi(redActiva ? _redGasData.features.length : '—', 'Segmentos de red de gas') +
-                _intKpi(gasKm, 'Km de red cargados');
-        }
-    }
-
-    function _intKpi(val, lbl) {
-        return '<div class="int-kpi"><span class="num">' + val + '</span><span class="lbl">' + lbl + '</span></div>';
-    }
-    /* ===== FIN INTERVENTORÍA ===== */
 
     /* Agrega bloque de estadísticas de gas al panel de reporte activo */
     function _appendGasToReport() {
