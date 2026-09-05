@@ -7,318 +7,182 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #04000f; color: #e1bee7; font-family: Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
+    #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-    body {
-        background: #04000f;
-        color: #e1bee7;
-        font-family: Arial, sans-serif;
-        min-height: 100vh;
-        overflow-x: hidden;
+    /* ── PANTALLAS ── */
+    .screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .screen.oculto { display: none; }
+
+    /* ── SELECTOR DE INTERVENTOR ── */
+    #screen-selector { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); flex-direction: column; gap: 36px; }
+    .sel-header { text-align: center; }
+    .sel-icon { font-size: 40px; margin-bottom: 10px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
+    .sel-title { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
+    .sel-sub { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(156,39,176,0.55); margin-top: 6px; }
+    .sel-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .sel-card {
+        background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97));
+        border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0;
+        border-radius: 16px; padding: 36px 44px; min-width: 200px;
+        text-align: center; cursor: pointer;
+        box-shadow: 0 0 40px rgba(100,0,180,0.15);
+        transition: all 0.25s; position: relative; z-index: 1;
     }
+    .sel-card:hover { border-color: rgba(180,60,220,0.7); box-shadow: 0 0 60px rgba(156,39,176,0.35); transform: translateY(-4px); }
+    .sel-card-avatar { font-size: 52px; margin-bottom: 14px; filter: drop-shadow(0 0 12px rgba(180,60,220,0.4)); }
+    .sel-card-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #e1bee7; text-transform: uppercase; }
+    .sel-card-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.6); margin-top: 6px; }
+    .sel-back { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; transition: color 0.2s; }
+    .sel-back:hover { color: #ce93d8; }
 
-    /* ── FONDO ANIMADO ── */
-    #bg-canvas {
-        position: fixed; inset: 0; z-index: 0;
-        pointer-events: none;
-    }
-
-    /* ── PANTALLA DE LOGIN ── */
-    #login-screen {
-        position: fixed; inset: 0; z-index: 100;
-        display: flex; align-items: center; justify-content: center;
-        background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.18), transparent 70%);
-    }
-    #login-screen.oculto { display: none; }
-
+    /* ── LOGIN INTERVENTOR ── */
+    #screen-login { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); }
     .login-box {
         background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97));
-        border: 1px solid rgba(156,39,176,0.45);
-        border-left: 4px solid #9c27b0;
-        border-radius: 16px;
-        padding: 44px 48px;
-        width: 360px;
-        box-shadow: 0 0 80px rgba(140,0,200,0.3), inset 0 0 40px rgba(80,0,140,0.06);
-        text-align: center;
-        position: relative;
-        z-index: 1;
+        border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0;
+        border-radius: 16px; padding: 44px 48px; width: 360px;
+        box-shadow: 0 0 80px rgba(140,0,200,0.28); text-align: center; position: relative; z-index: 1;
     }
-    .login-logo {
-        font-size: 44px; margin-bottom: 12px;
-        filter: drop-shadow(0 0 16px rgba(180,60,220,0.6));
-    }
-    .login-title {
-        font-family: 'Orbitron', monospace;
-        font-size: 15px; font-weight: 900;
-        letter-spacing: 3px; color: #ce93d8;
-        text-transform: uppercase; margin-bottom: 4px;
-    }
-    .login-sub {
-        font-family: 'Orbitron', monospace;
-        font-size: 8px; letter-spacing: 2px;
-        color: rgba(156,39,176,0.6); margin-bottom: 32px;
-    }
-    .login-label {
-        font-family: 'Orbitron', monospace;
-        font-size: 8px; letter-spacing: 2px;
-        color: #9575cd; text-align: left; margin-bottom: 8px;
-        display: block; text-transform: uppercase;
-    }
+    .login-avatar { font-size: 52px; margin-bottom: 10px; filter: drop-shadow(0 0 16px rgba(180,60,220,0.5)); }
+    .login-name { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; letter-spacing: 4px; color: #e1bee7; text-transform: uppercase; margin-bottom: 4px; }
+    .login-role { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 2px; color: rgba(149,117,205,0.55); margin-bottom: 30px; }
+    .login-label { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: #9575cd; text-align: left; margin-bottom: 8px; display: block; text-transform: uppercase; }
     #login-password {
-        width: 100%;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(156,39,176,0.4);
-        border-radius: 10px;
-        padding: 12px 16px;
-        color: #e1bee7;
-        font-size: 18px;
-        font-family: 'Orbitron', monospace;
-        letter-spacing: 4px;
-        outline: none;
-        text-align: center;
-        margin-bottom: 10px;
-        transition: border-color 0.25s, box-shadow 0.25s;
+        width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.4);
+        border-radius: 10px; padding: 12px 16px; color: #e1bee7; font-size: 18px;
+        font-family: 'Orbitron', monospace; letter-spacing: 4px; outline: none;
+        text-align: center; margin-bottom: 10px; transition: border-color 0.25s, box-shadow 0.25s;
     }
-    #login-password:focus {
-        border-color: #9c27b0;
-        box-shadow: 0 0 18px rgba(156,39,176,0.3);
-    }
-    #login-password::placeholder {
-        letter-spacing: 1px; font-size: 10px; color: rgba(149,117,205,0.5);
-    }
-    #login-error {
-        color: #ef9a9a; font-size: 10px; letter-spacing: 1px;
-        font-family: 'Orbitron', monospace;
-        min-height: 16px; margin-bottom: 16px;
-        transition: opacity 0.3s;
-    }
+    #login-password:focus { border-color: #9c27b0; box-shadow: 0 0 18px rgba(156,39,176,0.3); }
+    #login-password::placeholder { letter-spacing: 1px; font-size: 10px; color: rgba(149,117,205,0.4); }
+    #login-error { color: #ef9a9a; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; min-height: 16px; margin-bottom: 14px; }
     #btn-login {
-        width: 100%;
-        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-        color: #fff;
-        border: none; border-radius: 10px;
-        padding: 13px;
-        font-size: 11px; font-weight: bold;
-        font-family: 'Orbitron', monospace;
-        letter-spacing: 2px; text-transform: uppercase;
-        cursor: pointer;
-        box-shadow: 0 0 20px rgba(156,39,176,0.4);
-        transition: all 0.2s;
-        margin-bottom: 10px;
+        width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff;
+        border: none; border-radius: 10px; padding: 13px; font-size: 11px; font-weight: bold;
+        font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer;
+        box-shadow: 0 0 20px rgba(156,39,176,0.35); transition: all 0.2s; margin-bottom: 14px;
     }
-    #btn-login:hover { background: linear-gradient(135deg, #ab47bc, #8e24aa); box-shadow: 0 0 32px rgba(180,60,220,0.55); }
-    .login-back {
-        font-family: 'Orbitron', monospace; font-size: 8px;
-        letter-spacing: 1.5px; color: rgba(149,117,205,0.5);
-        text-decoration: none; transition: color 0.2s;
-    }
-    .login-back:hover { color: #ce93d8; }
+    #btn-login:hover { box-shadow: 0 0 32px rgba(180,60,220,0.55); }
+    .login-back-btn { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; transition: color 0.2s; }
+    .login-back-btn:hover { color: #ce93d8; }
 
     /* ── PANEL PRINCIPAL ── */
-    #main-panel {
-        display: none; position: relative; z-index: 10;
-        min-height: 100vh; flex-direction: column;
-    }
+    #main-panel { display: none; position: relative; z-index: 10; min-height: 100vh; flex-direction: column; }
     #main-panel.visible { display: flex; }
-
-    /* Header */
     .int-header {
-        background: rgba(15,0,35,0.95);
-        border-bottom: 1px solid rgba(156,39,176,0.25);
-        padding: 16px 32px;
-        display: flex; align-items: center; justify-content: space-between;
-        position: sticky; top: 0; z-index: 50;
-        backdrop-filter: blur(10px);
+        background: rgba(15,0,35,0.95); border-bottom: 1px solid rgba(156,39,176,0.22);
+        padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
     }
-    .int-header-left { display: flex; align-items: center; gap: 16px; }
-    .int-header-icon { font-size: 26px; filter: drop-shadow(0 0 10px rgba(180,60,220,0.5)); }
-    .int-header-title {
-        font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
-        letter-spacing: 3px; color: #ce93d8; text-transform: uppercase;
-    }
-    .int-header-sub {
-        font-family: 'Orbitron', monospace; font-size: 8px;
-        letter-spacing: 2px; color: rgba(149,117,205,0.6); margin-top: 2px;
-    }
-    .int-header-right { display: flex; align-items: center; gap: 12px; }
-    .int-badge-session {
-        font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px;
-        color: #ce93d8; background: rgba(156,39,176,0.12);
-        border: 1px solid rgba(156,39,176,0.3);
-        padding: 5px 12px; border-radius: 20px;
-    }
-    #btn-cerrar-sesion {
-        background: rgba(156,39,176,0.1);
-        border: 1px solid rgba(156,39,176,0.35);
-        color: #ce93d8; padding: 7px 16px;
-        border-radius: 8px; font-size: 9px; font-weight: bold;
-        font-family: 'Orbitron', monospace; letter-spacing: 1px;
-        cursor: pointer; transition: all 0.2s;
-    }
-    #btn-cerrar-sesion:hover { background: rgba(156,39,176,0.25); }
-    .btn-inicio {
-        background: rgba(0,200,255,0.08);
-        border: 1px solid rgba(0,200,255,0.25);
-        color: #00c8ff; padding: 7px 16px;
-        border-radius: 8px; font-size: 9px; font-weight: bold;
-        font-family: 'Orbitron', monospace; letter-spacing: 1px;
-        cursor: pointer; transition: all 0.2s;
-        text-decoration: none; display: inline-block;
-    }
+    .int-header-left { display: flex; align-items: center; gap: 14px; }
+    .int-header-avatar { font-size: 28px; filter: drop-shadow(0 0 8px rgba(180,60,220,0.4)); }
+    .int-header-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; letter-spacing: 3px; color: #ce93d8; text-transform: uppercase; }
+    .int-header-sub { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1.5px; color: rgba(149,117,205,0.55); margin-top: 2px; }
+    .int-header-right { display: flex; align-items: center; gap: 10px; }
+    .btn-header { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; font-weight: bold; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-inicio { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.22) !important; color: #00c8ff; text-decoration: none; display: inline-block; }
     .btn-inicio:hover { background: rgba(0,200,255,0.18); }
+    .btn-sesion { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.3) !important; color: #ce93d8; }
+    .btn-sesion:hover { background: rgba(156,39,176,0.22); }
 
     /* Body */
-    .int-body { padding: 32px; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
-
-    /* Sección */
-    .int-section { margin-bottom: 36px; }
-    .int-section-title {
-        font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
-        letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase;
-        border-bottom: 1px solid rgba(156,39,176,0.2);
-        padding-bottom: 10px; margin-bottom: 18px;
-    }
+    .int-body { padding: 28px 32px; flex: 1; max-width: 1100px; margin: 0 auto; width: 100%; }
+    .int-section { margin-bottom: 32px; }
+    .int-section-title { font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2.5px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.18); padding-bottom: 9px; margin-bottom: 16px; }
 
     /* KPIs */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-    .kpi-card {
-        background: rgba(156,39,176,0.08);
-        border: 1px solid rgba(156,39,176,0.25);
-        border-left: 4px solid #9c27b0;
-        border-radius: 12px; padding: 20px 22px;
-        transition: box-shadow 0.2s;
-    }
-    .kpi-card:hover { box-shadow: 0 4px 24px rgba(156,39,176,0.2); }
-    .kpi-num {
-        font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900;
-        color: #e1bee7; display: block; line-height: 1;
-    }
-    .kpi-lbl {
-        font-size: 10px; color: #9575cd; margin-top: 6px;
-        letter-spacing: 0.5px; display: block;
-    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+    .kpi-card { background: rgba(156,39,176,0.07); border: 1px solid rgba(156,39,176,0.22); border-left: 4px solid #9c27b0; border-radius: 12px; padding: 18px 20px; transition: box-shadow 0.2s; }
+    .kpi-card:hover { box-shadow: 0 4px 24px rgba(156,39,176,0.18); }
+    .kpi-num { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 900; color: #e1bee7; display: block; line-height: 1; }
+    .kpi-lbl { font-size: 10px; color: #9575cd; margin-top: 5px; display: block; }
 
-    /* Tabla */
-    .int-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .int-table th {
-        background: rgba(156,39,176,0.15); color: #ce93d8;
-        padding: 10px 14px; text-align: left;
-        font-family: 'Orbitron', monospace; font-size: 8px;
-        letter-spacing: 1.5px; text-transform: uppercase;
-        border-bottom: 1px solid rgba(156,39,176,0.3);
-    }
-    .int-table td {
-        padding: 10px 14px; color: #d1c4e9;
-        border-bottom: 1px solid rgba(156,39,176,0.08);
-    }
-    .int-table tr:hover td { background: rgba(156,39,176,0.06); }
+    /* Formulario */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: #9575cd; text-transform: uppercase; }
+    .form-input, .form-select, .form-textarea { background: rgba(255,255,255,0.04); border: 1px solid rgba(156,39,176,0.32); border-radius: 8px; padding: 9px 12px; color: #e1bee7; font-size: 12px; outline: none; transition: border-color 0.2s; font-family: Arial, sans-serif; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #9c27b0; box-shadow: 0 0 10px rgba(156,39,176,0.18); }
+    .form-select option { background: #1a003a; }
+    .form-textarea { resize: vertical; min-height: 75px; }
+    .form-full { grid-column: 1 / -1; }
+    #btn-registrar { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 9px; padding: 11px 26px; font-size: 9px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 14px rgba(156,39,176,0.28); transition: all 0.2s; margin-top: 6px; }
+    #btn-registrar:hover { box-shadow: 0 0 26px rgba(180,60,220,0.45); }
+    #form-msg { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; margin-top: 8px; min-height: 14px; }
+    #form-msg.ok { color: #81c784; } #form-msg.err { color: #ef9a9a; }
+
+    /* Registros */
+    .reg-item { background: rgba(156,39,176,0.05); border: 1px solid rgba(156,39,176,0.13); border-left: 3px solid #9c27b0; border-radius: 10px; padding: 13px 16px; margin-bottom: 9px; display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; }
+    .reg-fecha { font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 1px; color: #9575cd; white-space: nowrap; }
+    .reg-desc { font-size: 12px; color: #d1c4e9; line-height: 1.5; }
+    .reg-desc strong { color: #ce93d8; }
 
     /* Badges */
     .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: bold; letter-spacing: 0.5px; }
-    .badge-ok   { background: rgba(76,175,80,0.15);  color: #81c784; border: 1px solid rgba(76,175,80,0.35); }
-    .badge-warn { background: rgba(255,152,0,0.15);  color: #ffb74d; border: 1px solid rgba(255,152,0,0.35); }
-    .badge-bad  { background: rgba(244,67,54,0.15);  color: #ef9a9a; border: 1px solid rgba(244,67,54,0.35); }
-    .badge-info { background: rgba(33,150,243,0.15); color: #64b5f6; border: 1px solid rgba(33,150,243,0.35); }
-
-    /* Formulario de registro */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-label {
-        font-family: 'Orbitron', monospace; font-size: 8px;
-        letter-spacing: 1.5px; color: #9575cd; text-transform: uppercase;
-    }
-    .form-input, .form-select, .form-textarea {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(156,39,176,0.35);
-        border-radius: 8px; padding: 10px 12px;
-        color: #e1bee7; font-size: 12px; outline: none;
-        transition: border-color 0.2s;
-        font-family: Arial, sans-serif;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-        border-color: #9c27b0; box-shadow: 0 0 12px rgba(156,39,176,0.2);
-    }
-    .form-select option { background: #1a003a; }
-    .form-textarea { resize: vertical; min-height: 80px; }
-    .form-full { grid-column: 1 / -1; }
-    #btn-registrar {
-        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-        color: #fff; border: none; border-radius: 10px;
-        padding: 12px 28px; font-size: 10px; font-weight: bold;
-        font-family: 'Orbitron', monospace; letter-spacing: 2px;
-        cursor: pointer; box-shadow: 0 0 16px rgba(156,39,176,0.3);
-        transition: all 0.2s; margin-top: 8px;
-    }
-    #btn-registrar:hover { box-shadow: 0 0 28px rgba(180,60,220,0.5); }
-    #form-msg {
-        font-family: 'Orbitron', monospace; font-size: 9px;
-        letter-spacing: 1px; margin-top: 10px; min-height: 14px;
-    }
-    #form-msg.ok  { color: #81c784; }
-    #form-msg.err { color: #ef9a9a; }
-
-    /* Lista de registros */
-    #lista-registros { margin-top: 16px; }
-    .reg-item {
-        background: rgba(156,39,176,0.06);
-        border: 1px solid rgba(156,39,176,0.15);
-        border-left: 3px solid #9c27b0;
-        border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;
-        display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start;
-    }
-    .reg-fecha {
-        font-family: 'Orbitron', monospace; font-size: 8px;
-        letter-spacing: 1px; color: #9575cd; white-space: nowrap;
-    }
-    .reg-desc { font-size: 12px; color: #d1c4e9; line-height: 1.5; }
-    .reg-desc strong { color: #ce93d8; }
-    .reg-estado { align-self: center; }
+    .badge-ok   { background: rgba(76,175,80,0.13);  color: #81c784; border: 1px solid rgba(76,175,80,0.32); }
+    .badge-warn { background: rgba(255,152,0,0.13);  color: #ffb74d; border: 1px solid rgba(255,152,0,0.32); }
+    .badge-bad  { background: rgba(244,67,54,0.13);  color: #ef9a9a; border: 1px solid rgba(244,67,54,0.32); }
 
     /* Nota */
-    .int-nota {
-        background: rgba(156,39,176,0.06);
-        border-left: 3px solid #9c27b0;
-        border-radius: 0 10px 10px 0;
-        padding: 14px 18px; font-size: 11px;
-        color: #b39ddb; line-height: 1.8;
-    }
+    .int-nota { background: rgba(156,39,176,0.06); border-left: 3px solid #9c27b0; border-radius: 0 10px 10px 0; padding: 13px 16px; font-size: 11px; color: #b39ddb; line-height: 1.8; }
 </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<!-- ── LOGIN ── -->
-<div id="login-screen">
+<!-- ── SELECTOR DE INTERVENTOR ── -->
+<div id="screen-selector" class="screen">
+    <div class="sel-header">
+        <div class="sel-icon">🔐</div>
+        <div class="sel-title">Módulo de Interventoría</div>
+        <div class="sel-sub">Araucana de Gases · Seleccione su perfil</div>
+    </div>
+    <div class="sel-cards">
+        <div class="sel-card" onclick="seleccionarInterventor('SAHAD')">
+            <div class="sel-card-avatar">👷</div>
+            <div class="sel-card-name">SAHAD</div>
+            <div class="sel-card-role">Interventor · Perfil 1</div>
+        </div>
+        <div class="sel-card" onclick="seleccionarInterventor('MIA')">
+            <div class="sel-card-avatar">👷‍♀️</div>
+            <div class="sel-card-name">MIA</div>
+            <div class="sel-card-role">Interventor · Perfil 2</div>
+        </div>
+    </div>
+    <a href="index.html" class="sel-back">← Volver al inicio</a>
+</div>
+
+<!-- ── LOGIN INTERVENTOR ── -->
+<div id="screen-login" class="screen oculto">
     <div class="login-box">
-        <div class="login-logo">🔐</div>
-        <div class="login-title">Interventoría</div>
-        <div class="login-sub">Araucana de Gases · Acceso Restringido</div>
-        <label class="login-label" for="login-password">Contraseña de acceso</label>
+        <div class="login-avatar" id="login-avatar">👷</div>
+        <div class="login-name" id="login-nombre">SAHAD</div>
+        <div class="login-role">Interventor · Acceso restringido</div>
+        <label class="login-label" for="login-password">Contraseña</label>
         <input type="password" id="login-password" placeholder="••••••••"
-               onkeydown="if(event.key==='Enter') validarLogin()"
-               autocomplete="off" />
+               onkeydown="if(event.key==='Enter') validarLogin()" autocomplete="off" />
         <div id="login-error"></div>
         <button id="btn-login" onclick="validarLogin()">🔓 INGRESAR</button>
-        <a href="index.html" class="login-back">← Volver al inicio</a>
+        <button class="login-back-btn" onclick="volverSelector()">← Cambiar perfil</button>
     </div>
 </div>
 
 <!-- ── PANEL PRINCIPAL ── -->
 <div id="main-panel">
-
     <div class="int-header">
         <div class="int-header-left">
-            <div class="int-header-icon">🔐</div>
+            <div class="int-header-avatar" id="panel-avatar">👷</div>
             <div>
-                <div class="int-header-title">Módulo de Interventoría</div>
+                <div class="int-header-title" id="panel-nombre">INTERVENTOR</div>
                 <div class="int-header-sub">Araucana de Gases · Control Técnico &amp; Seguimiento de Obra</div>
             </div>
         </div>
         <div class="int-header-right">
-            <span class="int-badge-session" id="badge-hora">—</span>
-            <a href="index.html" class="btn-inicio">🏠 INICIO</a>
-            <button id="btn-cerrar-sesion" onclick="cerrarSesion()">🔒 CERRAR SESIÓN</button>
+            <a href="index.html" class="btn-header btn-inicio">🏠 INICIO</a>
+            <button class="btn-header btn-sesion" onclick="cerrarSesion()">🔒 CERRAR SESIÓN</button>
         </div>
     </div>
 
@@ -326,38 +190,34 @@
 
         <!-- KPIs -->
         <div class="int-section">
-            <div class="int-section-title">📊 Resumen General</div>
+            <div class="int-section-title">📊 Resumen de mi Interventoría</div>
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <span class="kpi-num" id="kpi-total">0</span>
-                    <span class="kpi-lbl">Registros de interventoría</span>
+                    <span class="kpi-lbl">Registros totales</span>
                 </div>
                 <div class="kpi-card" style="border-left-color:#4caf50">
-                    <span class="kpi-num" id="kpi-aprobados" style="color:#81c784">0</span>
-                    <span class="kpi-lbl">Ítems aprobados</span>
+                    <span class="kpi-num" id="kpi-ok" style="color:#81c784">0</span>
+                    <span class="kpi-lbl">Aprobados</span>
                 </div>
                 <div class="kpi-card" style="border-left-color:#ffa726">
-                    <span class="kpi-num" id="kpi-pendientes" style="color:#ffb74d">0</span>
-                    <span class="kpi-lbl">Ítems con observación</span>
+                    <span class="kpi-num" id="kpi-warn" style="color:#ffb74d">0</span>
+                    <span class="kpi-lbl">Con observación</span>
                 </div>
                 <div class="kpi-card" style="border-left-color:#ef5350">
-                    <span class="kpi-num" id="kpi-rechazados" style="color:#ef9a9a">0</span>
-                    <span class="kpi-lbl">Ítems rechazados</span>
+                    <span class="kpi-num" id="kpi-bad" style="color:#ef9a9a">0</span>
+                    <span class="kpi-lbl">Rechazados</span>
                 </div>
             </div>
         </div>
 
-        <!-- NUEVO REGISTRO -->
+        <!-- FORMULARIO -->
         <div class="int-section">
-            <div class="int-section-title">📝 Nuevo Registro de Interventoría</div>
+            <div class="int-section-title">📝 Nuevo Registro</div>
             <div class="form-grid">
                 <div class="form-group">
                     <label class="form-label">Fecha de inspección</label>
                     <input type="date" class="form-input" id="f-fecha" />
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Inspector responsable</label>
-                    <input type="text" class="form-input" id="f-inspector" placeholder="Nombre del interventor" />
                 </div>
                 <div class="form-group">
                     <label class="form-label">Tipo de actividad</label>
@@ -390,6 +250,10 @@
                     <label class="form-label">Contratista</label>
                     <input type="text" class="form-input" id="f-contratista" placeholder="Nombre o razón social" />
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Ubicación / Referencia</label>
+                    <input type="text" class="form-input" id="f-ubicacion" placeholder="Dirección o punto de referencia" />
+                </div>
                 <div class="form-group form-full">
                     <label class="form-label">Descripción / Observaciones</label>
                     <textarea class="form-textarea" id="f-descripcion" placeholder="Detalle de la actividad inspeccionada, hallazgos y acciones correctivas si aplica..."></textarea>
@@ -399,11 +263,11 @@
             <div id="form-msg"></div>
         </div>
 
-        <!-- TABLA DE REGISTROS -->
+        <!-- HISTORIAL -->
         <div class="int-section">
             <div class="int-section-title">📋 Historial de Registros</div>
             <div id="lista-registros">
-                <p style="color:rgba(149,117,205,0.5); font-size:11px; text-align:center; padding:30px 0">
+                <p style="color:rgba(149,117,205,0.4);font-size:11px;text-align:center;padding:28px 0">
                     No hay registros aún. Usa el formulario de arriba para agregar el primero.
                 </p>
             </div>
@@ -411,12 +275,10 @@
 
         <!-- NOTA -->
         <div class="int-section">
-            <div class="int-section-title">ℹ️ Información del Módulo</div>
+            <div class="int-section-title">ℹ️ Información</div>
             <div class="int-nota">
-                ⚠️ <strong>Este módulo es de uso exclusivo del área de Interventoría de Araucana de Gases.</strong><br>
-                Los registros se almacenan localmente en esta sesión. Para exportar el historial, use el botón de descarga al finalizar.<br>
-                Acceso autorizado únicamente para personal de interventoría técnica y supervisión de obra.<br>
-                Sesión activa desde: <span id="sesion-hora" style="color:#ce93d8"></span>
+                ⚠️ <strong>Módulo de uso exclusivo del área de Interventoría — Araucana de Gases.</strong><br>
+                Los registros son independientes por perfil. Sesión activa: <span id="sesion-hora" style="color:#ce93d8"></span>
             </div>
         </div>
 
@@ -424,151 +286,133 @@
 </div>
 
 <script>
-/* ─── FONDO ANIMADO ─── */
+/* ── FONDO ── */
 (function(){
-    var c = document.getElementById('bg-canvas');
-    var ctx = c.getContext('2d');
-    var W, H, pts = [];
-    function resize(){ W = c.width = innerWidth; H = c.height = innerHeight; }
-    resize(); window.addEventListener('resize', resize);
-    for(var i=0;i<55;i++) pts.push({
-        x:Math.random()*2000, y:Math.random()*1200,
-        vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
-        r:Math.random()*1.5+.5
-    });
+    var c=document.getElementById('bg-canvas'),ctx=c.getContext('2d'),W,H,pts=[];
+    function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; }
+    resize(); window.addEventListener('resize',resize);
+    for(var i=0;i<55;i++) pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+.5});
     function draw(){
         ctx.clearRect(0,0,W,H);
-        pts.forEach(function(p){
-            p.x+=p.vx; p.y+=p.vy;
-            if(p.x<0||p.x>W) p.vx*=-1;
-            if(p.y<0||p.y>H) p.vy*=-1;
-            ctx.beginPath();
-            ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-            ctx.fillStyle='rgba(156,39,176,0.35)';
-            ctx.fill();
-        });
-        pts.forEach(function(a,i){
-            pts.slice(i+1).forEach(function(b){
-                var dx=a.x-b.x, dy=a.y-b.y, d=Math.sqrt(dx*dx+dy*dy);
-                if(d<140){
-                    ctx.beginPath();
-                    ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
-                    ctx.strokeStyle='rgba(156,39,176,'+(0.12*(1-d/140))+')';
-                    ctx.lineWidth=.6; ctx.stroke();
-                }
-            });
-        });
+        pts.forEach(function(p){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle='rgba(156,39,176,0.32)'; ctx.fill(); });
+        pts.forEach(function(a,i){ pts.slice(i+1).forEach(function(b){ var dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy); if(d<140){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='rgba(156,39,176,'+(0.12*(1-d/140))+')'; ctx.lineWidth=.6; ctx.stroke(); } }); });
         requestAnimationFrame(draw);
     }
     draw();
 })();
 
-/* ─── LOGIN ─── */
-var _PASS = 'INT2026.';
-var _registros = [];
+/* ── DATOS ── */
+var _PERFILES = {
+    'SAHAD': { pass: 'SAHAD-INT1', avatar: '👷',   registros: [] },
+    'MIA':   { pass: 'MIA2026-',  avatar: '👷‍♀️', registros: [] }
+};
+var _perfilActual = null;
 
+/* ── SELECTOR ── */
+function seleccionarInterventor(nombre) {
+    _perfilActual = nombre;
+    var p = _PERFILES[nombre];
+    document.getElementById('login-avatar').textContent  = p.avatar;
+    document.getElementById('login-nombre').textContent  = nombre;
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('screen-selector').classList.add('oculto');
+    document.getElementById('screen-login').classList.remove('oculto');
+    setTimeout(function(){ document.getElementById('login-password').focus(); }, 100);
+}
+
+function volverSelector() {
+    document.getElementById('screen-login').classList.add('oculto');
+    document.getElementById('screen-selector').classList.remove('oculto');
+    _perfilActual = null;
+}
+
+/* ── LOGIN ── */
 function validarLogin() {
-    var pw = document.getElementById('login-password').value;
+    var pw  = document.getElementById('login-password').value;
     var err = document.getElementById('login-error');
-    if (pw === _PASS) {
-        document.getElementById('login-screen').classList.add('oculto');
+    var p   = _PERFILES[_perfilActual];
+    if (pw === p.pass) {
+        document.getElementById('screen-login').classList.add('oculto');
+        // Configurar panel
+        document.getElementById('panel-avatar').textContent  = p.avatar;
+        document.getElementById('panel-nombre').textContent  = _perfilActual;
+        document.getElementById('sesion-hora').textContent   = new Date().toLocaleString('es-CO');
+        document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
         document.getElementById('main-panel').classList.add('visible');
-        var ahora = new Date();
-        var hora = ahora.toLocaleString('es-CO');
-        document.getElementById('badge-hora').textContent = '🟢 Sesión activa';
-        document.getElementById('sesion-hora').textContent = hora;
-        // Fecha actual en el formulario
-        document.getElementById('f-fecha').value = ahora.toISOString().slice(0,10);
-        actualizarKPIs();
+        renderRegistros(); actualizarKPIs();
     } else {
         err.textContent = '⚠ Contraseña incorrecta';
         document.getElementById('login-password').value = '';
         document.getElementById('login-password').focus();
-        setTimeout(function(){ err.textContent = ''; }, 2500);
+        setTimeout(function(){ err.textContent=''; }, 2500);
     }
 }
 
 function cerrarSesion() {
     document.getElementById('main-panel').classList.remove('visible');
-    document.getElementById('login-screen').classList.remove('oculto');
-    document.getElementById('login-password').value = '';
-    document.getElementById('login-error').textContent = '';
-    document.getElementById('login-password').focus();
+    document.getElementById('screen-login').classList.add('oculto');
+    document.getElementById('screen-selector').classList.remove('oculto');
+    _perfilActual = null;
 }
 
-/* ─── REGISTROS ─── */
-function agregarRegistro() {
-    var fecha      = document.getElementById('f-fecha').value;
-    var inspector  = document.getElementById('f-inspector').value.trim();
-    var tipo       = document.getElementById('f-tipo').value;
-    var resultado  = document.getElementById('f-resultado').value;
-    var sector     = document.getElementById('f-sector').value.trim();
-    var contratista= document.getElementById('f-contratista').value.trim();
-    var desc       = document.getElementById('f-descripcion').value.trim();
-    var msg        = document.getElementById('form-msg');
-
-    if (!fecha || !inspector || !tipo || !resultado || !desc) {
-        msg.className = 'err';
-        msg.textContent = '⚠ Complete los campos obligatorios: fecha, inspector, tipo, resultado y descripción.';
-        setTimeout(function(){ msg.textContent=''; }, 3000);
-        return;
-    }
-
-    _registros.unshift({ fecha, inspector, tipo, resultado, sector, contratista, desc, id: Date.now() });
-
-    // Limpiar form
-    document.getElementById('f-inspector').value = '';
-    document.getElementById('f-tipo').value = '';
-    document.getElementById('f-resultado').value = '';
-    document.getElementById('f-sector').value = '';
-    document.getElementById('f-contratista').value = '';
-    document.getElementById('f-descripcion').value = '';
-    msg.className = 'ok';
-    msg.textContent = '✅ Registro guardado correctamente.';
-    setTimeout(function(){ msg.textContent=''; }, 2500);
-
-    renderRegistros();
-    actualizarKPIs();
-}
-
-var BADGE_MAP = {
+/* ── REGISTROS ── */
+var BADGE = {
     ok:   '<span class="badge badge-ok">✅ Aprobado</span>',
     warn: '<span class="badge badge-warn">⚠️ Con observación</span>',
     bad:  '<span class="badge badge-bad">❌ Rechazado</span>'
 };
 
+function agregarRegistro() {
+    var fecha   = document.getElementById('f-fecha').value;
+    var tipo    = document.getElementById('f-tipo').value;
+    var result  = document.getElementById('f-resultado').value;
+    var sector  = document.getElementById('f-sector').value.trim();
+    var contrat = document.getElementById('f-contratista').value.trim();
+    var ubic    = document.getElementById('f-ubicacion').value.trim();
+    var desc    = document.getElementById('f-descripcion').value.trim();
+    var msg     = document.getElementById('form-msg');
+
+    if (!fecha || !tipo || !result || !desc) {
+        msg.className='err'; msg.textContent='⚠ Complete: fecha, tipo, resultado y descripción.';
+        setTimeout(function(){ msg.textContent=''; },3000); return;
+    }
+    _PERFILES[_perfilActual].registros.unshift({ fecha, tipo, result, sector, contrat, ubic, desc, id: Date.now() });
+
+    ['f-tipo','f-resultado','f-sector','f-contratista','f-ubicacion','f-descripcion']
+        .forEach(function(id){ document.getElementById(id).value=''; });
+    msg.className='ok'; msg.textContent='✅ Registro guardado.';
+    setTimeout(function(){ msg.textContent=''; },2500);
+    renderRegistros(); actualizarKPIs();
+}
+
 function renderRegistros() {
-    var el = document.getElementById('lista-registros');
-    if (_registros.length === 0) {
-        el.innerHTML = '<p style="color:rgba(149,117,205,0.5);font-size:11px;text-align:center;padding:30px 0">No hay registros aún.</p>';
+    var regs = _PERFILES[_perfilActual].registros;
+    var el   = document.getElementById('lista-registros');
+    if (!regs.length) {
+        el.innerHTML='<p style="color:rgba(149,117,205,0.4);font-size:11px;text-align:center;padding:28px 0">No hay registros aún.</p>';
         return;
     }
-    el.innerHTML = _registros.map(function(r, i){
+    el.innerHTML = regs.map(function(r,i){
         return '<div class="reg-item">' +
-            '<div class="reg-fecha">' + r.fecha + '<br>#' + (_registros.length - i) + '</div>' +
-            '<div class="reg-desc">' +
-                '<strong>' + r.tipo + '</strong>' +
-                (r.sector ? ' · ' + r.sector : '') +
-                (r.contratista ? ' · <em>' + r.contratista + '</em>' : '') +
-                '<br>Inspector: ' + r.inspector +
-                '<br><span style="color:#b39ddb">' + r.desc + '</span>' +
-            '</div>' +
-            '<div class="reg-estado">' + (BADGE_MAP[r.resultado] || '') + '</div>' +
+            '<div class="reg-fecha">' + r.fecha + '<br>#' + (regs.length-i) + '</div>' +
+            '<div class="reg-desc"><strong>' + r.tipo + '</strong>' +
+            (r.sector  ? ' · ' + r.sector  : '') +
+            (r.ubic    ? ' · ' + r.ubic    : '') +
+            (r.contrat ? ' · <em>' + r.contrat + '</em>' : '') +
+            '<br><span style="color:#b39ddb">' + r.desc + '</span></div>' +
+            '<div>' + (BADGE[r.result]||'') + '</div>' +
         '</div>';
     }).join('');
 }
 
 function actualizarKPIs() {
-    document.getElementById('kpi-total').textContent = _registros.length;
-    document.getElementById('kpi-aprobados').textContent  = _registros.filter(function(r){ return r.resultado==='ok'; }).length;
-    document.getElementById('kpi-pendientes').textContent = _registros.filter(function(r){ return r.resultado==='warn'; }).length;
-    document.getElementById('kpi-rechazados').textContent = _registros.filter(function(r){ return r.resultado==='bad'; }).length;
+    var regs = _PERFILES[_perfilActual].registros;
+    document.getElementById('kpi-total').textContent = regs.length;
+    document.getElementById('kpi-ok').textContent    = regs.filter(function(r){ return r.result==='ok';   }).length;
+    document.getElementById('kpi-warn').textContent  = regs.filter(function(r){ return r.result==='warn'; }).length;
+    document.getElementById('kpi-bad').textContent   = regs.filter(function(r){ return r.result==='bad';  }).length;
 }
-
-// Focus automático
-window.addEventListener('load', function(){
-    document.getElementById('login-password').focus();
-});
 </script>
 </body>
 </html>
