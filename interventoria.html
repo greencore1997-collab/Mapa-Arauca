@@ -201,64 +201,14 @@
 
     <!-- TABS -->
     <div class="tabs-bar">
-        <button class="tab-btn activo" onclick="cambiarTab('registros', this)">📋 REGISTROS</button>
-        <button class="tab-btn" onclick="cambiarTab('mapas', this)">🗺️ MAPAS PDF</button>
+        <button class="tab-btn activo" onclick="cambiarTab('mapas', this)">🗺️ MAPAS PDF</button>
         <button class="tab-btn" onclick="cambiarTab('reportes', this)">📊 REPORTES EXCEL</button>
     </div>
 
     <div class="int-body">
 
-        <!-- ══ TAB: REGISTROS ══ -->
-        <div id="tab-registros" class="tab-content activo">
-
-            <div class="int-section">
-                <div class="int-section-title">📊 Resumen</div>
-                <div class="kpi-grid">
-                    <div class="kpi-card"><span class="kpi-num" id="kpi-total">0</span><span class="kpi-lbl">Registros totales</span></div>
-                    <div class="kpi-card" style="border-left-color:#4caf50"><span class="kpi-num" id="kpi-ok" style="color:#81c784">0</span><span class="kpi-lbl">Aprobados</span></div>
-                    <div class="kpi-card" style="border-left-color:#ffa726"><span class="kpi-num" id="kpi-warn" style="color:#ffb74d">0</span><span class="kpi-lbl">Con observación</span></div>
-                    <div class="kpi-card" style="border-left-color:#ef5350"><span class="kpi-num" id="kpi-bad" style="color:#ef9a9a">0</span><span class="kpi-lbl">Rechazados</span></div>
-                </div>
-            </div>
-
-            <div class="int-section">
-                <div class="int-section-title">📝 Nuevo Registro</div>
-                <div class="form-grid">
-                    <div class="form-group"><label class="form-label">Fecha</label><input type="date" class="form-input" id="f-fecha" /></div>
-                    <div class="form-group"><label class="form-label">Tipo de actividad</label>
-                        <select class="form-select" id="f-tipo">
-                            <option value="">Seleccionar...</option>
-                            <option>Instalación de tubería</option><option>Prueba de presión</option>
-                            <option>Conexión de acometida</option><option>Revisión de polivalvula</option>
-                            <option>Inspección de zanja</option><option>Recibo de materiales</option>
-                            <option>Control de calidad de soldadura</option><option>Otro</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label class="form-label">Resultado</label>
-                        <select class="form-select" id="f-resultado">
-                            <option value="">Seleccionar...</option>
-                            <option value="ok">✅ Aprobado</option>
-                            <option value="warn">⚠️ Con observación</option>
-                            <option value="bad">❌ Rechazado</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label class="form-label">Sector / Barrio</label><input type="text" class="form-input" id="f-sector" placeholder="Ej: La Alborada..." /></div>
-                    <div class="form-group"><label class="form-label">Contratista</label><input type="text" class="form-input" id="f-contratista" placeholder="Nombre o razón social" /></div>
-                    <div class="form-group"><label class="form-label">Ubicación / Referencia</label><input type="text" class="form-input" id="f-ubicacion" placeholder="Dirección o referencia" /></div>
-                    <div class="form-group form-full"><label class="form-label">Descripción / Observaciones</label><textarea class="form-textarea" id="f-descripcion" placeholder="Detalle de la actividad, hallazgos y acciones correctivas..."></textarea></div>
-                </div>
-                <button class="btn-primary" onclick="agregarRegistro()">➕ GUARDAR REGISTRO</button>
-                <div class="form-msg" id="form-msg"></div>
-            </div>
-
-            <div class="int-section">
-                <div class="int-section-title">📋 Historial</div>
-                <div id="lista-registros"><p class="empty-msg">No hay registros aún.</p></div>
-            </div>
-        </div>
-
         <!-- ══ TAB: MAPAS PDF ══ -->
-        <div id="tab-mapas" class="tab-content">
+        <div id="tab-mapas" class="tab-content activo">
             <div class="int-section">
                 <div class="int-section-title">🗺️ Cargar Mapas en PDF</div>
                 <div class="upload-zone" id="zone-pdf"
@@ -348,10 +298,8 @@ function validarLogin() {
         document.getElementById('screen-login').classList.add('oculto');
         document.getElementById('panel-avatar').textContent = _PERFILES[_perfil].avatar;
         document.getElementById('panel-nombre').textContent = _perfil;
-        document.getElementById('f-fecha').value = new Date().toISOString().slice(0,10);
         document.getElementById('main-panel').classList.add('visible');
-        cambiarTab('registros', document.querySelector('.tab-btn'));
-        renderRegistros(); actualizarKPIs();
+        cambiarTab('mapas', document.querySelector('.tab-btn'));
         renderArchivos('pdf'); renderArchivos('xls');
     } else {
         err.textContent = '⚠ Contraseña incorrecta';
