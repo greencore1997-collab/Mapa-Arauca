@@ -22,16 +22,16 @@
     .sel-sub { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 1.5px; color: rgba(156,39,176,0.55); margin-top: 5px; }
     .sel-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 480px; }
     .sel-card { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.35); border-left: 4px solid #9c27b0; border-radius: 14px; padding: 28px 32px; flex: 1; min-width: 140px; text-align: center; cursor: pointer; box-shadow: 0 0 30px rgba(100,0,180,0.1); transition: all 0.22s; -webkit-tap-highlight-color: transparent; }
-    .sel-card:active { transform: scale(0.97); background: linear-gradient(160deg, rgba(20,0,45,0.97), rgba(35,0,70,0.97)); }
-    .sel-card-avatar { font-size: 44px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(180,60,220,0.35)); }
+    .sel-card:active { transform: scale(0.97); }
+    .sel-card-avatar { font-size: 44px; margin-bottom: 10px; }
     .sel-card-name { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 900; letter-spacing: 2.5px; color: #e1bee7; text-transform: uppercase; }
     .sel-card-role { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-top: 5px; }
-    .sel-back { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; padding: 8px; -webkit-tap-highlight-color: transparent; }
+    .sel-back { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.4); text-decoration: none; padding: 8px; }
 
     /* ── LOGIN ── */
     #screen-login { background: radial-gradient(ellipse at 50% 40%, rgba(80,0,130,0.15), transparent 70%); }
     .login-box { background: linear-gradient(160deg, rgba(12,0,30,0.97), rgba(22,0,50,0.97)); border: 1px solid rgba(156,39,176,0.45); border-left: 4px solid #9c27b0; border-radius: 16px; padding: 36px 28px; width: 100%; max-width: 340px; box-shadow: 0 0 60px rgba(140,0,200,0.2); text-align: center; position: relative; z-index: 1; }
-    .login-avatar { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 0 14px rgba(180,60,220,0.5)); }
+    .login-avatar { font-size: 48px; margin-bottom: 8px; }
     .login-name { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 900; letter-spacing: 3px; color: #e1bee7; text-transform: uppercase; margin-bottom: 3px; }
     .login-role { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.5); margin-bottom: 24px; }
     .login-label { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: #9575cd; text-align: left; margin-bottom: 7px; display: block; text-transform: uppercase; }
@@ -41,7 +41,7 @@
     #login-error { color: #ef9a9a; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; min-height: 16px; margin-bottom: 12px; }
     #btn-login { width: 100%; background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; border: none; border-radius: 10px; padding: 15px; font-size: 11px; font-weight: bold; font-family: 'Orbitron', monospace; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 18px rgba(156,39,176,0.3); transition: all 0.2s; margin-bottom: 12px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     #btn-login:active { transform: scale(0.98); }
-    .login-back-btn { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; padding: 8px; -webkit-tap-highlight-color: transparent; }
+    .login-back-btn { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: rgba(149,117,205,0.45); background: none; border: none; cursor: pointer; padding: 8px; }
 
     /* ── PANEL PRINCIPAL ── */
     #main-panel { display: none; position: relative; z-index: 10; min-height: 100vh; min-height: -webkit-fill-available; flex-direction: column; }
@@ -55,21 +55,17 @@
     .int-header-right { display: flex; align-items: center; gap: 6px; }
     .btn-hdr { font-family: 'Orbitron', monospace; font-size: 7px; letter-spacing: 0.5px; font-weight: bold; padding: 7px 10px; border-radius: 8px; cursor: pointer; transition: all 0.18s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
     .btn-inicio { background: rgba(0,200,255,0.07); border: 1px solid rgba(0,200,255,0.22) !important; color: #00c8ff; }
-    .btn-inicio:active { background: rgba(0,200,255,0.18); }
     .btn-sesion { background: rgba(156,39,176,0.1); border: 1px solid rgba(156,39,176,0.28) !important; color: #ce93d8; }
-    .btn-sesion:active { background: rgba(156,39,176,0.24); }
 
     /* ── TABS ── */
     .tabs-bar { display: flex; border-bottom: 1px solid rgba(156,39,176,0.2); background: rgba(10,0,25,0.7); position: sticky; top: 52px; z-index: 40; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .tab-btn { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; color: rgba(149,117,205,0.5); background: none; border: none; border-bottom: 3px solid transparent; padding: 13px 0; flex: 1; cursor: pointer; transition: all 0.18s; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    .tab-btn:active { background: rgba(156,39,176,0.06); }
     .tab-btn.activo { color: #ce93d8; border-bottom-color: #9c27b0; }
 
     /* ── BODY ── */
     .int-body { padding: 18px 14px 32px; flex: 1; width: 100%; max-width: 700px; margin: 0 auto; }
     .tab-content { display: none; }
     .tab-content.activo { display: block; }
-
     .int-section-title { font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 700; letter-spacing: 2px; color: #ce93d8; text-transform: uppercase; border-bottom: 1px solid rgba(156,39,176,0.16); padding-bottom: 8px; margin-bottom: 14px; }
 
     /* ── LISTA DE ARCHIVOS ── */
@@ -83,9 +79,7 @@
     .file-actions { display: flex; gap: 7px; flex-shrink: 0; }
     .btn-file { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.5px; padding: 8px 11px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
     .btn-ver { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
-    .btn-ver:active { background: rgba(156,39,176,0.32); }
     .btn-dl  { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; text-decoration: none; display: inline-flex; align-items: center; }
-    .btn-dl:active { background: rgba(0,200,255,0.22); }
 
     /* ── CHECKBOX DE RECORRIDO ── */
     .file-check-row { display: flex; align-items: center; gap: 9px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(156,39,176,0.1); }
@@ -96,6 +90,155 @@
     .check-text { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 1px; color: rgba(149,117,205,0.6); text-transform: uppercase; }
     .check-label.marcado .check-text { color: #ce93d8; }
     .check-date { font-family: 'Orbitron', monospace; font-size: 6.5px; letter-spacing: 0.5px; color: rgba(149,117,205,0.4); margin-left: auto; }
+
+    /* ════════════════════════════════
+       PANEL ADMIN — solo escritorio
+       ════════════════════════════════ */
+    /* Trigger: punto invisible en esquina inferior derecha */
+    #admin-trigger {
+        position: fixed;
+        bottom: 6px;
+        right: 6px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(156,39,176,0.08);
+        border: 1px solid rgba(156,39,176,0.12);
+        cursor: pointer;
+        z-index: 8000;
+        transition: background 0.2s;
+    }
+    #admin-trigger:hover { background: rgba(156,39,176,0.25); }
+    /* En móvil: hacerlo aún más pequeño y casi invisible pero operable */
+    @media (max-width: 768px) {
+        #admin-trigger { width: 8px; height: 8px; background: transparent; border-color: rgba(156,39,176,0.06); }
+    }
+
+    /* Panel admin */
+    #admin-panel {
+        display: none;
+        position: fixed;
+        bottom: 24px;
+        right: 16px;
+        width: 340px;
+        max-width: calc(100vw - 32px);
+        background: linear-gradient(160deg, rgba(8,0,20,0.99), rgba(18,0,40,0.99));
+        border: 1px solid rgba(156,39,176,0.4);
+        border-radius: 14px;
+        box-shadow: 0 0 40px rgba(100,0,180,0.3);
+        z-index: 8500;
+        overflow: hidden;
+    }
+    #admin-panel.visible { display: block; }
+    .admin-head {
+        background: rgba(156,39,176,0.12);
+        border-bottom: 1px solid rgba(156,39,176,0.2);
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .admin-head-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 7.5px;
+        letter-spacing: 2px;
+        color: rgba(149,117,205,0.7);
+        text-transform: uppercase;
+    }
+    .admin-close {
+        font-size: 12px;
+        color: rgba(149,117,205,0.5);
+        cursor: pointer;
+        background: none;
+        border: none;
+        line-height: 1;
+        padding: 2px 4px;
+    }
+    .admin-body { padding: 14px; }
+
+    /* Login admin */
+    #admin-login { }
+    #admin-pw {
+        width: 100%;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(156,39,176,0.3);
+        border-radius: 8px;
+        padding: 9px 12px;
+        color: #e1bee7;
+        font-size: 13px;
+        font-family: 'Orbitron', monospace;
+        letter-spacing: 3px;
+        outline: none;
+        text-align: center;
+        margin-bottom: 8px;
+        -webkit-appearance: none;
+    }
+    #admin-pw:focus { border-color: #9c27b0; }
+    #admin-pw-err { color: #ef9a9a; font-size: 8px; font-family: 'Orbitron', monospace; letter-spacing: 1px; min-height: 12px; margin-bottom: 6px; text-align: center; }
+    .admin-btn {
+        font-family: 'Orbitron', monospace;
+        font-size: 7.5px;
+        letter-spacing: 1px;
+        font-weight: bold;
+        padding: 9px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.18s;
+        white-space: nowrap;
+    }
+    .admin-btn-primary { background: linear-gradient(135deg,#9c27b0,#7b1fa2); color: #fff; width: 100%; }
+    .admin-btn-add { background: rgba(0,200,100,0.12); color: #69f0ae; border: 1px solid rgba(0,200,100,0.3) !important; }
+    .admin-btn-del { background: rgba(244,67,54,0.1); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.25) !important; font-size: 7px; padding: 6px 9px; }
+
+    /* Contenido admin (tras login) */
+    #admin-content { display: none; }
+    .admin-section-label {
+        font-family: 'Orbitron', monospace;
+        font-size: 7px;
+        letter-spacing: 1.5px;
+        color: rgba(149,117,205,0.55);
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+    .admin-row { display: flex; gap: 7px; margin-bottom: 8px; align-items: flex-start; flex-wrap: wrap; }
+    .admin-input {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(156,39,176,0.28);
+        border-radius: 7px;
+        padding: 8px 10px;
+        color: #e1bee7;
+        font-size: 11px;
+        outline: none;
+        width: 100%;
+        margin-bottom: 6px;
+        -webkit-appearance: none;
+        font-family: Arial, sans-serif;
+    }
+    .admin-input:focus { border-color: #9c27b0; }
+    .admin-input::placeholder { color: rgba(149,117,205,0.35); font-size: 9px; }
+    .admin-sep { border: none; border-top: 1px solid rgba(156,39,176,0.14); margin: 12px 0; }
+    .admin-file-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(156,39,176,0.06);
+        border: 1px solid rgba(156,39,176,0.12);
+        border-radius: 7px;
+        padding: 7px 10px;
+        margin-bottom: 5px;
+        gap: 8px;
+    }
+    .admin-file-name {
+        font-size: 10px;
+        color: #d1c4e9;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .admin-empty { color: rgba(149,117,205,0.35); font-size: 9px; font-family: 'Orbitron', monospace; text-align: center; padding: 8px; letter-spacing: 1px; }
 
     /* ── VISOR UNIVERSAL ── */
     #visor-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(2,0,12,0.98); flex-direction: column; }
@@ -191,28 +334,19 @@
     </div>
 
     <div class="tabs-bar">
-        <button class="tab-btn activo" onclick="cambiarTab('mapas', this)">🗺️ MAPAS PDF</button>
-        <button class="tab-btn" onclick="cambiarTab('reportes', this)">📊 REPORTES EXCEL</button>
+        <button class="tab-btn activo" id="tab-btn-mapas"   onclick="cambiarTab('mapas',this)">🗺️ MAPAS PDF</button>
+        <button class="tab-btn"        id="tab-btn-reportes" onclick="cambiarTab('reportes',this)">📊 REPORTES EXCEL</button>
     </div>
 
     <div class="int-body">
-
-        <!-- TAB MAPAS -->
         <div id="tab-mapas" class="tab-content activo">
             <div class="int-section-title">🗺️ Mapas Disponibles</div>
-            <div class="file-list" id="lista-pdf">
-                <p class="empty-msg">No hay mapas disponibles aún.</p>
-            </div>
+            <div class="file-list" id="lista-pdf"></div>
         </div>
-
-        <!-- TAB REPORTES -->
         <div id="tab-reportes" class="tab-content">
             <div class="int-section-title">📊 Reportes Disponibles</div>
-            <div class="file-list" id="lista-xls">
-                <p class="empty-msg">No hay reportes disponibles aún.</p>
-            </div>
+            <div class="file-list" id="lista-xls"></div>
         </div>
-
     </div>
 </div>
 
@@ -232,6 +366,61 @@
     <div id="xls-viewer"></div>
 </div>
 
+<!-- ── TRIGGER ADMIN (punto casi invisible) ── -->
+<div id="admin-trigger" title="" onclick="abrirAdminPanel()"></div>
+
+<!-- ── PANEL ADMIN ── -->
+<div id="admin-panel">
+    <div class="admin-head">
+        <span class="admin-head-title">⚙ Solo administrador</span>
+        <button class="admin-close" onclick="cerrarAdminPanel()">✕</button>
+    </div>
+    <div class="admin-body">
+
+        <!-- Login admin -->
+        <div id="admin-login">
+            <div class="admin-section-label">Clave de administrador</div>
+            <input type="password" id="admin-pw" placeholder="••••••" autocomplete="off"
+                   onkeydown="if(event.key==='Enter') adminLogin()" />
+            <div id="admin-pw-err"></div>
+            <button class="admin-btn admin-btn-primary" onclick="adminLogin()">ENTRAR</button>
+        </div>
+
+        <!-- Contenido admin (post-login) -->
+        <div id="admin-content">
+
+            <!-- Selector de perfil y tipo -->
+            <div class="admin-section-label">Perfil activo: <span id="adm-perfil-label">—</span></div>
+            <div class="admin-row">
+                <select id="adm-perfil" class="admin-input" style="margin:0;flex:1" onchange="adminRefrescarLista()">
+                    <option value="SAHAD">SAHAD</option>
+                    <option value="MIA">MIA</option>
+                </select>
+                <select id="adm-tipo" class="admin-input" style="margin:0;flex:1" onchange="adminRefrescarLista()">
+                    <option value="pdf">Mapas PDF</option>
+                    <option value="xls">Reportes Excel</option>
+                </select>
+            </div>
+
+            <hr class="admin-sep">
+
+            <!-- Agregar archivo -->
+            <div class="admin-section-label">Agregar archivo</div>
+            <input class="admin-input" id="adm-nombre" type="text" placeholder="Nombre visible (ej: Mapa Sector Norte.pdf)" />
+            <input class="admin-input" id="adm-desc"   type="text" placeholder="Descripción breve (opcional)" />
+            <input class="admin-input" id="adm-url"    type="url"  placeholder="URL completa (https://...)" />
+            <button class="admin-btn admin-btn-add" onclick="adminAgregar()" style="width:100%;margin-bottom:4px">＋ AGREGAR</button>
+
+            <hr class="admin-sep">
+
+            <!-- Lista actual con botón eliminar -->
+            <div class="admin-section-label">Archivos actuales</div>
+            <div id="adm-lista"></div>
+
+        </div>
+    </div>
+</div>
+
 <script>
 /* ── FONDO ── */
 (function(){
@@ -249,46 +438,46 @@
 })();
 
 /* ════════════════════════════════════════════
-   CATÁLOGO DE ARCHIVOS POR PERFIL
-   Cada entrada: { id, nombre, desc, url }
-   • id:     clave única para el localStorage (no cambiar una vez creado)
-   • nombre: nombre a mostrar
-   • desc:   descripción breve (puede ser null)
-   • url:    URL completa del archivo en GitHub Pages
+   CATÁLOGO — se combina con localStorage
+   Estructura base (puede estar vacía; el admin
+   agrega entradas que se guardan en localStorage)
    ════════════════════════════════════════════ */
-var _CATALOGO = {
-    'SAHAD': {
-        pdfs: [
-            { id:'sahad-pdf-1', nombre:'LA GRANJA 2 SAHAD.pdf', desc:'Mapa sector La Granja 2', url:'https://greencore1997-collab.github.io/Mapa-Arauca/LA%20GRANJA%202%20SAHAD.pdf' }
-        ],
-        excels: [
-            /* Ejemplo:
-            { id:'sahad-xls-1', nombre:'Reporte Agosto 2026.xlsx', desc:'Seguimiento obras agosto', url:'https://greencore1997-collab.github.io/Mapa-Arauca/archivos/sahad/reporte-ago-2026.xlsx' }
-            */
-        ]
-    },
-    'MIA': {
-        pdfs: [],
-        excels: []
-    }
+var _CATALOGO_BASE = {
+    'SAHAD': { pdfs: [], excels: [] },
+    'MIA':   { pdfs: [], excels: [] }
 };
+
+var _LS_CAT = 'int_catalogo_v1';
+
+function _getCatalogo() {
+    try {
+        var raw = localStorage.getItem(_LS_CAT);
+        if (raw) return JSON.parse(raw);
+    } catch(e){}
+    return JSON.parse(JSON.stringify(_CATALOGO_BASE));
+}
+function _saveCatalogo(cat) {
+    try { localStorage.setItem(_LS_CAT, JSON.stringify(cat)); } catch(e){}
+}
 
 /* ── AUTH ── */
 var _PERFILES = {
-    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'    },
-    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️'  }
+    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'   },
+    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️' }
 };
-var _perfil = null;
+var _ADMIN_PASS = 'ADMIN-ARG2026';
+var _perfil     = null;
 var _visorActual = null;
+var _tabActual   = 'pdf';
 
 /* ── SELECTOR ── */
 function seleccionarInterventor(nombre) {
     _perfil = nombre;
     var p = _PERFILES[nombre];
-    document.getElementById('login-avatar').textContent  = p.avatar;
-    document.getElementById('login-nombre').textContent  = nombre;
-    document.getElementById('login-password').value      = '';
-    document.getElementById('login-error').textContent   = '';
+    document.getElementById('login-avatar').textContent = p.avatar;
+    document.getElementById('login-nombre').textContent = nombre;
+    document.getElementById('login-password').value     = '';
+    document.getElementById('login-error').textContent  = '';
     document.getElementById('screen-selector').classList.add('oculto');
     document.getElementById('screen-login').classList.remove('oculto');
     setTimeout(function(){ document.getElementById('login-password').focus(); }, 120);
@@ -305,10 +494,10 @@ function validarLogin() {
     var err = document.getElementById('login-error');
     if (pw === _PERFILES[_perfil].pass) {
         document.getElementById('screen-login').classList.add('oculto');
-        document.getElementById('panel-avatar').textContent  = _PERFILES[_perfil].avatar;
-        document.getElementById('panel-nombre').textContent  = _perfil;
+        document.getElementById('panel-avatar').textContent = _PERFILES[_perfil].avatar;
+        document.getElementById('panel-nombre').textContent = _perfil;
         document.getElementById('main-panel').classList.add('visible');
-        cambiarTab('mapas', document.querySelector('.tab-btn'));
+        cambiarTab('mapas', document.getElementById('tab-btn-mapas'));
         renderArchivos('pdf');
         renderArchivos('xls');
     } else {
@@ -322,31 +511,32 @@ function cerrarSesion() {
     document.getElementById('main-panel').classList.remove('visible');
     document.getElementById('screen-login').classList.add('oculto');
     document.getElementById('screen-selector').classList.remove('oculto');
+    cerrarAdminPanel();
     _perfil = null;
 }
 
 /* ── TABS ── */
 function cambiarTab(nombre, btn) {
+    _tabActual = nombre === 'mapas' ? 'pdf' : 'xls';
     document.querySelectorAll('.tab-content').forEach(function(el){ el.classList.remove('activo'); });
     document.querySelectorAll('.tab-btn').forEach(function(el){ el.classList.remove('activo'); });
     document.getElementById('tab-' + nombre).classList.add('activo');
     if (btn) btn.classList.add('activo');
+    // Sincronizar selector del panel admin
+    var admTipo = document.getElementById('adm-tipo');
+    if (admTipo) admTipo.value = _tabActual;
+    adminRefrescarLista();
 }
 
 /* ── LOCALSTORAGE CHECKS ── */
-function _lsKey(perfil, fileId) {
-    return 'int_check_' + perfil + '_' + fileId;
-}
+function _lsKey(perfil, fileId) { return 'int_check_' + perfil + '_' + fileId; }
 function _getCheck(perfil, fileId) {
     try { return JSON.parse(localStorage.getItem(_lsKey(perfil, fileId)) || 'null'); } catch(e) { return null; }
 }
 function _setCheck(perfil, fileId, value) {
     try {
-        if (value) {
-            localStorage.setItem(_lsKey(perfil, fileId), JSON.stringify({ marcado: true, fecha: _fmtFecha() }));
-        } else {
-            localStorage.removeItem(_lsKey(perfil, fileId));
-        }
+        if (value) localStorage.setItem(_lsKey(perfil, fileId), JSON.stringify({ marcado: true, fecha: _fmtFecha() }));
+        else        localStorage.removeItem(_lsKey(perfil, fileId));
     } catch(e) {}
 }
 function _fmtFecha() {
@@ -359,20 +549,17 @@ function toggleCheck(fileId) {
     var estado = _getCheck(_perfil, fileId);
     var nuevo  = !estado;
     _setCheck(_perfil, fileId, nuevo);
-    // Actualizar UI
     var box  = document.getElementById('chk-box-'  + fileId);
     var lbl  = document.getElementById('chk-lbl-'  + fileId);
     var date = document.getElementById('chk-date-' + fileId);
     if (!box) return;
     if (nuevo) {
-        box.classList.add('marcado');
-        lbl.classList.add('marcado');
+        box.classList.add('marcado'); lbl.classList.add('marcado');
         var info = _getCheck(_perfil, fileId);
         if (date && info) date.textContent = info.fecha;
         mostrarToast('✅ Mapa marcado como recorrido');
     } else {
-        box.classList.remove('marcado');
-        lbl.classList.remove('marcado');
+        box.classList.remove('marcado'); lbl.classList.remove('marcado');
         if (date) date.textContent = '';
         mostrarToast('Mapa desmarcado');
     }
@@ -380,7 +567,9 @@ function toggleCheck(fileId) {
 
 /* ── RENDER LISTAS ── */
 function renderArchivos(tipo) {
-    var arr  = tipo==='pdf' ? _CATALOGO[_perfil].pdfs : _CATALOGO[_perfil].excels;
+    if (!_perfil) return;
+    var cat  = _getCatalogo();
+    var arr  = tipo==='pdf' ? cat[_perfil].pdfs : cat[_perfil].excels;
     var elId = tipo==='pdf' ? 'lista-pdf' : 'lista-xls';
     var el   = document.getElementById(elId);
     if (!el) return;
@@ -392,14 +581,15 @@ function renderArchivos(tipo) {
         var icon    = tipo==='pdf' ? '📄' : '📊';
         var estado  = tipo==='pdf' ? _getCheck(_perfil, f.id) : null;
         var marcado = estado && estado.marcado;
+        var safeId  = f.id.replace(/[^a-zA-Z0-9\-_]/g,'_');
 
         var checkHtml = tipo==='pdf' ? (
             '<div class="file-check-row">' +
-            '<label class="check-label' + (marcado?' marcado':'') + '" id="chk-lbl-' + _esc(f.id) + '" onclick="toggleCheck(\'' + _esc(f.id) + '\')">' +
-            '<div class="check-box' + (marcado?' marcado':'') + '" id="chk-box-' + _esc(f.id) + '"></div>' +
+            '<label class="check-label' + (marcado?' marcado':'') + '" id="chk-lbl-' + safeId + '" onclick="toggleCheck(\'' + _esc(f.id) + '\')">' +
+            '<div class="check-box' + (marcado?' marcado':'') + '" id="chk-box-' + safeId + '"></div>' +
             '<span class="check-text">Mapa recorrido</span>' +
             '</label>' +
-            '<span class="check-date" id="chk-date-' + _esc(f.id) + '">' + (marcado && estado.fecha ? estado.fecha : '') + '</span>' +
+            '<span class="check-date" id="chk-date-' + safeId + '">' + (marcado && estado.fecha ? _esc(estado.fecha) : '') + '</span>' +
             '</div>'
         ) : '';
 
@@ -414,9 +604,7 @@ function renderArchivos(tipo) {
                 '<button class="btn-file btn-ver" onclick="abrirVisor(' + i + ',\'' + tipo + '\')">👁 VER</button>' +
                 '<a class="btn-file btn-dl" href="' + _esc(f.url) + '" download="' + _esc(f.nombre) + '" target="_blank">⬇</a>' +
             '</div>' +
-            '</div>' +
-            checkHtml +
-            '</div>';
+            '</div>' + checkHtml + '</div>';
     }).join('');
 }
 
@@ -434,13 +622,127 @@ function mostrarToast(msg) {
     _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
 }
 
+/* ════════════════════════════════
+   PANEL ADMIN
+   ════════════════════════════════ */
+var _adminAutenticado = false;
+
+function abrirAdminPanel() {
+    var p = document.getElementById('admin-panel');
+    p.classList.add('visible');
+    if (!_adminAutenticado) {
+        document.getElementById('admin-pw').value = '';
+        document.getElementById('admin-pw-err').textContent = '';
+        setTimeout(function(){ document.getElementById('admin-pw').focus(); }, 80);
+    }
+    // Sincronizar perfil y tipo con lo que está activo
+    if (_perfil) {
+        document.getElementById('adm-perfil').value = _perfil;
+        document.getElementById('adm-perfil-label').textContent = _perfil;
+    }
+    document.getElementById('adm-tipo').value = _tabActual || 'pdf';
+    adminRefrescarLista();
+}
+
+function cerrarAdminPanel() {
+    document.getElementById('admin-panel').classList.remove('visible');
+}
+
+function adminLogin() {
+    var pw = document.getElementById('admin-pw').value;
+    if (pw === _ADMIN_PASS) {
+        _adminAutenticado = true;
+        document.getElementById('admin-login').style.display   = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        if (_perfil) {
+            document.getElementById('adm-perfil').value = _perfil;
+            document.getElementById('adm-perfil-label').textContent = _perfil;
+        }
+        document.getElementById('adm-tipo').value = _tabActual || 'pdf';
+        adminRefrescarLista();
+    } else {
+        document.getElementById('admin-pw-err').textContent = '⚠ Clave incorrecta';
+        document.getElementById('admin-pw').value = '';
+        setTimeout(function(){ document.getElementById('admin-pw-err').textContent=''; }, 2000);
+    }
+}
+
+function adminRefrescarLista() {
+    var lista = document.getElementById('adm-lista');
+    if (!lista || !_adminAutenticado) return;
+    var perfil = document.getElementById('adm-perfil').value;
+    var tipo   = document.getElementById('adm-tipo').value;
+    var cat    = _getCatalogo();
+    var arr    = tipo === 'pdf' ? cat[perfil].pdfs : cat[perfil].excels;
+    if (!arr || !arr.length) {
+        lista.innerHTML = '<div class="admin-empty">Sin archivos aún</div>';
+        return;
+    }
+    lista.innerHTML = arr.map(function(f, i) {
+        return '<div class="admin-file-row">' +
+            '<span class="admin-file-name" title="' + _esc(f.url) + '">' + _esc(f.nombre) + '</span>' +
+            '<button class="admin-btn admin-btn-del" onclick="adminEliminar(' + i + ')">🗑 Eliminar</button>' +
+            '</div>';
+    }).join('');
+}
+
+function adminAgregar() {
+    var nombre = document.getElementById('adm-nombre').value.trim();
+    var desc   = document.getElementById('adm-desc').value.trim();
+    var url    = document.getElementById('adm-url').value.trim();
+    var perfil = document.getElementById('adm-perfil').value;
+    var tipo   = document.getElementById('adm-tipo').value;
+
+    if (!nombre || !url) { mostrarToast('⚠ Nombre y URL son obligatorios'); return; }
+    if (!url.startsWith('http')) { mostrarToast('⚠ La URL debe empezar con http'); return; }
+
+    var cat = _getCatalogo();
+    var id  = 'adm-' + perfil.toLowerCase() + '-' + tipo + '-' + Date.now();
+    var entry = { id: id, nombre: nombre, desc: desc || null, url: url };
+
+    if (tipo === 'pdf') cat[perfil].pdfs.push(entry);
+    else                cat[perfil].excels.push(entry);
+
+    _saveCatalogo(cat);
+
+    // Limpiar campos
+    document.getElementById('adm-nombre').value = '';
+    document.getElementById('adm-desc').value   = '';
+    document.getElementById('adm-url').value    = '';
+
+    adminRefrescarLista();
+    // Refrescar lista del usuario si corresponde
+    if (_perfil === perfil) {
+        renderArchivos(tipo);
+    }
+    mostrarToast('✅ Archivo agregado a ' + perfil);
+}
+
+function adminEliminar(idx) {
+    var perfil = document.getElementById('adm-perfil').value;
+    var tipo   = document.getElementById('adm-tipo').value;
+    var cat    = _getCatalogo();
+    var arr    = tipo === 'pdf' ? cat[perfil].pdfs : cat[perfil].excels;
+
+    var nombre = arr[idx] ? arr[idx].nombre : '';
+    arr.splice(idx, 1);
+
+    if (tipo === 'pdf') cat[perfil].pdfs   = arr;
+    else                cat[perfil].excels = arr;
+
+    _saveCatalogo(cat);
+    adminRefrescarLista();
+    if (_perfil === perfil) renderArchivos(tipo);
+    mostrarToast('🗑 Eliminado: ' + nombre);
+}
+
 /* ── VISOR ── */
 function abrirVisor(i, tipo) {
-    var f = tipo==='pdf' ? _CATALOGO[_perfil].pdfs[i] : _CATALOGO[_perfil].excels[i];
+    var cat = _getCatalogo();
+    var f   = tipo==='pdf' ? cat[_perfil].pdfs[i] : cat[_perfil].excels[i];
     if (!f) return;
     _visorActual = { f: f, tipo: tipo };
 
-    var overlay = document.getElementById('visor-overlay');
     var frame   = document.getElementById('pdf-frame');
     var xlsDiv  = document.getElementById('xls-viewer');
     var xlsLoad = document.getElementById('xls-loading');
@@ -456,7 +758,7 @@ function abrirVisor(i, tipo) {
     xlsDiv.innerHTML      = '';
     frame.src             = 'about:blank';
 
-    overlay.classList.add('visible');
+    document.getElementById('visor-overlay').classList.add('visible');
 
     if (tipo === 'pdf') {
         frame.style.display = 'block';
@@ -519,11 +821,12 @@ function cerrarVisor() {
 function visorDescargar() {
     if (!_visorActual) return;
     var a = document.createElement('a');
-    a.href     = _visorActual.f.url;
-    a.download = _visorActual.f.nombre;
-    a.target   = '_blank';
+    a.href = _visorActual.f.url; a.download = _visorActual.f.nombre; a.target = '_blank';
     a.click();
 }
+
+// Inicializar listas vacías al cargar
+renderArchivos('pdf'); renderArchivos('xls');
 </script>
 </body>
 </html>
