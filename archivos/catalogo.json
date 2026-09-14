@@ -13,6 +13,14 @@
   },
   "MIA": {
     "pdf": [],
-    "xls": []
+    "xls": [
+      {
+        "id": "gh-mia-xls-1789382782984",
+        "nombre": "REPORTE INTERVENTORIA 14-09-2026.xlsx",
+        "desc": null,
+        "url": "https://greencore1997-collab.github.io/Mapa-Arauca/archivos/MIA/reporte-interventoria-14-09-2026.xlsx",
+        "ghPath": "archivos/MIA/reporte-interventoria-14-09-2026.xlsx"
+      }
+    ]
   }
 }
