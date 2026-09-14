@@ -570,9 +570,29 @@ var _tt=null;
 function mostrarToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2400);}
 
 var _bannerTimer=null;
+function _ultimaFechaExcel(){
+    // Busca el uploadedAt más reciente entre todos los Excel de todos los perfiles
+    var last=null;
+    Object.keys(_CAT).forEach(function(p){
+        var arr=(_CAT[p]&&_CAT[p].xls)||[];
+        arr.forEach(function(f){
+            if(f.uploadedAt && (!last||f.uploadedAt>last)) last=f.uploadedAt;
+        });
+    });
+    if(!last) return null;
+    var d=new Date(last);
+    var dd=String(d.getDate()).padStart(2,'0');
+    var mm=String(d.getMonth()+1).padStart(2,'0');
+    var yyyy=d.getFullYear();
+    var hh=d.getHours();
+    var min=String(d.getMinutes()).padStart(2,'0');
+    var ampm=hh>=12?'p.m.':'a.m.';
+    var h12=hh%12||12;
+    return dd+'/'+mm+'/'+yyyy+' a las '+h12+':'+min+' '+ampm;
+}
 function mostrarBannerSync(){
-    var fechaCarga='11/09/2026 a las 6:00 p.m.';
-    var body='EL REPORTE EXCEL HA SIDO ACTUALIZADO A LAS '+fechaCarga+'.\nRECUERDA MANTENER SINCRONIZADA LA INFORMACIÓN EN LA APP DE EPICOLLECT5.';
+    var fechaCarga=_ultimaFechaExcel()||'fecha no disponible';
+    var body='EL REPORTE EXCEL HA SIDO ACTUALIZADO EL '+fechaCarga+'.\nRECUERDA MANTENER SINCRONIZADA LA INFORMACIÓN EN LA APP DE EPICOLLECT5.';
     var el=document.getElementById('banner-sync');
     var bd=document.getElementById('banner-sync-body');
     bd.textContent=body;
@@ -683,7 +703,8 @@ async function adminAgregar(){
         // Actualizar catálogo
         if(!_CAT[perfil]) _CAT[perfil]={pdf:[],xls:[]};
         var id='gh-'+perfil.toLowerCase()+'-'+tipo+'-'+Date.now();
-        _CAT[perfil][tipo].push({id:id, nombre:nombre, desc:desc||null, url:ghUrl, ghPath:ghPath});
+        var uploadedAt = tipo==='xls' ? new Date().toISOString() : null;
+        _CAT[perfil][tipo].push({id:id, nombre:nombre, desc:desc||null, url:ghUrl, ghPath:ghPath, uploadedAt:uploadedAt});
         await _guardarCatalogo();
 
         // Limpiar UI
