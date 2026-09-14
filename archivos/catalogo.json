@@ -22,7 +22,16 @@
     ]
   },
   "MIA": {
-    "pdf": [],
+    "pdf": [
+      {
+        "id": "gh-mia-pdf-1789407249206",
+        "nombre": "SANTA TERESITA MIA.pdf",
+        "desc": null,
+        "url": "https://greencore1997-collab.github.io/Mapa-Arauca/archivos/MIA/santa-teresita-mia.pdf",
+        "ghPath": "archivos/MIA/santa-teresita-mia.pdf",
+        "uploadedAt": null
+      }
+    ],
     "xls": [
       {
         "id": "gh-mia-xls-1789382782984",
