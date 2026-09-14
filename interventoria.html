@@ -184,6 +184,11 @@
     /* TOAST */
     #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(30,0,60,0.97); border: 1px solid rgba(156,39,176,0.4); border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px; color: #ce93d8; z-index: 99999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; max-width: 90vw; text-align: center; }
     #toast.show { opacity: 1; }
+    #banner-sync { position: fixed; top: 28px; left: 50%; transform: translateX(-50%) translateY(-120px); background: linear-gradient(135deg,rgba(10,30,60,0.97),rgba(0,50,80,0.97)); border: 1.5px solid #00e5ff; border-radius: 14px; padding: 16px 28px; font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 1.2px; color: #e0f7fa; z-index: 99998; opacity: 0; transition: opacity 0.5s, transform 0.5s; pointer-events: none; max-width: 88vw; text-align: center; box-shadow: 0 0 28px rgba(0,229,255,0.3); }
+    #banner-sync.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #banner-sync .bs-icon { font-size: 18px; display: block; margin-bottom: 6px; }
+    #banner-sync .bs-title { color: #00e5ff; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+    #banner-sync .bs-body { color: #b2ebf2; font-size: 9px; line-height: 1.6; display: block; }
 
     @media (max-width: 380px) {
         .sel-card { padding: 22px 18px; } .sel-card-avatar { font-size: 36px; }
@@ -195,6 +200,11 @@
 <body>
 <canvas id="bg-canvas"></canvas>
 <div id="toast"></div>
+<div id="banner-sync">
+  <span class="bs-icon">📊</span>
+  <span class="bs-title">ACTUALIZACIÓN DE REPORTE</span>
+  <span class="bs-body" id="banner-sync-body"></span>
+</div>
 
 <!-- SELECTOR -->
 <div id="screen-selector" class="screen">
@@ -378,8 +388,10 @@ var _CAT = { SAHAD:{pdf:[],xls:[]}, MIA:{pdf:[],xls:[]} };
 var _catLoaded = false;
 
 async function _ghGet(path) {
+    var hdrs = { Accept:'application/vnd.github.v3+json' };
+    if (_GH.token) hdrs.Authorization = 'token '+_GH.token;
     var r = await fetch('https://api.github.com/repos/'+_GH.owner+'/'+_GH.repo+'/contents/'+path+'?ref='+_GH.branch, {
-        headers: { Authorization:'token '+_GH.token, Accept:'application/vnd.github.v3+json' }
+        headers: hdrs
     });
     if (!r.ok) return null;
     return r.json();
@@ -471,6 +483,7 @@ function validarLogin() {
         cambiarTab('mapas',document.getElementById('tab-btn-mapas'));
         if (!_catLoaded) _cargarCatalogo();
         else { renderArchivos('pdf'); renderArchivos('xls'); }
+        setTimeout(mostrarBannerSync, 5000);
     } else {
         err.textContent='⚠ Contraseña incorrecta';
         document.getElementById('login-password').value='';
@@ -556,12 +569,33 @@ function _esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 var _tt=null;
 function mostrarToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2400);}
 
+var _bannerTimer=null;
+function mostrarBannerSync(){
+    var fechaCarga='11/09/2026 a las 6:00 p.m.';
+    var body='EL REPORTE EXCEL HA SIDO ACTUALIZADO A LAS '+fechaCarga+'.\nRECUERDA MANTENER SINCRONIZADA LA INFORMACIÓN EN LA APP DE EPICOLLECT5.';
+    var el=document.getElementById('banner-sync');
+    var bd=document.getElementById('banner-sync-body');
+    bd.textContent=body;
+    el.classList.add('show');
+    clearTimeout(_bannerTimer);
+    _bannerTimer=setTimeout(function(){ el.classList.remove('show'); },10000);
+}
+
 /* ══════════════════════════════════
    PANEL ADMIN
    ══════════════════════════════════ */
 function abrirAdminPanel(){
     document.getElementById('admin-panel').classList.add('visible');
-    if(!_adminAuth){document.getElementById('admin-pw').value='';document.getElementById('admin-pw-err').textContent='';setTimeout(function(){document.getElementById('admin-pw').focus();},80);}
+    if(!_adminAuth){
+        document.getElementById('admin-pw').value='';
+        document.getElementById('admin-pw-err').textContent='';
+        // Pre-llenar token guardado si existe
+        try {
+            var savedTk = localStorage.getItem('_int_adm_tk');
+            if(savedTk) document.getElementById('admin-token').value=savedTk;
+        } catch(e) {}
+        setTimeout(function(){document.getElementById('admin-pw').focus();},80);
+    }
     if(_perfil) document.getElementById('adm-perfil').value=_perfil;
     document.getElementById('adm-tipo').value=_tabActual||'pdf';
     adminRefrescarLista();
@@ -579,6 +613,7 @@ function adminLogin(){
             return;
         }
         _GH.token=tk;
+        try { localStorage.setItem('_int_adm_tk', tk); } catch(e) {}
         _adminAuth=true;
         document.getElementById('admin-login').style.display='none';
         document.getElementById('admin-content').style.display='block';
