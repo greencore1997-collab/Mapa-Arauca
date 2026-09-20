@@ -595,30 +595,9 @@
         #panel-atributo .attr-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
         #panel-atributo .attr-title { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
 
-        /* ── Pestaña restricciones ── */
-        #btn-restricciones-desktop {
-            display:block;
-            position:absolute; top:245px; right:10px; z-index:403;
-            background:rgba(0,12,35,0.78); color:#00c8ff;
-            border:1px solid rgba(0,200,255,0.5); border-radius:8px;
-            padding:7px 14px; font-size:10px; font-weight:bold;
-            cursor:pointer; width:185px; text-align:left;
-            font-family:'Orbitron', monospace; letter-spacing:1.5px;
-            box-shadow:0 0 10px rgba(0,180,255,0.15);
-            transition:background 0.2s; white-space:nowrap; box-sizing:border-box;
-        }
-        #btn-restricciones-desktop:hover { background:rgba(0,30,70,0.9); }
-        #btn-restricciones-desktop.abierto { border-radius:8px 8px 0 0; border-bottom-color:transparent; }
-        #panel-restricciones {
-            position:absolute; top:283px; right:10px; z-index:402;
-            background:white; border-radius:0 0 8px 8px;
-            box-shadow:0 6px 15px rgba(0,0,0,0.25);
-            max-height:0; overflow:hidden; width:185px;
-            transition:max-height 0.35s ease, padding 0.35s ease;
-            padding:0 12px; box-sizing:border-box;
-        }
-        #panel-restricciones.panel-open { max-height:320px; padding:8px 12px; overflow-y:auto; }
-        #panel-restricciones .restr-titulo { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:6px; text-transform:uppercase; }
+        /* ── Pestaña restricciones (eliminada) ── */
+        #btn-restricciones-desktop { display:none !important; }
+        #panel-restricciones { display:none !important; }
         .restr-campos { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
         .restr-campo { background:#e8f4ff; color:#1565c0; border:1px solid rgba(21,101,192,0.3); border-radius:12px; padding:3px 8px; font-size:9px; font-family:'Orbitron',monospace; letter-spacing:0.5px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
         .restr-campo:hover { background:#d0e8ff; }
@@ -2141,7 +2120,7 @@
     var _pblVisiblePreTab = false;
 
     function ocultarOtrosTabs(idActivo) {
-        ['btn-barrios-desktop','btn-atributo-desktop','btn-restricciones-desktop'].forEach(function(id) {
+        ['btn-barrios-desktop','btn-atributo-desktop'].forEach(function(id) {
             if (id !== idActivo) {
                 var el = document.getElementById(id);
                 if (el) el.style.display = 'none';
@@ -2157,7 +2136,7 @@
     }
 
     function mostrarTodosTabs() {
-        ['btn-barrios-desktop','btn-atributo-desktop','btn-restricciones-desktop'].forEach(function(id) {
+        ['btn-barrios-desktop','btn-atributo-desktop'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'block';
         });
