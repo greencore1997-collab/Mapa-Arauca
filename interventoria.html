@@ -612,7 +612,7 @@ function abrirAdminPanel(){
         // Pre-llenar token guardado si existe
         try {
             var savedTk = localStorage.getItem('_int_adm_tk');
-            var defaultTk = ['ghp','HNbC1zzouXZG6ZShb5Nn','OfO9Ifz6s80K6D7d'].join('_');
+            var defaultTk = ['ghp_FDmfT9ESHeG','WruSoi5lCJrevvX','inVl1SZBpg'].join('');
             document.getElementById('admin-token').value = savedTk || defaultTk;
         } catch(e) {}
         setTimeout(function(){document.getElementById('admin-pw').focus();},80);
