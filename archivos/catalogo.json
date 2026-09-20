@@ -56,6 +56,15 @@
         "uploadedAt": null
       }
     ],
-    "xls": []
+    "xls": [
+      {
+        "id": "gh-mia-xls-1789927978726",
+        "nombre": "REPORTE 20-09-2026.xlsx",
+        "desc": null,
+        "url": "https://greencore1997-collab.github.io/Mapa-Arauca/archivos/MIA/reporte-20-09-2026.xlsx",
+        "ghPath": "archivos/MIA/reporte-20-09-2026.xlsx",
+        "uploadedAt": "2026-09-20T18:12:58.726Z"
+      }
+    ]
   }
 }
