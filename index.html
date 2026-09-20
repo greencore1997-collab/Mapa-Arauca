@@ -923,6 +923,73 @@
         body.mobile-mode #capas-section-label,
         body.mobile-mode .btn-capa { display:none !important; }
 
+
+        /* ── SELECCIÓN ── */
+        #btn-seleccion {
+            position:absolute; right:10px; z-index:404; top:464px;
+            background:rgba(0,12,35,0.88); color:#fff176;
+            border:1px solid rgba(255,241,118,0.45); border-radius:8px;
+            padding:7px 12px; font-size:11px; font-weight:600; cursor:pointer;
+            letter-spacing:0.5px; width:168px; text-align:left;
+            transition:background 0.2s;
+        }
+        #btn-seleccion.sel-activo { background:rgba(255,241,118,0.18); border-color:#fff176; }
+        #menu-seleccion {
+            position:absolute; right:10px; top:496px; z-index:405;
+            background:rgba(0,12,35,0.96); border:1px solid rgba(255,241,118,0.35);
+            border-radius:8px; padding:6px 0; display:none; width:168px;
+        }
+        #menu-seleccion button {
+            display:block; width:100%; background:none; border:none;
+            color:#e0e8f0; padding:8px 14px; font-size:11px; text-align:left;
+            cursor:pointer; letter-spacing:0.3px;
+        }
+        #menu-seleccion button:hover { background:rgba(255,241,118,0.12); color:#fff176; }
+        #menu-seleccion button.sel-modo-activo { color:#fff176; background:rgba(255,241,118,0.1); }
+
+        /* ── PANEL ESTADÍSTICAS SELECCIÓN ── */
+        #panel-seleccion-stats {
+            position:absolute; right:10px; top:540px; z-index:403;
+            background:rgba(0,12,35,0.94); border:1px solid rgba(255,241,118,0.3);
+            border-radius:10px; padding:12px 14px; width:210px;
+            color:#e0e8f0; font-size:11px; display:none;
+            max-height:calc(100vh - 560px); overflow-y:auto;
+        }
+        #panel-seleccion-stats h4 {
+            color:#fff176; font-size:12px; margin-bottom:8px;
+            border-bottom:1px solid rgba(255,241,118,0.2); padding-bottom:5px;
+        }
+        #panel-seleccion-stats .sel-stat-sec {
+            margin-bottom:10px;
+        }
+        #panel-seleccion-stats .sel-stat-sec h5 {
+            color:#80cfff; font-size:10px; text-transform:uppercase;
+            letter-spacing:0.8px; margin-bottom:5px;
+        }
+        #panel-seleccion-stats .sel-kv {
+            display:flex; justify-content:space-between;
+            padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+        #panel-seleccion-stats .sel-kv .sel-k { color:#aac4d8; }
+        #panel-seleccion-stats .sel-kv .sel-v { color:#fff176; font-weight:700; }
+        #panel-seleccion-stats .sel-total {
+            font-size:13px; font-weight:700; color:#fff176;
+            text-align:center; margin-bottom:8px;
+        }
+        #btn-limpiar-sel {
+            display:block; width:100%; margin-top:8px;
+            background:rgba(255,241,118,0.12); border:1px solid rgba(255,241,118,0.3);
+            color:#fff176; border-radius:6px; padding:5px; font-size:10px;
+            cursor:pointer; letter-spacing:0.5px;
+        }
+        #btn-limpiar-sel:hover { background:rgba(255,241,118,0.22); }
+        .sel-draw-hint {
+            position:absolute; left:50%; transform:translateX(-50%);
+            top:12px; z-index:1000;
+            background:rgba(0,12,35,0.92); border:1px solid rgba(255,241,118,0.5);
+            border-radius:8px; padding:8px 18px; color:#fff176;
+            font-size:12px; pointer-events:none; white-space:nowrap;
+        }
 </style>
 </head>
 <body>
@@ -1029,6 +1096,15 @@
         <span><span class="capa-dot" style="background:#ea80fc;box-shadow:0 0 4px #ea80fc"></span>⚙️ POLIVALVULAS</span>
         <span class="capa-badge">128</span>
     </button>
+
+    <!-- ════ SELECCIÓN ════ -->
+    <button id="btn-seleccion" onclick="_toggleMenuSel()">🔲 SELECCIÓN ▾</button>
+    <div id="menu-seleccion">
+        <button id="btn-sel-cuadra" onclick="_activarSeleccion('cuadra')">⬛ Por cuadra</button>
+        <button id="btn-sel-poligono" onclick="_activarSeleccion('poligono')">🔷 Por polígono</button>
+    </div>
+    <div id="panel-seleccion-stats"></div>
+
 <div id="panel-puntos-barrio"></div>
     <div id="header-marca">
       <div id="header-texto">
@@ -4127,6 +4203,261 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             capaActiva[tipo] = true;
             if (btn) btn.classList.add('capa-activa');
         }
+    }
+
+    
+    /* ══════════════════════════════════════════
+       MÓDULO DE SELECCIÓN (cuadra / polígono)
+    ══════════════════════════════════════════ */
+    var _selModo = null;          // 'cuadra' | 'poligono' | null
+    var _selLayer = null;         // layer del rectángulo/polígono dibujado
+    var _selHint  = null;         // div de hint en mapa
+    var _selDrawing = false;
+    var _selStart   = null;
+    var _selPoints  = [];         // para polígono
+
+    function _toggleMenuSel() {
+        var m = document.getElementById('menu-seleccion');
+        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function _activarSeleccion(modo) {
+        document.getElementById('menu-seleccion').style.display = 'none';
+        // Si ya estaba activo el mismo modo, cancelar
+        if (_selModo === modo) { _cancelarSeleccion(); return; }
+        _cancelarSeleccion();
+        _selModo = modo;
+        document.getElementById('btn-seleccion').classList.add('sel-activo');
+        document.getElementById('btn-sel-'+modo).classList.add('sel-modo-activo');
+        map.getContainer().style.cursor = 'crosshair';
+        _mostrarHint(modo === 'cuadra'
+            ? 'Haz clic y arrastra para seleccionar un área'
+            : 'Haz clic para añadir vértices · Doble clic para cerrar');
+        _selDrawing = false;
+        _selPoints  = [];
+        if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+        // Eventos
+        map.on('mousedown', _selOnDown);
+        map.on('mousemove', _selOnMove);
+        map.on('mouseup',   _selOnUp);
+        if (modo === 'poligono') map.on('dblclick', _selPoligonoCerrar);
+        map.dragging.disable();
+    }
+
+    function _cancelarSeleccion() {
+        _selModo = null; _selDrawing = false; _selPoints = [];
+        map.off('mousedown', _selOnDown);
+        map.off('mousemove', _selOnMove);
+        map.off('mouseup',   _selOnUp);
+        map.off('dblclick', _selPoligonoCerrar);
+        map.dragging.enable();
+        map.getContainer().style.cursor = '';
+        if (_selHint) { _selHint.remove(); _selHint = null; }
+        document.getElementById('btn-seleccion').classList.remove('sel-activo');
+        ['cuadra','poligono'].forEach(function(m){
+            var b = document.getElementById('btn-sel-'+m);
+            if (b) b.classList.remove('sel-modo-activo');
+        });
+    }
+
+    function _limpiarSeleccion() {
+        if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+        document.getElementById('panel-seleccion-stats').style.display = 'none';
+        document.getElementById('panel-seleccion-stats').innerHTML = '';
+        _cancelarSeleccion();
+    }
+
+    function _mostrarHint(txt) {
+        if (_selHint) _selHint.remove();
+        _selHint = document.createElement('div');
+        _selHint.className = 'sel-draw-hint';
+        _selHint.textContent = txt;
+        map.getContainer().appendChild(_selHint);
+    }
+
+    /* ── CUADRA (rectángulo) ── */
+    function _selOnDown(e) {
+        if (_selModo === 'cuadra') {
+            _selDrawing = true;
+            _selStart   = e.latlng;
+            if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+            _selLayer = L.rectangle([_selStart, _selStart], {
+                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
+            }).addTo(map);
+        } else if (_selModo === 'poligono') {
+            _selPoints.push(e.latlng);
+            if (_selLayer) map.removeLayer(_selLayer);
+            _selLayer = L.polygon(_selPoints, {
+                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
+            }).addTo(map);
+        }
+    }
+
+    function _selOnMove(e) {
+        if (_selModo === 'cuadra' && _selDrawing && _selLayer) {
+            _selLayer.setBounds(L.latLngBounds(_selStart, e.latlng));
+        } else if (_selModo === 'poligono' && _selPoints.length > 0) {
+            if (_selLayer) map.removeLayer(_selLayer);
+            var pts = _selPoints.concat([e.latlng]);
+            _selLayer = L.polygon(pts, {
+                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
+            }).addTo(map);
+        }
+    }
+
+    function _selOnUp(e) {
+        if (_selModo === 'cuadra' && _selDrawing) {
+            _selDrawing = false;
+            var bounds = L.latLngBounds(_selStart, e.latlng);
+            _selLayer.setBounds(bounds);
+            _cancelarSeleccion();
+            if (_selLayer) map.removeLayer(_selLayer);
+            _selLayer = L.rectangle(bounds, {
+                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
+            }).addTo(map);
+            _calcularEstadisticasBounds(bounds, 'rectangle');
+        }
+    }
+
+    function _selPoligonoCerrar(e) {
+        if (_selModo !== 'poligono' || _selPoints.length < 3) return;
+        L.DomEvent.stopPropagation(e);
+        var pts = _selPoints.slice();
+        _cancelarSeleccion();
+        if (_selLayer) map.removeLayer(_selLayer);
+        _selLayer = L.polygon(pts, {
+            color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
+        }).addTo(map);
+        _calcularEstadisticasPoly(pts);
+    }
+
+    /* ── Punto dentro de polígono (ray casting) ── */
+    function _puntoDentroPoligono(lat, lon, pts) {
+        var x = lat, y = lon, inside = false;
+        for (var i=0, j=pts.length-1; i<pts.length; j=i++) {
+            var xi=pts[i].lat, yi=pts[i].lng, xj=pts[j].lat, yj=pts[j].lng;
+            var inter = ((yi>y) !== (yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi);
+            if (inter) inside = !inside;
+        }
+        return inside;
+    }
+
+    /* ── Punto dentro de bounds ── */
+    function _puntoDentroBounds(lat, lon, bounds) {
+        return bounds.contains(L.latLng(lat, lon));
+    }
+
+    /* ── Calcular estadísticas ── */
+    function _calcularEstadisticasBounds(bounds, tipo) {
+        _mostrarEstadisticas(function(lat, lon) {
+            return _puntoDentroBounds(lat, lon, bounds);
+        });
+    }
+
+    function _calcularEstadisticasPoly(pts) {
+        _mostrarEstadisticas(function(lat, lon) {
+            return _puntoDentroPoligono(lat, lon, pts);
+        });
+    }
+
+    function _mostrarEstadisticas(dentroFn) {
+        var stats = {};
+
+        // Acometidas
+        if (capaActiva['acometidas']) {
+            var ac = { total:0, motivos:{}, digitadores:{} };
+            datAcometidas.forEach(function(p) {
+                if (!dentroFn(p.a, p.o)) return;
+                ac.total++;
+                var mot = p.m || 'Sin motivo';
+                ac.motivos[mot] = (ac.motivos[mot]||0)+1;
+                var dig = p.d || 'Sin dato';
+                ac.digitadores[dig] = (ac.digitadores[dig]||0)+1;
+            });
+            if (ac.total > 0) stats['acometidas'] = ac;
+        }
+
+        // Cruces de vía
+        if (capaActiva['cruces']) {
+            var cr = { total:0, tipos:{}, longTotal:0 };
+            datCruces.forEach(function(p) {
+                if (!dentroFn(p.a, p.o)) return;
+                cr.total++;
+                var t = p.u || 'Sin tipo';
+                cr.tipos[t] = (cr.tipos[t]||0)+1;
+                if (p.l) cr.longTotal += parseFloat(p.l)||0;
+            });
+            if (cr.total > 0) stats['cruces'] = cr;
+        }
+
+        // Usuarios
+        if (capaActiva['usuarios']) {
+            var us = { total:0, barrios:{} };
+            datUsuarios.forEach(function(p) {
+                if (!dentroFn(p[0], p[1])) return;
+                us.total++;
+                var b = p[4] || 'Sin barrio';
+                us.barrios[b] = (us.barrios[b]||0)+1;
+            });
+            if (us.total > 0) stats['usuarios'] = us;
+        }
+
+        _renderEstadisticas(stats);
+    }
+
+    function _kv(k, v) {
+        return '<div class="sel-kv"><span class="sel-k">'+k+'</span><span class="sel-v">'+v+'</span></div>';
+    }
+
+    function _renderEstadisticas(stats) {
+        var panel = document.getElementById('panel-seleccion-stats');
+        if (Object.keys(stats).length === 0) {
+            panel.innerHTML = '<h4>📊 SELECCIÓN</h4><p style="color:#aac4d8;font-size:10px">No hay elementos de las capas activas en el área seleccionada.</p><button id="btn-limpiar-sel" onclick="_limpiarSeleccion()">✖ Limpiar selección</button>';
+            panel.style.display = 'block';
+            return;
+        }
+
+        var html = '<h4>📊 ESTADÍSTICAS DE SELECCIÓN</h4>';
+
+        if (stats['acometidas']) {
+            var ac = stats['acometidas'];
+            html += '<div class="sel-stat-sec">';
+            html += '<h5>🔧 Acometidas</h5>';
+            html += '<div class="sel-total">'+ac.total+' registros</div>';
+            // Motivos
+            var mots = Object.keys(ac.motivos).sort(function(a,b){return ac.motivos[b]-ac.motivos[a];});
+            mots.forEach(function(k){ html += _kv(k, ac.motivos[k]); });
+            // Digitadores
+            html += '<div style="margin-top:5px;color:#80cfff;font-size:10px;text-transform:uppercase;letter-spacing:0.8px">Técnicos</div>';
+            Object.keys(ac.digitadores).sort().forEach(function(k){ html += _kv(k, ac.digitadores[k]); });
+            html += '</div>';
+        }
+
+        if (stats['cruces']) {
+            var cr = stats['cruces'];
+            html += '<div class="sel-stat-sec">';
+            html += '<h5>🛣️ Cruces de Vía</h5>';
+            html += '<div class="sel-total">'+cr.total+' registros</div>';
+            if (cr.longTotal > 0) html += _kv('Longitud total', cr.longTotal.toFixed(1)+' m');
+            var tipos = Object.keys(cr.tipos).sort(function(a,b){return cr.tipos[b]-cr.tipos[a];});
+            tipos.forEach(function(k){ html += _kv(k.length>22?k.substring(0,22)+'…':k, cr.tipos[k]); });
+            html += '</div>';
+        }
+
+        if (stats['usuarios']) {
+            var us = stats['usuarios'];
+            html += '<div class="sel-stat-sec">';
+            html += '<h5>👤 Usuarios</h5>';
+            html += '<div class="sel-total">'+us.total+' usuarios</div>';
+            var barrs = Object.keys(us.barrios).sort(function(a,b){return us.barrios[b]-us.barrios[a];});
+            barrs.slice(0,8).forEach(function(k){ html += _kv(k.length>20?k.substring(0,20)+'…':k, us.barrios[k]); });
+            if (barrs.length>8) html += '<div style="color:#667;font-size:10px;text-align:center">+' +(barrs.length-8)+' barrios más</div>';
+            html += '</div>';
+        }
+
+        html += '<button id="btn-limpiar-sel" onclick="_limpiarSeleccion()">✖ Limpiar selección</button>';
+        panel.innerHTML = html;
+        panel.style.display = 'block';
     }
 
     </script>
