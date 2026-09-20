@@ -4504,6 +4504,16 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     /* ── ESTADÍSTICAS POR BARRIO (llamado desde filtrarPorBarrio) ── */
     function _estadisticasBarrio(nombre) {
         if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+        // Verificar si hay capas activas
+        var capasOn = Object.keys(capaActiva).filter(function(k){ return capaActiva[k]; });
+        if (capasOn.length === 0) {
+            var panel = document.getElementById('panel-seleccion-stats');
+            panel.innerHTML = '<h4>📊 ' + nombre + '</h4>'
+                + '<p style="color:#ffcc80;font-size:11px;margin:6px 0">⚠️ No hay capas activas.<br>Activa una capa (Acometidas, Cruces, etc.) para ver estadísticas del barrio.</p>'
+                + '<button id="btn-limpiar-sel" onclick="_limpiarSeleccion()" style="margin-top:6px">✖ Cerrar</button>';
+            panel.style.display = 'block';
+            return;
+        }
         var rawPoly = POLIGONOS[nombre];
         if (rawPoly && rawPoly.length >= 3) {
             var latlngs = rawPoly.map(function(c){ return L.latLng(c[0], c[1]); });
