@@ -3947,14 +3947,6 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             +_repKpi(no,'Usuarios que NO desean el servicio','#ef5350')
             +'</div>';
 
-        html+='<div class="rep-section"><h3>✅ Desea el Servicio de Gas</h3>'
-            +'<div class="rep-kpi-grid" style="grid-template-columns:repeat(3,1fr)">'
-            +'<div class="rep-kpi" style="background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.3)">'
-            +'<span class="num" style="color:#69f0ae">'+si+'</span><span class="lbl">SÍ desea el servicio<br><em>'+(si?((si/total)*100).toFixed(1):0)+'% del total</em></span></div>'
-            +'<div class="rep-kpi" style="background:rgba(239,83,80,0.1);border:1px solid rgba(239,83,80,0.3)">'
-            +'<span class="num" style="color:#ef5350">'+no+'</span><span class="lbl">NO desea el servicio<br><em>'+(no?((no/total)*100).toFixed(1):0)+'% del total</em></span></div>'
-            +'<div class="rep-kpi"><span class="num" style="color:#80cfff">'+(servDist['Sin dato']||0)+'</span><span class="lbl">Sin respuesta registrada</span></div>'
-            +'</div></div>';
 
         if(Object.keys(digDist).length){
             html+='<div class="rep-section"><h3>👷 Técnico Digitador por Registro</h3>'+_repBarras(digDist,total)+'</div>';
