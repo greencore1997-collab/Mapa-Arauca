@@ -82,17 +82,7 @@
         #geovisor-status .st-close:hover { color:#333; background:#eee; }
         body.mobile-mode #geovisor-status { bottom:auto; top:205px; left:5px; width:175px; font-size:9px; }
         #minimap-container {
-            position:absolute; bottom:15px; left:15px; z-index:800;
-            width:220px; height:200px;
-            background:rgba(0,12,35,0.78);
-            border-radius:14px;
-            box-shadow:0 0 28px rgba(0,180,255,0.35), inset 0 0 18px rgba(0,100,200,0.12);
-            overflow:hidden;
-            border-left:4px solid #00c8ff;
-            border-top:1px solid rgba(0,200,255,0.3);
-            border-right:1px solid rgba(0,200,255,0.15);
-            border-bottom:1px solid rgba(0,200,255,0.15);
-            backdrop-filter:blur(6px);
+            display:none !important;
         }
         #minimap-title {
             background:transparent;
@@ -1225,7 +1215,7 @@
     </div>
 
 <div id="geovisor-status"></div>
-<div id="minimap-container">
+<div id="minimap-container" style="display:none">
         <div id="minimap-title">Delimitación barrios</div>
         <div id="minimap"></div>
     </div>
