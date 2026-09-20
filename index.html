@@ -4215,6 +4215,7 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     var _selDrawing = false;
     var _selStart   = null;
     var _selPoints  = [];         // para polígono
+    var _selLastClick = 0;        // timestamp último click (anti-doble-registro)
 
     function _toggleMenuSel() {
         var m = document.getElementById('menu-seleccion');
@@ -4223,10 +4224,10 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
     function _activarSeleccion(modo) {
         document.getElementById('menu-seleccion').style.display = 'none';
-        // Si ya estaba activo el mismo modo, cancelar
         if (_selModo === modo) { _cancelarSeleccion(); return; }
         _cancelarSeleccion();
         _selModo = modo;
+        _selLastClick = 0;
         document.getElementById('btn-seleccion').classList.add('sel-activo');
         document.getElementById('btn-sel-'+modo).classList.add('sel-modo-activo');
         map.getContainer().style.cursor = 'crosshair';
@@ -4236,20 +4237,26 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         _selDrawing = false;
         _selPoints  = [];
         if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
-        // Eventos
-        map.on('mousedown', _selOnDown);
-        map.on('mousemove', _selOnMove);
-        map.on('mouseup',   _selOnUp);
-        if (modo === 'poligono') map.on('dblclick', _selPoligonoCerrar);
+        if (modo === 'cuadra') {
+            map.on('mousedown', _selOnDown);
+            map.on('mousemove', _selOnMove);
+            map.on('mouseup',   _selOnUp);
+        } else {
+            // Polígono: usar click (no mousedown) para evitar conflicto con dblclick
+            map.on('click',    _selPoligonoClick);
+            map.on('mousemove', _selOnMove);
+            map.on('dblclick', _selPoligonoCerrar);
+        }
         map.dragging.disable();
     }
 
     function _cancelarSeleccion() {
-        _selModo = null; _selDrawing = false; _selPoints = [];
+        _selModo = null; _selDrawing = false; _selPoints = []; _selLastClick = 0;
         map.off('mousedown', _selOnDown);
         map.off('mousemove', _selOnMove);
         map.off('mouseup',   _selOnUp);
-        map.off('dblclick', _selPoligonoCerrar);
+        map.off('click',     _selPoligonoClick);
+        map.off('dblclick',  _selPoligonoCerrar);
         map.dragging.enable();
         map.getContainer().style.cursor = '';
         if (_selHint) { _selHint.remove(); _selHint = null; }
@@ -4277,20 +4284,13 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
 
     /* ── CUADRA (rectángulo) ── */
     function _selOnDown(e) {
-        if (_selModo === 'cuadra') {
-            _selDrawing = true;
-            _selStart   = e.latlng;
-            if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
-            _selLayer = L.rectangle([_selStart, _selStart], {
-                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
-            }).addTo(map);
-        } else if (_selModo === 'poligono') {
-            _selPoints.push(e.latlng);
-            if (_selLayer) map.removeLayer(_selLayer);
-            _selLayer = L.polygon(_selPoints, {
-                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
-            }).addTo(map);
-        }
+        if (_selModo !== 'cuadra') return;
+        _selDrawing = true;
+        _selStart   = e.latlng;
+        if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+        _selLayer = L.rectangle([_selStart, _selStart], {
+            color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
+        }).addTo(map);
     }
 
     function _selOnMove(e) {
@@ -4306,23 +4306,39 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     }
 
     function _selOnUp(e) {
-        if (_selModo === 'cuadra' && _selDrawing) {
-            _selDrawing = false;
-            var bounds = L.latLngBounds(_selStart, e.latlng);
-            _selLayer.setBounds(bounds);
-            _cancelarSeleccion();
-            if (_selLayer) map.removeLayer(_selLayer);
-            _selLayer = L.rectangle(bounds, {
-                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
-            }).addTo(map);
-            _calcularEstadisticasBounds(bounds, 'rectangle');
-        }
+        if (_selModo !== 'cuadra' || !_selDrawing) return;
+        _selDrawing = false;
+        var bounds = L.latLngBounds(_selStart, e.latlng);
+        _cancelarSeleccion();
+        if (_selLayer) map.removeLayer(_selLayer);
+        _selLayer = L.rectangle(bounds, {
+            color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
+        }).addTo(map);
+        _calcularEstadisticasBounds(bounds);
+    }
+
+    /* ── POLÍGONO ── */
+    function _selPoligonoClick(e) {
+        if (_selModo !== 'poligono') return;
+        // Ignorar el segundo click de un doble clic (separación < 300ms)
+        var now = Date.now();
+        if (now - _selLastClick < 300) return;
+        _selLastClick = now;
+        _selPoints.push(e.latlng);
+        if (_selLayer) map.removeLayer(_selLayer);
+        _selLayer = L.polygon(_selPoints, {
+            color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.08, dashArray:'5,4'
+        }).addTo(map);
+        // Actualizar hint con contador de puntos
+        _mostrarHint('Vértices: ' + _selPoints.length + ' · Doble clic para cerrar');
     }
 
     function _selPoligonoCerrar(e) {
-        if (_selModo !== 'poligono' || _selPoints.length < 3) return;
-        L.DomEvent.stopPropagation(e);
+        if (_selModo !== 'poligono') return;
+        L.DomEvent.stop(e);
+        // Quitar el último punto duplicado que pudo añadir el segundo click del dblclick
         var pts = _selPoints.slice();
+        if (pts.length < 3) return;
         _cancelarSeleccion();
         if (_selLayer) map.removeLayer(_selLayer);
         _selLayer = L.polygon(pts, {
