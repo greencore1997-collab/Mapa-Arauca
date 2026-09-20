@@ -4418,6 +4418,20 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             if (us.total > 0) stats['usuarios'] = us;
         }
 
+        // Polivalvulas
+        if (capaActiva['polivalvulas']) {
+            var pv = { total:0, tecnicos:{}, tipos:{} };
+            datPolivalvulas.forEach(function(p) {
+                if (!dentroFn(p.a, p.o)) return;
+                pv.total++;
+                var t = p.f || 'Sin dato';
+                pv.tecnicos[t] = (pv.tecnicos[t]||0)+1;
+                var u = p.u || 'Sin tipo';
+                pv.tipos[u] = (pv.tipos[u]||0)+1;
+            });
+            if (pv.total > 0) stats['polivalvulas'] = pv;
+        }
+
         _renderEstadisticas(stats);
     }
 
@@ -4468,6 +4482,19 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             var barrs = Object.keys(us.barrios).sort(function(a,b){return us.barrios[b]-us.barrios[a];});
             barrs.slice(0,8).forEach(function(k){ html += _kv(k.length>20?k.substring(0,20)+'…':k, us.barrios[k]); });
             if (barrs.length>8) html += '<div style="color:#667;font-size:10px;text-align:center">+' +(barrs.length-8)+' barrios más</div>';
+            html += '</div>';
+        }
+
+        if (stats['polivalvulas']) {
+            var pv = stats['polivalvulas'];
+            html += '<div class="sel-stat-sec">';
+            html += '<h5>⚙️ Polivalvulas</h5>';
+            html += '<div class="sel-total">'+pv.total+' registros</div>';
+            var pvTipos = Object.keys(pv.tipos).filter(function(k){return k && k!=='Sin tipo';});
+            pvTipos.sort(function(a,b){return pv.tipos[b]-pv.tipos[a];});
+            pvTipos.forEach(function(k){ html += _kv(k.length>22?k.substring(0,22)+'…':k, pv.tipos[k]); });
+            html += '<div style="margin-top:5px;color:#80cfff;font-size:10px;text-transform:uppercase;letter-spacing:0.8px">Técnicos</div>';
+            Object.keys(pv.tecnicos).sort().forEach(function(k){ html += _kv(k, pv.tecnicos[k]); });
             html += '</div>';
         }
 
