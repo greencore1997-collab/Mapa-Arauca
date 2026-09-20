@@ -567,33 +567,9 @@
         .minimap-poly { cursor:pointer; }
         #minimap-title { cursor:pointer; }
 
-        /* ── Pestaña de atributos ── */
-        #btn-atributo-desktop {
-            display:block;
-            position:absolute; top:205px; right:10px; z-index:403;
-            background:rgba(0,12,35,0.78); color:#00c8ff;
-            border:1px solid rgba(0,200,255,0.5); border-radius:8px;
-            padding:7px 14px; font-size:10px; font-weight:bold;
-            cursor:pointer; width:185px; text-align:left;
-            font-family:'Orbitron', monospace; letter-spacing:1.5px;
-            box-shadow:0 0 10px rgba(0,180,255,0.15);
-            transition:background 0.2s; white-space:nowrap; box-sizing:border-box;
-        }
-        #btn-atributo-desktop:hover { background:rgba(0,30,70,0.9); }
-        #btn-atributo-desktop.abierto { border-radius:8px 8px 0 0; border-bottom-color:transparent; }
-        #panel-atributo {
-            position:absolute; top:243px; right:10px; z-index:402;
-            background:white; border-radius:0 0 8px 8px;
-            box-shadow:0 6px 15px rgba(0,0,0,0.25);
-            max-height:0; overflow:hidden; width:185px;
-            transition:max-height 0.35s ease, padding 0.35s ease;
-            padding:0 12px; box-sizing:border-box;
-        }
-        #panel-atributo.panel-open { max-height:250px; padding:10px 12px; overflow-y:auto; }
-        #panel-atributo label { display:flex; align-items:center; gap:6px; padding:4px 0; cursor:pointer; font-size:11px; color:#333; border-bottom:1px solid #f0f0f0; }
-        #panel-atributo label:last-child { border-bottom:none; }
-        #panel-atributo .attr-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-        #panel-atributo .attr-title { font-weight:bold; font-size:9px; color:#666; letter-spacing:1px; margin-bottom:4px; text-transform:uppercase; }
+        /* ── Pestaña de atributos (eliminada) ── */
+        #btn-atributo-desktop { display:none !important; }
+        #panel-atributo { display:none !important; }
 
         /* ── Pestaña restricciones (eliminada) ── */
         #btn-restricciones-desktop { display:none !important; }
@@ -1035,8 +1011,8 @@
 
     <div id="map"></div>
     <button id="btn-barrios-desktop" onclick="toggleLegendDesktop()">🏘️ BARRIOS <span id="flecha-barrios">▼</span></button>
-    <button id="btn-atributo-desktop" onclick="toggleAtributo()">🎨 ATRIBUTO <span id="flecha-atributo">▼</span></button>
-    <div id="panel-atributo">
+    <button id="btn-atributo-desktop" onclick="toggleAtributo()" style="display:none !important">🎨 ATRIBUTO <span id="flecha-atributo">▼</span></button>
+    <div id="panel-atributo" style="display:none !important">
       <div class="attr-title">Colorear mapa por:</div>
       <div id="attr-opciones"></div>
     </div>
@@ -2120,7 +2096,7 @@
     var _pblVisiblePreTab = false;
 
     function ocultarOtrosTabs(idActivo) {
-        ['btn-barrios-desktop','btn-atributo-desktop'].forEach(function(id) {
+        ['btn-barrios-desktop'].forEach(function(id) {
             if (id !== idActivo) {
                 var el = document.getElementById(id);
                 if (el) el.style.display = 'none';
@@ -2136,7 +2112,7 @@
     }
 
     function mostrarTodosTabs() {
-        ['btn-barrios-desktop','btn-atributo-desktop'].forEach(function(id) {
+        ['btn-barrios-desktop'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.style.display = 'block';
         });
