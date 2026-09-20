@@ -1999,69 +1999,10 @@
             if (pts.length > 0) map.fitBounds(L.latLngBounds(pts), {padding:[30,30]});
             mostrarDialogoCoordenadas(nombre);
             // Mostrar estadísticas del barrio usando polígono si existe
-            _estadisticasBarrio(nombre);
+            setTimeout(function(){ _estadisticasBarrio(nombre); }, 100);
         }
     }
 
-    function _estadisticasBarrio(nombre) {
-        // Dibujar polígono del barrio si existe
-        if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
-        var rawPoly = POLIGONOS[nombre];
-        if (rawPoly && rawPoly.length >= 3) {
-            var latlngs = rawPoly.map(function(c){ return L.latLng(c[0], c[1]); });
-            _selLayer = L.polygon(latlngs, {
-                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
-            }).addTo(map);
-            _calcularEstadisticasPoly(latlngs);
-        } else {
-            // Sin polígono: filtrar por atributo barrio directamente
-            _mostrarEstadisticasBarrioAtrib(nombre);
-        }
-    }
-
-    function _mostrarEstadisticasBarrioAtrib(nombre) {
-        var stats = {};
-        if (capaActiva['acometidas']) {
-            var ac = { total:0, motivos:{}, digitadores:{} };
-            datAcometidas.forEach(function(p) {
-                if ((p.barrio||'') !== nombre) return;
-                ac.total++;
-                ac.motivos[p.m||'Sin motivo'] = (ac.motivos[p.m||'Sin motivo']||0)+1;
-                ac.digitadores[p.d||'Sin dato'] = (ac.digitadores[p.d||'Sin dato']||0)+1;
-            });
-            if (ac.total > 0) stats['acometidas'] = ac;
-        }
-        if (capaActiva['cruces']) {
-            var cr = { total:0, tipos:{}, longTotal:0 };
-            datCruces.forEach(function(p) {
-                if ((p.barrio||'') !== nombre) return;
-                cr.total++;
-                cr.tipos[p.u||'Sin tipo'] = (cr.tipos[p.u||'Sin tipo']||0)+1;
-                if (p.l) cr.longTotal += parseFloat(p.l)||0;
-            });
-            if (cr.total > 0) stats['cruces'] = cr;
-        }
-        if (capaActiva['usuarios']) {
-            var us = { total:0, barrios:{} };
-            datUsuarios.forEach(function(p) {
-                if ((p[4]||'') !== nombre) return;
-                us.total++;
-                us.barrios[nombre] = (us.barrios[nombre]||0)+1;
-            });
-            if (us.total > 0) stats['usuarios'] = us;
-        }
-        if (capaActiva['polivalvulas']) {
-            var pv = { total:0, tecnicos:{}, tipos:{} };
-            datPolivalvulas.forEach(function(p) {
-                if ((p.barrio||'') !== nombre) return;
-                pv.total++;
-                pv.tecnicos[p.f||'Sin dato'] = (pv.tecnicos[p.f||'Sin dato']||0)+1;
-                pv.tipos[p.u||'Sin tipo'] = (pv.tipos[p.u||'Sin tipo']||0)+1;
-            });
-            if (pv.total > 0) stats['polivalvulas'] = pv;
-        }
-        _renderEstadisticas(stats);
-    }
 
     var pblMarkers = [];
     var pblSelectedIdx = -1;
@@ -4559,6 +4500,20 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         panel.style.display = 'block';
     }
 
-    </script>
+
+    /* ── ESTADÍSTICAS POR BARRIO (llamado desde filtrarPorBarrio) ── */
+    function _estadisticasBarrio(nombre) {
+        if (_selLayer) { map.removeLayer(_selLayer); _selLayer = null; }
+        var rawPoly = POLIGONOS[nombre];
+        if (rawPoly && rawPoly.length >= 3) {
+            var latlngs = rawPoly.map(function(c){ return L.latLng(c[0], c[1]); });
+            _selLayer = L.polygon(latlngs, {
+                color:'#fff176', weight:2, fillColor:'#fff176', fillOpacity:0.06, dashArray:'5,4'
+            }).addTo(map);
+            _calcularEstadisticasPoly(latlngs);
+        }
+    }
+
+        </script>
 </body>
 </html>
