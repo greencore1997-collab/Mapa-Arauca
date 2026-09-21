@@ -1562,20 +1562,71 @@ function registrarAreaMapa(x,y,w,h){
   _dfAreas.push({x:x,y:y,w:w,h:h});
 }
 
+// Estado OSM por frame (true = OSM activo)
+var _dfOsm = {};
+
 // Asegura que existan N divs de data frame en el DOM
 function asegurarDivs(n){
   var wrap=document.getElementById('sal-canvas-wrap');
   for(var i=1;i<=n;i++){
+    if(_dfOsm[i]===undefined) _dfOsm[i]=true;
     if(!document.getElementById('df-wrap-'+i)){
       var dw=document.createElement('div');
       dw.id='df-wrap-'+i;
-      dw.style.cssText='display:none;position:absolute;border:1px solid #888;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;';
+      dw.style.cssText='display:none;position:absolute;border:1px solid #888;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;overflow:hidden;';
+
+      // Fondo gris (visible cuando OSM está desactivado)
+      var bg=document.createElement('div');
+      bg.id='df-bg-'+i;
+      bg.style.cssText='position:absolute;inset:0;background:#e8e0d0;z-index:0;';
+      dw.appendChild(bg);
+
+      // Contenedor del mapa Leaflet
       var dm=document.createElement('div');
       dm.id='df-map-'+i;
-      dm.style.cssText='width:100%;height:100%;';
+      dm.style.cssText='position:absolute;inset:0;z-index:1;';
       dw.appendChild(dm);
+
+      // Botón toggle OSM
+      (function(idx){
+        var btn=document.createElement('button');
+        btn.id='df-btn-'+idx;
+        btn.title='Activar / desactivar OpenStreetMap';
+        btn.style.cssText=[
+          'position:absolute;bottom:5px;right:5px;z-index:20;',
+          'background:rgba(255,255,255,0.88);border:1px solid #aaa;border-radius:4px;',
+          'padding:3px 7px;font-size:9px;font-family:Arial,sans-serif;',
+          'cursor:pointer;color:#333;letter-spacing:0.5px;',
+          'box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:all 0.2s;line-height:1.3;'
+        ].join('');
+        btn.innerHTML='🗺 OSM';
+        btn.onclick=function(e){
+          e.stopPropagation();
+          toggleOsm(idx);
+        };
+        dw.appendChild(btn);
+      })(i);
+
       wrap.appendChild(dw);
     }
+  }
+}
+
+function toggleOsm(idx){
+  _dfOsm[idx] = !_dfOsm[idx];
+  var mapEl = document.getElementById('df-map-'+idx);
+  var btn   = document.getElementById('df-btn-'+idx);
+  var bg    = document.getElementById('df-bg-'+idx);
+
+  if(_dfOsm[idx]){
+    if(mapEl) mapEl.style.visibility='visible';
+    if(bg)    bg.style.background='#e8e0d0';
+    if(btn){  btn.innerHTML='🗺 OSM'; btn.style.background='rgba(255,255,255,0.88)'; btn.style.color='#333'; }
+    if(_dfMaps[idx-1]) setTimeout(function(){ _dfMaps[idx-1].invalidateSize(); },30);
+  } else {
+    if(mapEl) mapEl.style.visibility='hidden';
+    if(bg)    bg.style.background='#e8e0d0';
+    if(btn){  btn.innerHTML='◻ OSM'; btn.style.background='rgba(220,210,195,0.9)'; btn.style.color='#888'; }
   }
 }
 
@@ -1587,7 +1638,12 @@ function getOrCreateMap(n, centerLL, zoom){
   var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:true,attributionControl:false});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
   _dfMaps[n-1]=m;
-  setTimeout(function(){ m.invalidateSize(); },200);
+  setTimeout(function(){
+    m.invalidateSize();
+    // Aplicar estado OSM guardado
+    var mapEl=document.getElementById('df-map-'+n);
+    if(mapEl) mapEl.style.visibility=(_dfOsm[n]===false)?'hidden':'visible';
+  },200);
   return m;
 }
 
