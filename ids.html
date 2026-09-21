@@ -755,10 +755,113 @@ function agregarCapas(files) {
   Array.prototype.forEach.call(files, function(f){
     var ext = f.name.split('.').pop().toLowerCase();
     var icono = {geojson:'🟩',json:'🟩',kml:'📍',kmz:'📍',shp:'🔷',csv:'📊',gpx:'🏃'}[ext] || '📄';
-    capasActivas.push({ name: f.name, icono: icono, file: f });
+    var capa = { name: f.name, icono: icono, file: f, features: null };
+    capasActivas.push(capa);
+    // Leer geometría asíncronamente
+    if(ext==='geojson'||ext==='json'){
+      var fr=new FileReader();
+      fr.onload=function(e){
+        try{
+          var gj=JSON.parse(e.target.result);
+          capa.features=extraerFeatures(gj);
+          capa.bbox=calcBbox(capa.features);
+        }catch(err){}
+        renderCapas();
+        actualizarPreview();
+      };
+      fr.readAsText(f);
+    } else if(ext==='kml'||ext==='gpx'){
+      var fr2=new FileReader();
+      fr2.onload=function(e){
+        try{
+          var parser=new DOMParser();
+          var doc=parser.parseFromString(e.target.result,'text/xml');
+          capa.features=extraerFeaturesKML(doc, ext);
+          capa.bbox=calcBbox(capa.features);
+        }catch(err){}
+        renderCapas();
+        actualizarPreview();
+      };
+      fr2.readAsText(f);
+    }
   });
   renderCapas();
   actualizarPreview();
+}
+
+// Extrae features de un GeoJSON
+function extraerFeatures(gj){
+  var feats=[];
+  if(gj.type==='FeatureCollection') feats=gj.features||[];
+  else if(gj.type==='Feature') feats=[gj];
+  else if(gj.type) feats=[{type:'Feature',geometry:gj,properties:{}}];
+  return feats;
+}
+
+// Extrae features de KML/GPX (coordenadas como [lon,lat])
+function extraerFeaturesKML(doc, ext){
+  var feats=[];
+  // Puntos (Placemark con Point / wpt)
+  var tagPt = ext==='gpx' ? 'wpt' : 'Point';
+  doc.querySelectorAll(tagPt).forEach(function(el){
+    var coords = ext==='gpx'
+      ? [parseFloat(el.getAttribute('lon')), parseFloat(el.getAttribute('lat'))]
+      : parseCoordsStr(el.querySelector('coordinates'));
+    if(coords) feats.push({type:'Feature',geometry:{type:'Point',coordinates:coords},properties:{}});
+  });
+  // Líneas (LineString / trkseg)
+  var tagLs = ext==='gpx' ? 'trkseg' : 'LineString';
+  doc.querySelectorAll(tagLs).forEach(function(el){
+    var pts;
+    if(ext==='gpx'){
+      pts=[]; el.querySelectorAll('trkpt').forEach(function(tp){
+        pts.push([parseFloat(tp.getAttribute('lon')),parseFloat(tp.getAttribute('lat'))]);
+      });
+    } else {
+      pts=parseCoordsArrStr(el.querySelector('coordinates'));
+    }
+    if(pts&&pts.length>1) feats.push({type:'Feature',geometry:{type:'LineString',coordinates:pts},properties:{}});
+  });
+  // Polígonos
+  doc.querySelectorAll('Polygon').forEach(function(el){
+    var outer=el.querySelector('outerBoundaryIs coordinates')||el.querySelector('outerBoundaryIs > LinearRing > coordinates');
+    if(!outer) outer=el.querySelector('coordinates');
+    var pts=parseCoordsArrStr(outer);
+    if(pts&&pts.length>2) feats.push({type:'Feature',geometry:{type:'Polygon',coordinates:[pts]},properties:{}});
+  });
+  return feats;
+}
+function parseCoordsStr(el){
+  if(!el) return null;
+  var parts=(el.textContent||'').trim().split(/[\s,]+/).filter(Boolean);
+  if(parts.length<2) return null;
+  return [parseFloat(parts[0]),parseFloat(parts[1])];
+}
+function parseCoordsArrStr(el){
+  if(!el) return [];
+  var tuples=(el.textContent||'').trim().split(/\s+/);
+  var out=[];
+  tuples.forEach(function(t){
+    var p=t.split(',');
+    if(p.length>=2) out.push([parseFloat(p[0]),parseFloat(p[1])]);
+  });
+  return out;
+}
+
+// Calcula bounding box de features [{geometry:{type,coordinates}}]
+function calcBbox(features){
+  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  function visitCoord(c){ if(c[0]<minX)minX=c[0];if(c[0]>maxX)maxX=c[0];if(c[1]<minY)minY=c[1];if(c[1]>maxY)maxY=c[1]; }
+  function visitGeom(g){
+    if(!g) return;
+    if(g.type==='Point') visitCoord(g.coordinates);
+    else if(g.type==='MultiPoint'||g.type==='LineString') g.coordinates.forEach(visitCoord);
+    else if(g.type==='MultiLineString'||g.type==='Polygon') g.coordinates.forEach(function(r){ r.forEach(visitCoord); });
+    else if(g.type==='MultiPolygon') g.coordinates.forEach(function(p){ p.forEach(function(r){ r.forEach(visitCoord); }); });
+  }
+  features.forEach(function(f){ if(f&&f.geometry) visitGeom(f.geometry); });
+  if(!isFinite(minX)) return null;
+  return {minX:minX,minY:minY,maxX:maxX,maxY:maxY};
 }
 
 function renderCapas() {
@@ -893,24 +996,67 @@ function dibujarRosa(ctx,cx,cy,r){
   });
 }
 function dibujarMapaFondo(ctx,x,y,w,h,capas){
-  // Fondo crema / calles simuladas
+  // Fondo crema
   fillBox(ctx,x,y,w,h,'#f0ede6',null);
-  // Si hay capas, mostrar indicador
-  if(capas.length>0){
-    ctx.font='8px Arial';ctx.fillStyle='rgba(0,60,120,0.35)';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(capas.length+' CAPA'+(capas.length>1?'S':'')+' CARGADA'+(capas.length>1?'S':''),x+w/2,y+h-10);
-    // Simular puntos/polígono de capa
-    var colors=['rgba(76,175,80,0.7)','rgba(255,87,34,0.7)','rgba(33,150,243,0.7)','rgba(255,193,7,0.7)'];
-    capas.forEach(function(cap,ci){
-      ctx.fillStyle=colors[ci%colors.length];
-      for(var j=0;j<18;j++){
-        var px=x+20+Math.random()*(w-40);
-        var py=y+20+Math.random()*(h-40);
-        ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();
+
+  var capasConGeom = capas.filter(function(c){ return c.features&&c.features.length>0&&c.bbox; });
+
+  if(capasConGeom.length>0){
+    // Calcular bbox global de todas las capas
+    var gb={minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity};
+    capasConGeom.forEach(function(c){
+      if(c.bbox.minX<gb.minX)gb.minX=c.bbox.minX;
+      if(c.bbox.minY<gb.minY)gb.minY=c.bbox.minY;
+      if(c.bbox.maxX>gb.maxX)gb.maxX=c.bbox.maxX;
+      if(c.bbox.maxY>gb.maxY)gb.maxY=c.bbox.maxY;
+    });
+    var pad=12;
+    var rw=gb.maxX-gb.minX||0.001, rh=gb.maxY-gb.minY||0.001;
+    var scaleX=(w-pad*2)/rw, scaleY=(h-pad*2)/rh;
+    var sc=Math.min(scaleX,scaleY);
+    // Centro del bbox → centro del área de dibujo
+    var offX=x+pad+(w-pad*2-(rw*sc))/2;
+    var offY=y+pad+(h-pad*2-(rh*sc))/2;
+
+    function toCanvasX(lon){ return offX+(lon-gb.minX)*sc; }
+    function toCanvasY(lat){ return offY+(gb.maxY-lat)*sc; } // Y invertido
+
+    var colors=['rgba(76,175,80,0.85)','rgba(255,87,34,0.85)','rgba(33,150,243,0.85)','rgba(255,193,7,0.85)','rgba(156,39,176,0.85)'];
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip(); // clip al data frame
+
+    capasConGeom.forEach(function(cap,ci){
+      var col=colors[ci%colors.length];
+      cap.features.forEach(function(f){
+        if(!f||!f.geometry) return;
+        var g=f.geometry;
+        drawGeom(ctx,g,col,toCanvasX,toCanvasY);
+      });
+    });
+
+    // Capas sin geometría parseada (shp, csv, kmz) → puntos placeholder
+    capas.filter(function(c){ return !c.features; }).forEach(function(cap,ci){
+      ctx.fillStyle=colors[(capasConGeom.length+ci)%colors.length];
+      for(var j=0;j<12;j++){
+        var px=x+20+(w-40)*((j*37+17)%97)/97;
+        var py=y+20+(h-40)*((j*53+11)%89)/89;
+        ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fill();
       }
     });
+
+    ctx.restore();
+
+    // Etiqueta capas
+    ctx.font='7px Arial';ctx.fillStyle='rgba(0,60,120,0.4)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(capas.length+' CAPA'+(capas.length>1?'S':'')+' CARGADA'+(capas.length>1?'S':''),x+w/2,y+h-7);
+
+  } else if(capas.length>0){
+    // Capas cargadas pero aún sin parsear (leyendo archivo...)
+    ctx.font='8px Arial';ctx.fillStyle='rgba(0,60,120,0.3)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('CARGANDO CAPAS...', x+w/2, y+h/2);
   } else {
-    // Cuadrícula de calles dummy
+    // Sin capas: cuadrícula dummy
     ctx.strokeStyle='rgba(180,170,160,0.5)';ctx.lineWidth=1;
     for(var i=0;i<6;i++){
       ctx.beginPath();ctx.moveTo(x,y+i*(h/5));ctx.lineTo(x+w,y+i*(h/5));ctx.stroke();
@@ -919,6 +1065,51 @@ function dibujarMapaFondo(ctx,x,y,w,h,capas){
   }
   // Borde del data frame
   ctx.strokeStyle='#888';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);
+}
+
+// Dibuja una geometría GeoJSON en el canvas
+function drawGeom(ctx,g,color,toX,toY){
+  ctx.strokeStyle=color; ctx.fillStyle=color;
+  var lw=1.5;
+  if(g.type==='Point'){
+    ctx.beginPath();ctx.arc(toX(g.coordinates[0]),toY(g.coordinates[1]),3.5,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=0.5;ctx.stroke();
+  } else if(g.type==='MultiPoint'){
+    g.coordinates.forEach(function(c){
+      ctx.beginPath();ctx.arc(toX(c[0]),toY(c[1]),3.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    });
+  } else if(g.type==='LineString'){
+    drawLine(ctx,g.coordinates,color,lw,toX,toY);
+  } else if(g.type==='MultiLineString'){
+    g.coordinates.forEach(function(ring){ drawLine(ctx,ring,color,lw,toX,toY); });
+  } else if(g.type==='Polygon'){
+    drawPoly(ctx,g.coordinates,color,toX,toY);
+  } else if(g.type==='MultiPolygon'){
+    g.coordinates.forEach(function(poly){ drawPoly(ctx,poly,color,toX,toY); });
+  } else if(g.type==='GeometryCollection'){
+    g.geometries.forEach(function(sub){ drawGeom(ctx,sub,color,toX,toY); });
+  }
+}
+function drawLine(ctx,coords,color,lw,toX,toY){
+  if(!coords||coords.length<2) return;
+  ctx.beginPath();
+  ctx.moveTo(toX(coords[0][0]),toY(coords[0][1]));
+  for(var i=1;i<coords.length;i++) ctx.lineTo(toX(coords[i][0]),toY(coords[i][1]));
+  ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.stroke();
+}
+function drawPoly(ctx,rings,color,toX,toY){
+  if(!rings||!rings[0]||rings[0].length<3) return;
+  ctx.beginPath();
+  rings.forEach(function(ring,ri){
+    ctx.moveTo(toX(ring[0][0]),toY(ring[0][1]));
+    for(var i=1;i<ring.length;i++) ctx.lineTo(toX(ring[i][0]),toY(ring[i][1]));
+    ctx.closePath();
+  });
+  // Fill semitransparente + stroke
+  var fc=color.replace(/[\d.]+\)$/,'0.18)');
+  ctx.fillStyle=fc;ctx.fill('evenodd');
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
 }
 function dibujarLocalizacion(ctx,x,y,w,h){
   fillBox(ctx,x,y,w,h,'#e8f5e9',null);
