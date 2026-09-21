@@ -1634,6 +1634,10 @@ window.addEventListener('resize', function(){ actualizarPreview(); posicionarDat
 var MAX_DF = 8;          // máximo de frames (multimapa x6 + hasta 2 de localización)
 var _dfMaps = [];        // instancias Leaflet
 var _dfAreas = [];       // áreas registradas por la función de dibujo actual
+var _dfLayers = {};      // capas GeoJSON por frame (para no duplicar)
+
+// ── GeoJSON Norte de Santander (IGAC 1:500.000 simplificado, WGS84) ──
+var NDS_GEOJSON = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"nombre":"Norte de Santander","codigo":"54","pais":"Colombia"},"geometry":{"type":"Polygon","coordinates":[[[-73.3703,8.081],[-73.27,8.09],[-73.15,8.085],[-72.98,8.055],[-72.82,7.98],[-72.71,7.92],[-72.64,7.85],[-72.57,7.8],[-72.5,7.73],[-72.46,7.67],[-72.39,7.59],[-72.35,7.52],[-72.32,7.46],[-72.28,7.39],[-72.23,7.31],[-72.19,7.22],[-72.15,7.13],[-72.11,7.04],[-72.08,6.95],[-72.05,6.86],[-72.03,6.77],[-72.02,6.68],[-72.03,6.59],[-72.06,6.5],[-72.09,6.41],[-72.13,6.33],[-72.17,6.25],[-72.22,6.17],[-72.26,6.09],[-72.3,6.02],[-72.34,5.95],[-72.38,5.87],[-72.42,5.8],[-72.47,5.73],[-72.53,5.66],[-72.59,5.6],[-72.66,5.55],[-72.73,5.5],[-72.81,5.46],[-72.9,5.42],[-72.99,5.39],[-73.08,5.37],[-73.17,5.35],[-73.26,5.35],[-73.35,5.37],[-73.44,5.4],[-73.53,5.44],[-73.62,5.49],[-73.7,5.54],[-73.78,5.59],[-73.85,5.65],[-73.92,5.72],[-73.97,5.8],[-74.01,5.89],[-74.04,5.98],[-74.06,6.07],[-74.07,6.16],[-74.05,6.25],[-74.01,6.34],[-73.97,6.43],[-73.94,6.52],[-73.92,6.61],[-73.9,6.7],[-73.88,6.79],[-73.85,6.88],[-73.82,6.97],[-73.78,7.06],[-73.74,7.15],[-73.69,7.24],[-73.64,7.33],[-73.59,7.42],[-73.55,7.5],[-73.51,7.58],[-73.48,7.66],[-73.46,7.74],[-73.44,7.82],[-73.42,7.91],[-73.4,7.99],[-73.39,8.04],[-73.3703,8.081]]]}}]};
                          // cada área: {x,y,w,h} en coordenadas canvas (1100x780)
 
 // Llamada por cada función de dibujo para declarar sus áreas de mapa
@@ -1710,16 +1714,38 @@ function toggleOsm(idx){
 }
 
 // Inicializa o reutiliza una instancia Leaflet
-function getOrCreateMap(n, centerLL, zoom){
+function getOrCreateMap(n, centerLL, zoom, isLocFrame){
   if(_dfMaps[n-1]) return _dfMaps[n-1];
   var el=document.getElementById('df-map-'+n);
   if(!el) return null;
-  var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:true,attributionControl:false});
+  var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:!isLocFrame,attributionControl:false,scrollWheelZoom:!isLocFrame});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
   _dfMaps[n-1]=m;
+
+  // Si es frame de localización, agregar silueta NDS con sombreado 50%
+  if(isLocFrame && NDS_GEOJSON){
+    var ndsLayer = L.geoJSON(NDS_GEOJSON, {
+      style: function(){
+        return {
+          color: '#0d47a1',
+          weight: 1.5,
+          opacity: 0.85,
+          fillColor: '#1565c0',
+          fillOpacity: 0.50
+        };
+      }
+    }).addTo(m);
+    _dfLayers[n] = ndsLayer;
+    // Ajustar vista al bbox de NDS si es Colombia (zoom amplio)
+    if(zoom <= 5){
+      try{ m.fitBounds(ndsLayer.getBounds().pad(0.5)); }catch(e){}
+    } else {
+      try{ m.fitBounds(ndsLayer.getBounds().pad(0.15)); }catch(e){}
+    }
+  }
+
   setTimeout(function(){
     m.invalidateSize();
-    // Aplicar estado OSM guardado
     var mapEl=document.getElementById('df-map-'+n);
     if(mapEl) mapEl.style.visibility=(_dfOsm[n]===false)?'hidden':'visible';
   },200);
@@ -1793,7 +1819,11 @@ function posicionarDataFrames(){
     dfWrap.style.height=fh+'px';
 
     var cz=centroZoomDF(tipoActual,i);
-    var m=getOrCreateMap(idx,cz.c,cz.z);
+    var mainAreas=calcAreasPorTipo(tipoActual);
+    var mainCount=mainAreas.length;
+    // Es frame de localización si viene de _locAreas, o si es horizontal-simple idx 1/2
+    var isLoc=(i>=mainCount)||(tipoActual==='horizontal-simple'&&i>=1);
+    var m=getOrCreateMap(idx,cz.c,cz.z,isLoc);
     if(m) setTimeout((function(mm){ return function(){ mm.invalidateSize(); }; })(m),60);
   });
 }
