@@ -976,35 +976,81 @@ function broseBar(ctx,x,y,w,maxVal,pixPerUnit){
   }
 }
 function dibujarRosa(ctx,cx,cy,r){
-  var pts=[
-    {a:-Math.PI/2,lbl:'N',main:true},
-    {a:Math.PI/2,lbl:'S',main:false},
-    {a:0,lbl:'E',main:false},
-    {a:Math.PI,lbl:'W',main:false}
-  ];
-  // Punta N grande
-  ctx.beginPath();
-  ctx.moveTo(cx,cy-r);
-  ctx.lineTo(cx-r*0.3,cy);
-  ctx.lineTo(cx,cy+r*0.5);
-  ctx.lineTo(cx+r*0.3,cy);
-  ctx.closePath();
-  ctx.fillStyle='#222';ctx.fill();
-  // Punta S
-  ctx.beginPath();
-  ctx.moveTo(cx,cy+r);
-  ctx.lineTo(cx-r*0.3,cy);
-  ctx.lineTo(cx,cy-r*0.5);
-  ctx.lineTo(cx+r*0.3,cy);
-  ctx.closePath();
-  ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=0.5;ctx.stroke();
-  // Labels
-  pts.forEach(function(p){
-    ctx.font='bold '+(p.main?11:8)+'px Arial';
-    ctx.fillStyle=p.main?'#000':'#555';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(p.lbl,cx+Math.cos(p.a)*(r+10),cy+Math.sin(p.a)*(r+10));
+  ctx.save();
+  ctx.translate(cx,cy);
+
+  // Círculo de fondo crema
+  ctx.beginPath();ctx.arc(0,0,r*1.08,0,Math.PI*2);
+  ctx.fillStyle='#f5f0e8';ctx.fill();
+  ctx.strokeStyle='#bbb';ctx.lineWidth=0.8;ctx.stroke();
+
+  // ── 4 puntas principales N/S/E/W (largas, bicolor) ──
+  [-Math.PI/2, Math.PI/2, 0, Math.PI].forEach(function(a){
+    ctx.save();ctx.rotate(a);
+    // Mitad izquierda negra
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.90);
+    ctx.lineTo(-r*0.17,-r*0.10);
+    ctx.lineTo(0,-r*0.26);
+    ctx.closePath();
+    ctx.fillStyle='#1a1a1a';ctx.fill();
+    // Mitad derecha blanca/crema
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.90);
+    ctx.lineTo(r*0.17,-r*0.10);
+    ctx.lineTo(0,-r*0.26);
+    ctx.closePath();
+    ctx.fillStyle='#f0ece0';ctx.fill();
+    // Contorno
+    ctx.strokeStyle='#333';ctx.lineWidth=0.6;
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.90);ctx.lineTo(-r*0.17,-r*0.10);
+    ctx.lineTo(0,-r*0.26);ctx.lineTo(r*0.17,-r*0.10);ctx.closePath();ctx.stroke();
+    ctx.restore();
   });
+
+  // ── 4 puntas secundarias NE/SE/SW/NW (cortas, bicolor) ──
+  [-Math.PI/4, Math.PI/4, Math.PI*3/4, -Math.PI*3/4].forEach(function(a){
+    ctx.save();ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.58);ctx.lineTo(-r*0.095,-r*0.095);ctx.lineTo(0,-r*0.22);ctx.closePath();
+    ctx.fillStyle='#1a1a1a';ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.58);ctx.lineTo(r*0.095,-r*0.095);ctx.lineTo(0,-r*0.22);ctx.closePath();
+    ctx.fillStyle='#f0ece0';ctx.fill();
+    ctx.strokeStyle='#444';ctx.lineWidth=0.5;
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.58);ctx.lineTo(-r*0.095,-r*0.095);
+    ctx.lineTo(0,-r*0.22);ctx.lineTo(r*0.095,-r*0.095);ctx.closePath();ctx.stroke();
+    ctx.restore();
+  });
+
+  // ── Anillo decorativo central ──
+  ctx.beginPath();ctx.arc(0,0,r*0.23,0,Math.PI*2);
+  ctx.strokeStyle='#555';ctx.lineWidth=1.2;ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,r*0.14,0,Math.PI*2);
+  ctx.fillStyle='#1a1a1a';ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,r*0.06,0,Math.PI*2);
+  ctx.fillStyle='#f5f0e8';ctx.fill();
+
+  // ── Etiquetas N S E W ──
+  var fs=Math.max(8,Math.round(r*0.36));
+  ctx.font='bold '+fs+'px Arial';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  var lbls=[
+    {t:'N',x:0,      y:-r*1.22},
+    {t:'S',x:0,      y: r*1.26},
+    {t:'E',x: r*1.22,y: r*0.04},
+    {t:'W',x:-r*1.26,y: r*0.04}
+  ];
+  lbls.forEach(function(lb){
+    ctx.fillStyle='rgba(245,240,232,0.95)';
+    ctx.fillText(lb.t,lb.x+0.7,lb.y+0.7);
+    ctx.fillStyle='#1a1a1a';
+    ctx.fillText(lb.t,lb.x,lb.y);
+  });
+
+  ctx.restore();
 }
 function dibujarMapaFondo(ctx,x,y,w,h,capas){
   // Fondo crema
@@ -1184,8 +1230,8 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
 
   // DATA FRAME — mapa
   dibujarMapaFondo(ctx,12,12,mapW-12,H-24,capasActivas);
-  // Rosa de vientos
-  dibujarRosa(ctx,65,65,28);
+  // Rosa de vientos — arriba derecha del área de mapa
+  dibujarRosa(ctx,mapW-52,52,32);
 
   // PANEL DERECHO
   var px=panelX, py=12, pw=W-panelX-12;
@@ -1398,7 +1444,7 @@ function dibujarHorizontalBlanco(ctx,W,H,titulo,subtitulo,scs,proy){
 
   // Mapa casi completo
   dibujarMapaFondo(ctx,16,16,W-32,H-200,capasActivas);
-  dibujarRosa(ctx,W-55,40,26);
+  dibujarRosa(ctx,W-60,52,32);
 
   // Barra inferior con datos
   var bY=H-180;
@@ -1450,7 +1496,7 @@ function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
     var ftxt=framesData[i]||(i===0?'C.P. 1':'C.P. '+(i+1));
     ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(cx2+4,cy2+cellH-22,cellW-8,20);
     txt(ctx,ftxt.toUpperCase(),cx2+cellW/2,cy2+cellH-10,'bold 8px Arial','#fff','center','middle');
-    if(i===0) dibujarRosa(ctx,cx2+22,cy2+22,14);
+    if(i===0) dibujarRosa(ctx,cx2+cellW-22,cy2+22,16);
   }
 
   // Panel derecho
@@ -1466,7 +1512,7 @@ function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
 
   // Brújula + Leyenda
   fillBox(ctx,px,py,pw,55,'#fafafa','#ddd');
-  dibujarRosa(ctx,px+30,py+27,20);
+  dibujarRosa(ctx,px+pw/2-18,py+28,22);
   txt(ctx,'LEYENDA',px+pw/2+10,py+5,'bold 6.5px Arial','#333','center','top');
   leyItems.slice(0,3).forEach(function(it,i){
     ctx.fillStyle=it.color;ctx.fillRect(px+pw/2,py+15+i*14,12,10);
