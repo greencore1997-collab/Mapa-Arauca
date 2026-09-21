@@ -109,7 +109,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 #notif{position:fixed;bottom:22px;right:22px;z-index:999;background:rgba(0,8,24,0.96);border:1px solid rgba(229,57,53,0.4);border-radius:10px;padding:12px 20px;font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:1.5px;color:#ef9a9a;display:none;box-shadow:0 0 30px rgba(229,57,53,0.2);}
 
 /* ── MÓDULO SALIDAS CARTOGRÁFICAS ── */
-#salidas-panel{position:fixed;inset:54px 0 0 0;display:none;flex-direction:row;background:#000814;z-index:100;}
+#salidas-panel{position:fixed;inset:54px 0 0 0;display:flex;flex-direction:row;background:#000814;z-index:100;}
+#dash-body{display:none !important;}
+#kpi-bar{display:none !important;}
 
 /* Sidebar izquierdo salidas */
 #sal-sidebar{width:310px;flex-shrink:0;background:rgba(0,5,18,0.97);border-right:1px solid rgba(229,57,53,0.15);display:flex;flex-direction:column;overflow-y:auto;}
@@ -158,9 +160,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 #sal-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 #sal-canvas{background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.6);transform-origin:center center;}
 
-/* Header tab activo */
-.dh-tab{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(239,154,154,0.45);border:1px solid rgba(229,57,53,0.15);background:transparent;padding:6px 13px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
-.dh-tab:hover,.dh-tab.activo{color:#ef9a9a;border-color:rgba(229,57,53,0.5);background:rgba(229,57,53,0.08);}
 </style>
 </head>
 <body>
@@ -192,14 +191,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
       <div class="dh-sub">MÓDULO DE PRODUCCIÓN CARTOGRÁFICA</div>
     </div>
     <div class="dh-space"></div>
-    <div class="dh-stats">
-      <div class="dh-stat"><span id="kpi-total-h">0</span>TOTAL</div>
-      <div class="dh-stat"><span id="kpi-entregado-h">0</span>ENTREGADOS</div>
-      <div class="dh-stat"><span id="kpi-proceso-h">0</span>EN PROCESO</div>
-    </div>
-    <button class="dh-tab activo" id="tab-registro" onclick="cambiarTab('registro')">📋 REGISTRO</button>
-    <button class="dh-tab" id="tab-salidas" onclick="cambiarTab('salidas')">🗺️ SALIDAS</button>
-    <button class="dh-back" onclick="refrescarDatos()" style="margin-right:8px;">↺ REFRESCAR</button>
     <a class="dh-back" href="index.html">← INICIO</a>
   </div>
 
@@ -503,10 +494,7 @@ function verificarAcceso() {
   if (pass === '123456789') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
-    // Establecer fecha de hoy por defecto
-    document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
-    actualizarKPIs();
-    renderTabla();
+    setTimeout(actualizarPreview, 100);
   } else {
     err.style.display = 'block';
     document.getElementById('login-pass').style.borderColor = 'rgba(229,57,53,0.7)';
@@ -568,10 +556,9 @@ function actualizarKPIs() {
   var entregado = mapas.filter(function(m){ return m.estado==='Entregado'; }).length;
   var proceso   = mapas.filter(function(m){ return m.estado==='En proceso'; }).length;
   var revision  = mapas.filter(function(m){ return m.estado==='En revisión'; }).length;
-  ['kpi-total','kpi-total-h'].forEach(function(id){ document.getElementById(id).textContent=total; });
-  ['kpi-entregado','kpi-entregado-h'].forEach(function(id){ document.getElementById(id).textContent=entregado; });
-  ['kpi-proceso','kpi-proceso-h'].forEach(function(id){ document.getElementById(id).textContent=proceso; });
-  document.getElementById('kpi-revision').textContent = revision;
+  ['kpi-total','kpi-entregado','kpi-proceso','kpi-revision'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.textContent = id==='kpi-total'?total:id==='kpi-entregado'?entregado:id==='kpi-proceso'?proceso:revision;
+  });
 }
 
 // ── FILTROS ──
@@ -694,27 +681,8 @@ var leyItems = [];
 var capasActivas = [];
 var framesData = [];
 
-// ── CAMBIO DE TAB ──
-function cambiarTab(tab) {
-  var tabR = document.getElementById('tab-registro');
-  var tabS = document.getElementById('tab-salidas');
-  var dashBody = document.getElementById('dash-body');
-  var salPanel = document.getElementById('salidas-panel');
-  var kpiBar   = document.getElementById('kpi-bar');
-
-  if (tab === 'registro') {
-    tabR.classList.add('activo');
-    tabS.classList.remove('activo');
-    dashBody.style.display = 'flex';
-    salPanel.style.display = 'none';
-  } else {
-    tabS.classList.add('activo');
-    tabR.classList.remove('activo');
-    dashBody.style.display = 'none';
-    salPanel.style.display = 'flex';
-    setTimeout(actualizarPreview, 80);
-  }
-}
+// Panel salidas siempre visible — sin tabs
+setTimeout(actualizarPreview, 80);
 
 // ── SELECTOR TIPO DE MAPA ──
 function selTipo(tipo, btn) {
@@ -1223,10 +1191,8 @@ function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
   }
 }
 
-// Arrancar preview al cargar salidas
-window.addEventListener('resize', function(){
-  if(document.getElementById('salidas-panel').style.display==='flex') actualizarPreview();
-});
+// Redimensionar preview automáticamente
+window.addEventListener('resize', actualizarPreview);
 </script>
 </body>
 </html>
