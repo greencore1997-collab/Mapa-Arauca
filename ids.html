@@ -107,6 +107,60 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 
 /* Notificación */
 #notif{position:fixed;bottom:22px;right:22px;z-index:999;background:rgba(0,8,24,0.96);border:1px solid rgba(229,57,53,0.4);border-radius:10px;padding:12px 20px;font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:1.5px;color:#ef9a9a;display:none;box-shadow:0 0 30px rgba(229,57,53,0.2);}
+
+/* ── MÓDULO SALIDAS CARTOGRÁFICAS ── */
+#salidas-panel{position:fixed;inset:54px 0 0 0;display:none;flex-direction:row;background:#000814;z-index:100;}
+
+/* Sidebar izquierdo salidas */
+#sal-sidebar{width:310px;flex-shrink:0;background:rgba(0,5,18,0.97);border-right:1px solid rgba(229,57,53,0.15);display:flex;flex-direction:column;overflow-y:auto;}
+.sal-sec{padding:14px 16px;border-bottom:1px solid rgba(229,57,53,0.07);}
+.sal-sec-title{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;color:rgba(229,57,53,0.55);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.sal-sec-title::before{content:'';width:3px;height:10px;background:#e53935;border-radius:2px;}
+.sal-f{margin-bottom:10px;}
+.sal-lbl{font-size:8.5px;letter-spacing:1px;color:rgba(180,200,190,0.4);margin-bottom:4px;display:block;}
+.sal-inp,.sal-sel,.sal-ta{width:100%;background:rgba(0,12,35,0.85);border:1px solid rgba(229,57,53,0.15);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:6px;padding:8px 10px;outline:none;transition:border-color 0.2s;}
+.sal-inp:focus,.sal-sel:focus,.sal-ta:focus{border-color:rgba(229,57,53,0.5);}
+.sal-sel option{background:#001020;}
+.sal-ta{resize:vertical;min-height:55px;}
+
+/* Selector de tipo de mapa */
+.map-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.map-type-btn{background:rgba(0,12,35,0.7);border:1px solid rgba(229,57,53,0.18);border-radius:8px;padding:10px 8px;cursor:pointer;text-align:center;transition:all 0.2s;color:rgba(239,154,154,0.6);font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;line-height:1.4;}
+.map-type-btn:hover,.map-type-btn.sel{background:rgba(229,57,53,0.1);border-color:rgba(229,57,53,0.5);color:#ef9a9a;box-shadow:0 0 12px rgba(229,57,53,0.15);}
+.map-type-btn .mti{font-size:20px;display:block;margin-bottom:5px;}
+.map-type-btn.full-width{grid-column:1/-1;}
+
+/* Leyenda items */
+.ley-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ley-color{width:18px;height:18px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);}
+.ley-remove{font-size:10px;cursor:pointer;color:rgba(229,57,53,0.4);margin-left:auto;padding:2px 5px;border:none;background:transparent;transition:color 0.2s;}
+.ley-remove:hover{color:#ef5350;}
+
+/* Carga de capas */
+.layer-drop{border:1.5px dashed rgba(229,57,53,0.25);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(0,12,35,0.5);}
+.layer-drop:hover,.layer-drop.drag-over{border-color:rgba(229,57,53,0.6);background:rgba(229,57,53,0.05);}
+.layer-drop-icon{font-size:22px;display:block;margin-bottom:6px;}
+.layer-drop-txt{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:rgba(239,154,154,0.4);line-height:1.6;}
+.layer-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+.layer-chip{background:rgba(0,15,40,0.8);border:1px solid rgba(229,57,53,0.2);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:10px;color:#c0d4e0;}
+.layer-chip-icon{font-size:12px;}
+.layer-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.layer-chip-rm{font-size:10px;cursor:pointer;color:rgba(229,57,53,0.35);border:none;background:transparent;transition:color 0.2s;}
+.layer-chip-rm:hover{color:#ef5350;}
+
+/* Botón actualizar preview */
+.btn-preview{margin:10px 16px;width:calc(100% - 32px);font-family:'Orbitron',monospace;font-size:8.5px;font-weight:700;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#e53935,#b71c1c);border:none;border-radius:8px;padding:11px;cursor:pointer;transition:all 0.3s;box-shadow:0 0 16px rgba(229,57,53,0.3);}
+.btn-preview:hover{background:linear-gradient(135deg,#ef5350,#e53935);box-shadow:0 0 28px rgba(229,57,53,0.5);}
+
+/* Área preview */
+#sal-preview{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:18px;gap:0;}
+#sal-preview-label{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(229,57,53,0.4);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+#sal-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#sal-canvas{background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.6);transform-origin:center center;}
+
+/* Header tab activo */
+.dh-tab{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(239,154,154,0.45);border:1px solid rgba(229,57,53,0.15);background:transparent;padding:6px 13px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
+.dh-tab:hover,.dh-tab.activo{color:#ef9a9a;border-color:rgba(229,57,53,0.5);background:rgba(229,57,53,0.08);}
 </style>
 </head>
 <body>
@@ -143,6 +197,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
       <div class="dh-stat"><span id="kpi-entregado-h">0</span>ENTREGADOS</div>
       <div class="dh-stat"><span id="kpi-proceso-h">0</span>EN PROCESO</div>
     </div>
+    <button class="dh-tab activo" id="tab-registro" onclick="cambiarTab('registro')">📋 REGISTRO</button>
+    <button class="dh-tab" id="tab-salidas" onclick="cambiarTab('salidas')">🗺️ SALIDAS</button>
     <button class="dh-back" onclick="refrescarDatos()" style="margin-right:8px;">↺ REFRESCAR</button>
     <a class="dh-back" href="index.html">← INICIO</a>
   </div>
@@ -292,6 +348,136 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
     </div><!-- /main-area -->
   </div><!-- /dash-body -->
 </div><!-- /dashboard -->
+
+<!-- ══════════ SALIDAS CARTOGRÁFICAS ══════════ -->
+<div id="salidas-panel">
+
+  <!-- Sidebar izquierdo -->
+  <div id="sal-sidebar">
+
+    <!-- 1. Tipo de mapa -->
+    <div class="sal-sec">
+      <div class="sal-sec-title">TIPO DE SALIDA</div>
+      <div class="map-type-grid">
+        <button class="map-type-btn sel" id="mtype-h" onclick="selTipo('horizontal',this)">
+          <span class="mti">🗺️</span>MAPA<br>HORIZONTAL
+        </button>
+        <button class="map-type-btn" id="mtype-hs" onclick="selTipo('horizontal-simple',this)">
+          <span class="mti">📐</span>MAPA HORIZ.<br>SIMPLE
+        </button>
+        <button class="map-type-btn" id="mtype-hb" onclick="selTipo('horizontal-blanco',this)">
+          <span class="mti">⬜</span>MAPA HORIZ.<br>BLANCO
+        </button>
+        <button class="map-type-btn" id="mtype-m6" onclick="selTipo('multi6',this)">
+          <span class="mti">⬛</span>MULTIMAPA<br>X6
+        </button>
+        <button class="map-type-btn full-width" id="mtype-m4" onclick="selTipo('multi4',this)">
+          <span class="mti">🔲</span>MULTIMAPA X4
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Datos del panel lateral / recuadro -->
+    <div class="sal-sec">
+      <div class="sal-sec-title">ENCABEZADO / ENTIDAD</div>
+      <div class="sal-f">
+        <span class="sal-lbl">NOMBRE DE LA ENTIDAD</span>
+        <input class="sal-inp" id="s-entidad" type="text" placeholder="Ej. UNIDAD ADMINISTRATIVA DE SALUD" oninput="actualizarPreview()">
+      </div>
+      <div class="sal-f">
+        <span class="sal-lbl">PROGRAMA / SUBPROGRAMA</span>
+        <input class="sal-inp" id="s-programa" type="text" placeholder="Ej. PROGRAMA DE ETV - ZOONOSIS" oninput="actualizarPreview()">
+      </div>
+    </div>
+
+    <!-- 3. Datos del mapa -->
+    <div class="sal-sec">
+      <div class="sal-sec-title">DATOS DEL MAPA</div>
+      <div class="sal-f">
+        <span class="sal-lbl">TÍTULO PRINCIPAL</span>
+        <input class="sal-inp" id="s-titulo" type="text" placeholder="Ej. PROMOCION Y PREVENCION..." oninput="actualizarPreview()">
+      </div>
+      <div class="sal-f">
+        <span class="sal-lbl">SUBTÍTULO / MUNICIPIO / AÑO</span>
+        <input class="sal-inp" id="s-subtitulo" type="text" placeholder="Ej. MUNICIPIO DE ARAUQUITA 2024" oninput="actualizarPreview()">
+      </div>
+      <div class="sal-f" id="wrap-s-escala">
+        <span class="sal-lbl">ESCALA</span>
+        <select class="sal-sel" id="s-escala" onchange="actualizarPreview()">
+          <option>1:500</option>
+          <option>1:1.000</option>
+          <option selected>1:5.000</option>
+          <option>1:10.000</option>
+          <option>1:25.000</option>
+          <option>1:50.000</option>
+          <option>1:100.000</option>
+          <option>1:200.000</option>
+          <option>1:500.000</option>
+          <option>1:570.000</option>
+          <option>1:1.200.000</option>
+          <option>Sin escala definida</option>
+        </select>
+      </div>
+      <div class="sal-f">
+        <span class="sal-lbl">SISTEMA DE COORDENADAS</span>
+        <select class="sal-sel" id="s-scs" onchange="actualizarPreview()">
+          <option>MAGNA Colombia Este</option>
+          <option>GAUSS BTAMAGNA</option>
+          <option>MAGNA-SIRGAS</option>
+          <option>WGS84</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="sal-f">
+        <span class="sal-lbl">PROYECCIÓN</span>
+        <input class="sal-inp" id="s-proyeccion" type="text" value="Transverse Mercator" oninput="actualizarPreview()">
+      </div>
+    </div>
+
+    <!-- 4. Leyenda dinámica -->
+    <div class="sal-sec" id="wrap-leyenda">
+      <div class="sal-sec-title">LEYENDA</div>
+      <div id="ley-list"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input class="sal-inp" id="ley-color-inp" type="color" style="width:36px;padding:2px;height:30px;cursor:pointer;" value="#4caf50">
+        <input class="sal-inp" id="ley-texto-inp" type="text" placeholder="Descripción..." style="flex:1;">
+        <button onclick="agregarLeyItem()" style="background:rgba(229,57,53,0.2);border:1px solid rgba(229,57,53,0.3);color:#ef9a9a;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px;">＋</button>
+      </div>
+    </div>
+
+    <!-- 5. Títulos de data frames (multimapa) -->
+    <div class="sal-sec" id="wrap-frames" style="display:none;">
+      <div class="sal-sec-title">TÍTULOS DE DATA FRAMES</div>
+      <div id="frames-list"></div>
+    </div>
+
+    <!-- 6. Carga de capas -->
+    <div class="sal-sec">
+      <div class="sal-sec-title">CARGAR CAPA(S)</div>
+      <label class="layer-drop" id="layer-drop-zone">
+        <input type="file" id="layer-file-inp" accept=".geojson,.json,.kml,.kmz,.shp,.csv,.gpx" multiple style="display:none;" onchange="agregarCapas(this.files)">
+        <span class="layer-drop-icon">📂</span>
+        <span class="layer-drop-txt">ARRASTRE O HAGA CLIC<br>PARA CARGAR CAPAS<br><span style="opacity:0.5;font-size:6px;">.GeoJSON · .KML · .KMZ · .SHP · .CSV · .GPX</span></span>
+      </label>
+      <div class="layer-list" id="layer-list"></div>
+    </div>
+
+    <button class="btn-preview" onclick="actualizarPreview()">↻ ACTUALIZAR VISTA PREVIA</button>
+
+  </div><!-- /sal-sidebar -->
+
+  <!-- Área de vista previa -->
+  <div id="sal-preview">
+    <div id="sal-preview-label">
+      <span>👁</span> VISTA PREVIA · SALIDA CARTOGRÁFICA
+      <span style="margin-left:auto;font-size:7px;color:rgba(229,57,53,0.3);">SOLO DISEÑO — LA VISTA REAL DEL MAPA SE DEFINE EN SU SOFTWARE GIS</span>
+    </div>
+    <div id="sal-canvas-wrap">
+      <canvas id="sal-canvas" width="1100" height="780"></canvas>
+    </div>
+  </div>
+
+</div><!-- /salidas-panel -->
 
 <!-- Modal detalle -->
 <div id="modal-overlay" onclick="cerrarModal(event)">
@@ -498,6 +684,549 @@ function refrescarDatos() {
   renderTabla();
   mostrarNotif('🔄 DATOS ACTUALIZADOS');
 }
+
+// ══════════════════════════════════════════════════
+//  MÓDULO SALIDAS CARTOGRÁFICAS
+// ══════════════════════════════════════════════════
+
+var tipoActual = 'horizontal';
+var leyItems = [];
+var capasActivas = [];
+var framesData = [];
+
+// ── CAMBIO DE TAB ──
+function cambiarTab(tab) {
+  var tabR = document.getElementById('tab-registro');
+  var tabS = document.getElementById('tab-salidas');
+  var dashBody = document.getElementById('dash-body');
+  var salPanel = document.getElementById('salidas-panel');
+  var kpiBar   = document.getElementById('kpi-bar');
+
+  if (tab === 'registro') {
+    tabR.classList.add('activo');
+    tabS.classList.remove('activo');
+    dashBody.style.display = 'flex';
+    salPanel.style.display = 'none';
+  } else {
+    tabS.classList.add('activo');
+    tabR.classList.remove('activo');
+    dashBody.style.display = 'none';
+    salPanel.style.display = 'flex';
+    setTimeout(actualizarPreview, 80);
+  }
+}
+
+// ── SELECTOR TIPO DE MAPA ──
+function selTipo(tipo, btn) {
+  tipoActual = tipo;
+  document.querySelectorAll('.map-type-btn').forEach(function(b){ b.classList.remove('sel'); });
+  btn.classList.add('sel');
+
+  // Mostrar/ocultar sección de data frames (solo multimapa)
+  var wf = document.getElementById('wrap-frames');
+  var multi = (tipo === 'multi6' || tipo === 'multi4');
+  wf.style.display = multi ? 'block' : 'none';
+
+  // Generar inputs de data frames
+  if (multi) {
+    var count = tipo === 'multi6' ? 6 : 4;
+    var fl = document.getElementById('frames-list');
+    fl.innerHTML = '';
+    framesData = [];
+    for (var i = 0; i < count; i++) {
+      framesData.push('');
+      (function(idx){
+        var d = document.createElement('div');
+        d.className = 'sal-f';
+        d.innerHTML = '<span class="sal-lbl">FRAME '+(idx+1)+'</span>' +
+          '<input class="sal-inp" data-frame="'+idx+'" type="text" placeholder="Ej. C.P. LA ESMERALDA" oninput="framesData['+idx+']=this.value;actualizarPreview()">';
+        fl.appendChild(d);
+      })(i);
+    }
+  }
+
+  // Escala — ocultar en blanco (va dentro del mapa)
+  var ws = document.getElementById('wrap-s-escala');
+  ws.style.display = tipo === 'horizontal-blanco' ? 'none' : 'block';
+
+  actualizarPreview();
+}
+
+// ── LEYENDA ──
+function agregarLeyItem() {
+  var color = document.getElementById('ley-color-inp').value;
+  var texto = document.getElementById('ley-texto-inp').value.trim();
+  if (!texto) return;
+  leyItems.push({ color: color, texto: texto });
+  document.getElementById('ley-texto-inp').value = '';
+  renderLeyItems();
+  actualizarPreview();
+}
+
+function renderLeyItems() {
+  var ll = document.getElementById('ley-list');
+  ll.innerHTML = '';
+  leyItems.forEach(function(it, i){
+    var d = document.createElement('div');
+    d.className = 'ley-item';
+    d.innerHTML = '<div class="ley-color" style="background:'+it.color+'"></div>' +
+      '<span style="font-size:11px;color:#c0d0e0;flex:1;">'+escHtml(it.texto)+'</span>' +
+      '<button class="ley-remove" onclick="quitarLey('+i+')">✕</button>';
+    ll.appendChild(d);
+  });
+}
+
+function quitarLey(i) {
+  leyItems.splice(i, 1);
+  renderLeyItems();
+  actualizarPreview();
+}
+
+// ── CAPAS ──
+function agregarCapas(files) {
+  Array.prototype.forEach.call(files, function(f){
+    var ext = f.name.split('.').pop().toLowerCase();
+    var icono = {geojson:'🟩',json:'🟩',kml:'📍',kmz:'📍',shp:'🔷',csv:'📊',gpx:'🏃'}[ext] || '📄';
+    capasActivas.push({ name: f.name, icono: icono, file: f });
+  });
+  renderCapas();
+  actualizarPreview();
+}
+
+function renderCapas() {
+  var ll = document.getElementById('layer-list');
+  ll.innerHTML = '';
+  capasActivas.forEach(function(c, i){
+    var d = document.createElement('div');
+    d.className = 'layer-chip';
+    d.innerHTML = '<span class="layer-chip-icon">'+c.icono+'</span>' +
+      '<span class="layer-chip-name">'+escHtml(c.name)+'</span>' +
+      '<button class="layer-chip-rm" onclick="quitarCapa('+i+')">✕</button>';
+    ll.appendChild(d);
+  });
+}
+
+function quitarCapa(i) {
+  capasActivas.splice(i, 1);
+  renderCapas();
+  actualizarPreview();
+}
+
+// drag & drop zona
+(function(){
+  var dz = document.getElementById('layer-drop-zone');
+  if (!dz) return;
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); dz.classList.remove('drag-over');
+    agregarCapas(e.dataTransfer.files);
+  });
+})();
+
+// ── DIBUJAR PREVIEW EN CANVAS ──
+function actualizarPreview() {
+  var entidad    = (document.getElementById('s-entidad')    ||{}).value || 'ENTIDAD';
+  var programa   = (document.getElementById('s-programa')   ||{}).value || 'PROGRAMA';
+  var titulo     = (document.getElementById('s-titulo')     ||{}).value || 'TÍTULO DEL MAPA';
+  var subtitulo  = (document.getElementById('s-subtitulo')  ||{}).value || '';
+  var escala     = (document.getElementById('s-escala')     ||{}).value || '1:5.000';
+  var scs        = (document.getElementById('s-scs')        ||{}).value || 'MAGNA Colombia Este';
+  var proy       = (document.getElementById('s-proyeccion') ||{}).value || 'Transverse Mercator';
+
+  var cvs = document.getElementById('sal-canvas');
+  var wrap = document.getElementById('sal-canvas-wrap');
+  if (!cvs) return;
+
+  // Escalar canvas al contenedor
+  var maxW = wrap.clientWidth  - 20;
+  var maxH = wrap.clientHeight - 20;
+  var baseW = 1100, baseH = 780;
+  var scale = Math.min(maxW/baseW, maxH/baseH, 1);
+  cvs.style.transform = 'scale('+scale+')';
+
+  var ctx = cvs.getContext('2d');
+  ctx.clearRect(0,0,baseW,baseH);
+
+  switch(tipoActual) {
+    case 'horizontal':        dibujarHorizontal(ctx,baseW,baseH,entidad,programa,titulo,subtitulo,escala,scs,proy); break;
+    case 'horizontal-simple': dibujarHorizontalSimple(ctx,baseW,baseH,entidad,titulo,subtitulo,escala,scs,proy); break;
+    case 'horizontal-blanco': dibujarHorizontalBlanco(ctx,baseW,baseH,titulo,subtitulo,scs,proy); break;
+    case 'multi6':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,6); break;
+    case 'multi4':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,4); break;
+  }
+}
+
+// ────────────────────────────────────────────────
+//  HELPERS DE DIBUJO
+// ────────────────────────────────────────────────
+function fillBox(ctx,x,y,w,h,fill,stroke,sw){
+  ctx.fillStyle=fill; ctx.fillRect(x,y,w,h);
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw||1;ctx.strokeRect(x,y,w,h);}
+}
+function txt(ctx,s,x,y,font,color,align,baseline){
+  ctx.font=font;ctx.fillStyle=color;
+  ctx.textAlign=align||'left';ctx.textBaseline=baseline||'alphabetic';
+  ctx.fillText(s,x,y);
+}
+function wrapText(ctx,s,x,y,maxW,lineH,font,color){
+  ctx.font=font;ctx.fillStyle=color;ctx.textBaseline='top';ctx.textAlign='left';
+  var words=s.split(' '),line='';
+  for(var i=0;i<words.length;i++){
+    var test=line+(line?' ':'')+words[i];
+    if(ctx.measureText(test).width>maxW && i>0){
+      ctx.fillText(line,x,y); line=words[i]; y+=lineH;
+    } else { line=test; }
+  }
+  ctx.fillText(line,x,y);
+  return y+lineH;
+}
+function broseBar(ctx,x,y,w,maxVal,pixPerUnit){
+  // barra escala gráfica simple
+  var barW = w; var segs=4;
+  ctx.strokeStyle='#333';ctx.lineWidth=1;
+  ctx.strokeRect(x,y,barW,10);
+  for(var i=0;i<=segs;i++){
+    var xi=x+i*(barW/segs);
+    ctx.fillStyle=i%2===0?'#333':'#fff';
+    ctx.fillRect(xi,y,barW/segs,10);
+    ctx.strokeRect(xi,y,barW/segs,10);
+  }
+}
+function dibujarRosa(ctx,cx,cy,r){
+  var pts=[
+    {a:-Math.PI/2,lbl:'N',main:true},
+    {a:Math.PI/2,lbl:'S',main:false},
+    {a:0,lbl:'E',main:false},
+    {a:Math.PI,lbl:'W',main:false}
+  ];
+  // Punta N grande
+  ctx.beginPath();
+  ctx.moveTo(cx,cy-r);
+  ctx.lineTo(cx-r*0.3,cy);
+  ctx.lineTo(cx,cy+r*0.5);
+  ctx.lineTo(cx+r*0.3,cy);
+  ctx.closePath();
+  ctx.fillStyle='#222';ctx.fill();
+  // Punta S
+  ctx.beginPath();
+  ctx.moveTo(cx,cy+r);
+  ctx.lineTo(cx-r*0.3,cy);
+  ctx.lineTo(cx,cy-r*0.5);
+  ctx.lineTo(cx+r*0.3,cy);
+  ctx.closePath();
+  ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#555';ctx.lineWidth=0.5;ctx.stroke();
+  // Labels
+  pts.forEach(function(p){
+    ctx.font='bold '+(p.main?11:8)+'px Arial';
+    ctx.fillStyle=p.main?'#000':'#555';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(p.lbl,cx+Math.cos(p.a)*(r+10),cy+Math.sin(p.a)*(r+10));
+  });
+}
+function dibujarMapaFondo(ctx,x,y,w,h,capas){
+  // Fondo crema / calles simuladas
+  fillBox(ctx,x,y,w,h,'#f0ede6',null);
+  // Si hay capas, mostrar indicador
+  if(capas.length>0){
+    ctx.font='8px Arial';ctx.fillStyle='rgba(0,60,120,0.35)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(capas.length+' CAPA'+(capas.length>1?'S':'')+' CARGADA'+(capas.length>1?'S':''),x+w/2,y+h-10);
+    // Simular puntos/polígono de capa
+    var colors=['rgba(76,175,80,0.7)','rgba(255,87,34,0.7)','rgba(33,150,243,0.7)','rgba(255,193,7,0.7)'];
+    capas.forEach(function(cap,ci){
+      ctx.fillStyle=colors[ci%colors.length];
+      for(var j=0;j<18;j++){
+        var px=x+20+Math.random()*(w-40);
+        var py=y+20+Math.random()*(h-40);
+        ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();
+      }
+    });
+  } else {
+    // Cuadrícula de calles dummy
+    ctx.strokeStyle='rgba(180,170,160,0.5)';ctx.lineWidth=1;
+    for(var i=0;i<6;i++){
+      ctx.beginPath();ctx.moveTo(x,y+i*(h/5));ctx.lineTo(x+w,y+i*(h/5));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x+i*(w/5),y);ctx.lineTo(x+i*(w/5),y+h);ctx.stroke();
+    }
+  }
+  // Borde del data frame
+  ctx.strokeStyle='#888';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);
+}
+function dibujarLocalizacion(ctx,x,y,w,h){
+  fillBox(ctx,x,y,w,h,'#e8f5e9',null);
+  // Mini silueta colombia
+  ctx.fillStyle='#4caf50';ctx.fillRect(x+4,y+4,w-8,h-8);
+  ctx.fillStyle='#ffeb3b';ctx.fillRect(x+w*0.15,y+h*0.1,w*0.7,h*0.8);
+  ctx.fillStyle='#f44336';ctx.fillRect(x+w*0.25,y+h*0.15,w*0.2,h*0.35);
+  ctx.strokeStyle='#aaa';ctx.lineWidth=0.5;ctx.strokeRect(x,y,w,h);
+}
+function panelDatosTecnicos(ctx,x,y,w,scs,proy){
+  var datos=[
+    'Coordinate System: '+scs,
+    'Projection: '+proy,
+    'Datum: MAGNA',
+    'False Easting: 1.000.000.0000',
+    'False Northing: 1.000.000.0000',
+    'Scale Factor: 1.0000',
+    'Units: Meter'
+  ];
+  ctx.font='7px Arial';ctx.fillStyle='#555';ctx.textAlign='left';ctx.textBaseline='top';
+  datos.forEach(function(d,i){ ctx.fillText(d,x,y+i*10); });
+}
+
+// ── LOGO PLACEHOLDER ──
+function dibujarLogo(ctx,x,y,w,h){
+  fillBox(ctx,x,y,w,h,'#e3f2fd',null);
+  ctx.strokeStyle='#1565c0';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);
+  // Cruz médica
+  ctx.fillStyle='#1565c0';
+  ctx.fillRect(x+w*0.35,y+h*0.2,w*0.3,h*0.6);
+  ctx.fillRect(x+w*0.15,y+h*0.35,w*0.7,h*0.3);
+  ctx.beginPath();ctx.arc(x+w/2,y+h/2,Math.min(w,h)*0.45,0,Math.PI*2);
+  ctx.strokeStyle='#1565c0';ctx.lineWidth=1;ctx.stroke();
+}
+
+// ── 1. MAPA HORIZONTAL ──
+function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,proy){
+  var pad=12;
+  var mapW=Math.round(W*0.70), panelW=W-mapW-pad*2;
+  var panelX=mapW+pad;
+
+  // Fondo blanco general
+  fillBox(ctx,0,0,W,H,'#ffffff',null);
+  // Borde exterior doble
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(6,6,W-12,H-12);
+  ctx.strokeStyle='#666';ctx.lineWidth=0.5;ctx.strokeRect(9,9,W-18,H-18);
+
+  // DATA FRAME — mapa
+  dibujarMapaFondo(ctx,12,12,mapW-12,H-24,capasActivas);
+  // Rosa de vientos
+  dibujarRosa(ctx,65,65,28);
+
+  // PANEL DERECHO
+  var px=panelX, py=12, pw=W-panelX-12;
+
+  // Logo + entidad
+  dibujarLogo(ctx,px,py,pw,55);
+  py+=55+4;
+  fillBox(ctx,px,py,pw,38,'#f5f5f5','#ccc');
+  wrapText(ctx,entidad||'ENTIDAD',px+6,py+5,pw-12,11,'bold 8.5px Arial','#1a237e');
+  py+=38+3;
+
+  // Separador programa
+  fillBox(ctx,px,py,pw,22,'#e8eaf6','#9fa8da');
+  txt(ctx,programa||'PROGRAMA',px+pw/2,py+13,'bold 8px Arial','#1a237e','center','middle');
+  py+=22+4;
+
+  // Escala
+  fillBox(ctx,px,py,pw,42,'#fafafa','#ddd');
+  txt(ctx,'ESCALA',px+pw/2,py+8,'bold 7px Arial','#555','center','top');
+  txt(ctx,escala,px+pw/2,py+18,'8px Arial','#000','center','top');
+  broseBar(ctx,px+10,py+28,pw-20,100,1);
+  txt(ctx,'Metros',px+pw-14,py+40,'6px Arial','#555','right','middle');
+  py+=42+4;
+
+  // Leyenda
+  fillBox(ctx,px,py,pw,24,'#f5f5f5','#ddd');
+  txt(ctx,'LEYENDA',px+pw/2,py+14,'bold 7.5px Arial','#333','center','middle');
+  py+=24;
+  fillBox(ctx,px,py,pw,1,'#ddd',null);
+  py+=2;
+  var leyH=Math.min(leyItems.length,6)*18+8;
+  fillBox(ctx,px,py,pw,leyH>18?leyH:18,'#fafafa',null);
+  leyItems.slice(0,6).forEach(function(it,i){
+    ctx.fillStyle=it.color;ctx.fillRect(px+8,py+4+i*18,16,12);
+    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(px+8,py+4+i*18,16,12);
+    ctx.font='7.5px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(it.texto.substring(0,34),px+28,py+5+i*18);
+  });
+  py+=leyH>18?leyH:18;
+  py+=4;
+
+  // Diagrama localización
+  fillBox(ctx,px,py,pw,18,'#f5f5f5','#ddd');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+10,'bold 6.5px Arial','#444','center','middle');
+  py+=18;
+  var locW=Math.floor((pw-6)/2);
+  dibujarLocalizacion(ctx,px,py,locW,65);
+  dibujarLocalizacion(ctx,px+locW+6,py,locW,65);
+  py+=65+4;
+
+  // Título principal mapa
+  fillBox(ctx,px,py,pw,48,'#e8eaf6','#9fa8da');
+  wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+6,py+5,pw-12,13,'bold 8.5px Arial','#1a237e');
+  if(subtitulo){txt(ctx,subtitulo.toUpperCase(),px+pw/2,py+38,'6.5px Arial','#3949ab','center','top');}
+  py+=48+4;
+
+  // Datos técnicos
+  var techH=H-py-12;
+  if(techH>40){
+    fillBox(ctx,px,py,pw,techH,'#fafafa','#eee');
+    panelDatosTecnicos(ctx,px+6,py+4,pw-12,scs,proy);
+  }
+}
+
+// ── 2. MAPA HORIZONTAL SIMPLE ──
+function dibujarHorizontalSimple(ctx,W,H,entidad,titulo,subtitulo,escala,scs,proy){
+  var mapW=Math.round(W*0.73), panelW=W-mapW;
+  fillBox(ctx,0,0,W,H,'#ffffff',null);
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(5,5,W-10,H-10);
+
+  dibujarMapaFondo(ctx,10,10,mapW-10,H-20,capasActivas);
+  dibujarRosa(ctx,60,58,26);
+
+  var px=mapW+2, py=10, pw=W-mapW-12;
+
+  // Escala
+  fillBox(ctx,px,py,pw,40,'#fafafa','#ccc');
+  txt(ctx,'ESCALA',px+pw/2,py+7,'bold 7px Arial','#444','center','top');
+  txt(ctx,escala,px+pw/2,py+17,'9px Arial','#000','center','top');
+  broseBar(ctx,px+8,py+28,pw-16,100,1);
+  py+=40+4;
+
+  // Localización
+  fillBox(ctx,px,py,pw,14,'#f5f5f5','#ddd');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+8,'bold 6px Arial','#444','center','middle');
+  py+=14;
+  dibujarLocalizacion(ctx,px,py,Math.floor((pw-4)/2),58);
+  dibujarLocalizacion(ctx,px+Math.floor((pw-4)/2)+4,py,Math.floor((pw-4)/2),58);
+  py+=58+4;
+
+  // Leyenda
+  fillBox(ctx,px,py,pw,14,'#f5f5f5','#ddd');
+  txt(ctx,'LEYENDA',px+pw/2,py+8,'bold 6.5px Arial','#333','center','middle');
+  py+=14;
+  var leyH=Math.min(leyItems.length,5)*17+8;
+  fillBox(ctx,px,py,pw,leyH>16?leyH:16,'#fafafa',null);
+  leyItems.slice(0,5).forEach(function(it,i){
+    ctx.fillStyle=it.color;ctx.fillRect(px+6,py+3+i*17,14,11);
+    ctx.font='7px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(it.texto.substring(0,32),px+24,py+4+i*17);
+  });
+  py+=leyH>16?leyH:16+4;
+
+  // Título inferior
+  var remH=H-py-10;
+  if(remH>50){
+    fillBox(ctx,px,py,pw,remH,'#e8eaf6','#9fa8da');
+    wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+5,py+6,pw-10,11,'bold 7.5px Arial','#1a237e');
+    if(subtitulo) wrapText(ctx,subtitulo.toUpperCase(),px+5,py+32,pw-10,10,'6px Arial','#3949ab');
+    panelDatosTecnicos(ctx,px+5,py+50,pw-10,scs,proy);
+  }
+}
+
+// ── 3. MAPA HORIZONTAL BLANCO ──
+function dibujarHorizontalBlanco(ctx,W,H,titulo,subtitulo,scs,proy){
+  fillBox(ctx,0,0,W,H,'#ffffff',null);
+  ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(12,12,W-24,H-24);
+
+  // Mapa casi completo
+  dibujarMapaFondo(ctx,16,16,W-32,H-200,capasActivas);
+  dibujarRosa(ctx,W-55,40,26);
+
+  // Barra inferior con datos
+  var bY=H-180;
+  fillBox(ctx,16,bY,W-32,164,'#f5f5f5','#ccc');
+
+  // Título centrado
+  txt(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),W/2,bY+22,'bold 13px Arial','#1a237e','center','middle');
+  if(subtitulo) txt(ctx,subtitulo.toUpperCase(),W/2,bY+40,'9px Arial','#333','center','middle');
+
+  // Escala gráfica
+  txt(ctx,'ESCALA',W/2,bY+60,'bold 7px Arial','#444','center','top');
+  broseBar(ctx,W/2-70,bY+70,140,100,1);
+
+  // Leyenda horizontal
+  var lx=28;
+  txt(ctx,'LEYENDA',lx,bY+60,'bold 7px Arial','#333','left','top');
+  leyItems.slice(0,5).forEach(function(it,i){
+    var lxi=lx+i*120;
+    ctx.fillStyle=it.color;ctx.fillRect(lxi,bY+73,14,11);
+    ctx.font='7px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(it.texto.substring(0,14),lxi+18,bY+73);
+  });
+
+  // Localizacion + datos técnicos
+  dibujarLocalizacion(ctx,W-170,bY+55,70,55);
+  dibujarLocalizacion(ctx,W-95,bY+55,70,55);
+  panelDatosTecnicos(ctx,W-200,bY+112,190,scs,proy);
+}
+
+// ── 4/5. MULTIMAPA ──
+function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
+  fillBox(ctx,0,0,W,H,'#ffffff',null);
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(6,6,W-12,H-12);
+
+  var panelW=Math.round(W*0.28);
+  var mapAreaW=W-panelW-12;
+
+  // Grilla de mapas
+  var cols=3, rows=Math.ceil(count/cols);
+  if(count===4){cols=2;rows=2;}
+  var cellW=Math.floor((mapAreaW-cols*4)/cols);
+  var cellH=Math.floor((H-24-rows*4)/rows);
+
+  for(var i=0;i<count;i++){
+    var col=i%cols, row=Math.floor(i/cols);
+    var cx2=10+col*(cellW+4), cy2=12+row*(cellH+4);
+    dibujarMapaFondo(ctx,cx2,cy2,cellW,cellH,i===0?capasActivas:[]);
+    // Título del frame
+    var ftxt=framesData[i]||(i===0?'C.P. 1':'C.P. '+(i+1));
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(cx2+4,cy2+cellH-22,cellW-8,20);
+    txt(ctx,ftxt.toUpperCase(),cx2+cellW/2,cy2+cellH-10,'bold 8px Arial','#fff','center','middle');
+    if(i===0) dibujarRosa(ctx,cx2+22,cy2+22,14);
+  }
+
+  // Panel derecho
+  var px=mapAreaW+8, py=10, pw=panelW-4;
+  dibujarLogo(ctx,px,py,pw,50);
+  py+=50+3;
+  fillBox(ctx,px,py,pw,34,'#f5f5f5','#ccc');
+  wrapText(ctx,entidad||'ENTIDAD',px+5,py+3,pw-10,10,'bold 7.5px Arial','#1a237e');
+  py+=34+3;
+  fillBox(ctx,px,py,pw,20,'#e8eaf6','#9fa8da');
+  txt(ctx,programa||'PROGRAMA',px+pw/2,py+10,'bold 7px Arial','#1a237e','center','middle');
+  py+=20+3;
+
+  // Brújula + Leyenda
+  fillBox(ctx,px,py,pw,55,'#fafafa','#ddd');
+  dibujarRosa(ctx,px+30,py+27,20);
+  txt(ctx,'LEYENDA',px+pw/2+10,py+5,'bold 6.5px Arial','#333','center','top');
+  leyItems.slice(0,3).forEach(function(it,i){
+    ctx.fillStyle=it.color;ctx.fillRect(px+pw/2,py+15+i*14,12,10);
+    ctx.font='6.5px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(it.texto.substring(0,18),px+pw/2+15,py+16+i*14);
+  });
+  py+=55+3;
+
+  // Localización
+  fillBox(ctx,px,py,pw,14,'#f0f0f0','#ccc');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+8,'bold 5.5px Arial','#444','center','middle');
+  py+=14;
+  var locW2=Math.floor((pw-4)/2);
+  dibujarLocalizacion(ctx,px,py,locW2,55);
+  dibujarLocalizacion(ctx,px+locW2+4,py,locW2,55);
+  py+=55+4;
+
+  // Escala
+  fillBox(ctx,px,py,pw,36,'#fafafa','#ddd');
+  txt(ctx,'ESCALA  '+escala,px+pw/2,py+7,'bold 6.5px Arial','#444','center','top');
+  broseBar(ctx,px+6,py+18,pw-12,100,1);
+  py+=36+4;
+
+  // Título principal
+  var remH2=H-py-12;
+  if(remH2>40){
+    fillBox(ctx,px,py,pw,remH2,'#e8eaf6','#9fa8da');
+    wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+5,py+5,pw-10,11,'bold 7.5px Arial','#1a237e');
+    panelDatosTecnicos(ctx,px+5,py+50,pw-10,scs,proy);
+  }
+}
+
+// Arrancar preview al cargar salidas
+window.addEventListener('resize', function(){
+  if(document.getElementById('salidas-panel').style.display==='flex') actualizarPreview();
+});
 </script>
 </body>
 </html>
