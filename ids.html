@@ -467,13 +467,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
     </div>
     <div id="sal-canvas-wrap" style="position:relative;">
       <canvas id="sal-canvas" width="1100" height="780"></canvas>
-      <!-- Data frames OSM para mapa horizontal simple -->
-      <div id="df-wrap-1" style="display:none;position:absolute;border:1px solid #aaa;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;">
-        <div id="df-map-1" style="width:100%;height:100%;"></div>
-      </div>
-      <div id="df-wrap-2" style="display:none;position:absolute;border:1px solid #aaa;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;">
-        <div id="df-map-2" style="width:100%;height:100%;"></div>
-      </div>
+      <!-- Data frames OSM — creados dinámicamente por asegurarDivs() -->
     </div>
   </div>
 
@@ -927,6 +921,7 @@ function actualizarPreview() {
 
   var ctx = cvs.getContext('2d');
   ctx.clearRect(0,0,baseW,baseH);
+  _locAreas=[];  // reset antes de dibujar — dibujarLocalizacion los llena
 
   switch(tipoActual) {
     case 'horizontal':        dibujarHorizontal(ctx,baseW,baseH,entidad,programa,titulo,subtitulo,escala,scs,proy); break;
@@ -1168,7 +1163,9 @@ function drawPoly(ctx,rings,color,toX,toY){
   ctx.fillStyle=fc;ctx.fill('evenodd');
   ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
 }
+var _locAreas=[];  // se llena en cada render, usado por posicionarDataFrames
 function dibujarLocalizacion(ctx,x,y,w,h){
+  _locAreas.push({x:x,y:y,w:w,h:h});
   fillBox(ctx,x,y,w,h,'#e8f5e9',null);
   // Mini silueta colombia
   ctx.fillStyle='#4caf50';ctx.fillRect(x+4,y+4,w-8,h-8);
@@ -1373,29 +1370,18 @@ function dibujarHorizontalSimple(ctx,W,H,entidad,titulo,subtitulo,escala,scs,pro
   txt(ctx,'0',b1.x+8,by+64,'6px Arial','#444','left','top');
   txt(ctx,'Metros',b1.x+b1.w-8,by+64,'6px Arial','#444','right','top');
 
-  // ── Bloque 2: Data Frame 1 (localización Colombia) ──
+  // ── Bloque 2: Data Frame 1 (localización Colombia) — cubierto por Leaflet overlay ──
   var b2=blocks[2];
   fillBox(ctx,b2.x,by,b2.w,bh,'#fff',null);
   txt(ctx,'LOCALIZACIÓN',b2.x+b2.w/2,by+8,'bold 6px Arial','#444','center','top');
-  // Renderizar desde iframe OSM si existe, sino dibujar localización clásica
-  var dfEl1=document.getElementById('df-simple-1');
-  if(dfEl1&&dfEl1._canvas){
-    try{ ctx.drawImage(dfEl1._canvas,b2.x+4,by+16,b2.w-8,bh-22); }catch(e){ dibujarLocalizacion(ctx,b2.x+4,by+16,b2.w-8,bh-22); }
-  } else {
-    dibujarLocalizacion(ctx,b2.x+4,by+16,b2.w-8,bh-22);
-  }
+  fillBox(ctx,b2.x+4,by+16,b2.w-8,bh-22,'#e8f5e9',null);
   ctx.strokeStyle='#aaa';ctx.lineWidth=0.7;ctx.strokeRect(b2.x+4,by+16,b2.w-8,bh-22);
 
-  // ── Bloque 3: Data Frame 2 (zoom municipio) ──
+  // ── Bloque 3: Data Frame 2 (zoom municipio) — cubierto por Leaflet overlay ──
   var b3=blocks[3];
   fillBox(ctx,b3.x,by,b3.w,bh,'#fff',null);
   txt(ctx,'ÁREA DE INTERÉS',b3.x+b3.w/2,by+8,'bold 6px Arial','#444','center','top');
-  var dfEl2=document.getElementById('df-simple-2');
-  if(dfEl2&&dfEl2._canvas){
-    try{ ctx.drawImage(dfEl2._canvas,b3.x+4,by+16,b3.w-8,bh-22); }catch(e){ dibujarLocalizacion(ctx,b3.x+4,by+16,b3.w-8,bh-22); }
-  } else {
-    dibujarLocalizacion(ctx,b3.x+4,by+16,b3.w-8,bh-22);
-  }
+  fillBox(ctx,b3.x+4,by+16,b3.w-8,bh-22,'#e8f5e9',null);
   ctx.strokeStyle='#aaa';ctx.lineWidth=0.7;ctx.strokeRect(b3.x+4,by+16,b3.w-8,bh-22);
 
   // ── Bloque 4: Leyenda ──
@@ -1552,7 +1538,7 @@ window.addEventListener('resize', function(){ actualizarPreview(); posicionarDat
 //  SISTEMA UNIVERSAL DE DATA FRAMES LEAFLET
 // ══════════════════════════════════════════════════
 
-var MAX_DF = 6;          // máximo de frames (multimapa x6)
+var MAX_DF = 8;          // máximo de frames (multimapa x6 + hasta 2 de localización)
 var _dfMaps = [];        // instancias Leaflet
 var _dfAreas = [];       // áreas registradas por la función de dibujo actual
                          // cada área: {x,y,w,h} en coordenadas canvas (1100x780)
@@ -1648,10 +1634,18 @@ function getOrCreateMap(n, centerLL, zoom){
 }
 
 // Posiciones iniciales por tipo de mapa y número de frame
+// idx es 0-based (índice dentro del array areas[])
 function centroZoomDF(tipo, idx){
+  // Frames de localización siempre: par=Colombia(zoom4), impar=Arauca(zoom7)
+  var mainCount = calcAreasPorTipo(tipo).length;
+  if(idx >= mainCount){
+    var locIdx = idx - mainCount;
+    return (locIdx%2===0) ? {c:[4.5,-73.5],z:4} : {c:[6.9,-71.0],z:7};
+  }
   if(tipo==='horizontal-simple'){
-    // frame 0 = mapa principal, frame 1 = Colombia, frame 2 = área local
+    // frame 0 = mapa principal Arauca
     if(idx===0) return {c:[6.9,-71.0],z:8};
+    // frames 1,2 = localizaciones (aunque están en calcAreasPorTipo también)
     if(idx===1) return {c:[4.5,-73.5],z:4};
     return {c:[6.9,-71.0],z:7};
   }
@@ -1666,11 +1660,8 @@ function centroZoomDF(tipo, idx){
 
 // Calcula geometría canvas→pantalla y posiciona los wraps
 function posicionarDataFrames(){
-  _dfAreas=[];  // limpiar — las funciones de dibujo las vuelven a registrar en el próximo render
-
-  // Volver a ejecutar el dibujo SOLO para capturar las áreas (sin pintar nada)
-  // En su lugar, calculamos las áreas según el tipo actual directamente
-  var areas = calcAreasPorTipo(tipoActual);
+  // Combinar áreas del mapa principal con áreas de localización captadas durante el render
+  var areas = calcAreasPorTipo(tipoActual).concat(_locAreas);
   var n = areas.length;
 
   if(n===0){ ocultarDataFrames(); return; }
