@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Otros Módulos · Producción Cartográfica</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:'Rajdhani',sans-serif;color:#e0e8f0;}
@@ -463,8 +465,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
       <span>👁</span> VISTA PREVIA · SALIDA CARTOGRÁFICA
       <span style="margin-left:auto;font-size:7px;color:rgba(229,57,53,0.3);">SOLO DISEÑO — LA VISTA REAL DEL MAPA SE DEFINE EN SU SOFTWARE GIS</span>
     </div>
-    <div id="sal-canvas-wrap">
+    <div id="sal-canvas-wrap" style="position:relative;">
       <canvas id="sal-canvas" width="1100" height="780"></canvas>
+      <!-- Data frames OSM para mapa horizontal simple -->
+      <div id="df-wrap-1" style="display:none;position:absolute;border:1px solid #aaa;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;">
+        <div id="df-map-1" style="width:100%;height:100%;"></div>
+      </div>
+      <div id="df-wrap-2" style="display:none;position:absolute;border:1px solid #aaa;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:10;">
+        <div id="df-map-2" style="width:100%;height:100%;"></div>
+      </div>
     </div>
   </div>
 
@@ -926,6 +935,8 @@ function actualizarPreview() {
     case 'multi6':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,6); break;
     case 'multi4':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,4); break;
   }
+  // Posicionar data frames OSM si corresponde
+  setTimeout(posicionarDataFrames, 30);
 }
 
 // ────────────────────────────────────────────────
@@ -1241,51 +1252,143 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
 
 // ── 2. MAPA HORIZONTAL SIMPLE ──
 function dibujarHorizontalSimple(ctx,W,H,entidad,titulo,subtitulo,escala,scs,proy){
-  var mapW=Math.round(W*0.73), panelW=W-mapW;
+  var barH = 175; // altura barra inferior
+  var mapH = H - barH;
+  var borde = 3;
+
+  // ── Fondo general blanco ──
   fillBox(ctx,0,0,W,H,'#ffffff',null);
-  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(5,5,W-10,H-10);
 
-  dibujarMapaFondo(ctx,10,10,mapW-10,H-20,capasActivas);
-  dibujarRosa(ctx,60,58,26);
+  // ── Borde exterior negro doble ──
+  ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeRect(2,2,W-4,H-4);
+  ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.strokeRect(6,6,W-12,H-12);
 
-  var px=mapW+2, py=10, pw=W-mapW-12;
+  // ── Área de mapa principal (arriba) ──
+  var mx=8, my=8, mw=W-16, mh=mapH-8;
+  dibujarMapaFondo(ctx,mx,my,mw,mh,capasActivas);
 
-  // Escala
-  fillBox(ctx,px,py,pw,40,'#fafafa','#ccc');
-  txt(ctx,'ESCALA',px+pw/2,py+7,'bold 7px Arial','#444','center','top');
-  txt(ctx,escala,px+pw/2,py+17,'9px Arial','#000','center','top');
-  broseBar(ctx,px+8,py+28,pw-16,100,1);
-  py+=40+4;
-
-  // Localización
-  fillBox(ctx,px,py,pw,14,'#f5f5f5','#ddd');
-  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+8,'bold 6px Arial','#444','center','middle');
-  py+=14;
-  dibujarLocalizacion(ctx,px,py,Math.floor((pw-4)/2),58);
-  dibujarLocalizacion(ctx,px+Math.floor((pw-4)/2)+4,py,Math.floor((pw-4)/2),58);
-  py+=58+4;
-
-  // Leyenda
-  fillBox(ctx,px,py,pw,14,'#f5f5f5','#ddd');
-  txt(ctx,'LEYENDA',px+pw/2,py+8,'bold 6.5px Arial','#333','center','middle');
-  py+=14;
-  var leyH=Math.min(leyItems.length,5)*17+8;
-  fillBox(ctx,px,py,pw,leyH>16?leyH:16,'#fafafa',null);
-  leyItems.slice(0,5).forEach(function(it,i){
-    ctx.fillStyle=it.color;ctx.fillRect(px+6,py+3+i*17,14,11);
-    ctx.font='7px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
-    ctx.fillText(it.texto.substring(0,32),px+24,py+4+i*17);
-  });
-  py+=leyH>16?leyH:16+4;
-
-  // Título inferior
-  var remH=H-py-10;
-  if(remH>50){
-    fillBox(ctx,px,py,pw,remH,'#e8eaf6','#9fa8da');
-    wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+5,py+6,pw-10,11,'bold 7.5px Arial','#1a237e');
-    if(subtitulo) wrapText(ctx,subtitulo.toUpperCase(),px+5,py+32,pw-10,10,'6px Arial','#3949ab');
-    panelDatosTecnicos(ctx,px+5,py+50,pw-10,scs,proy);
+  // ── Grilla de coordenadas ──
+  ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=0.7;ctx.setLineDash([4,4]);
+  var gCols=4, gRows=3;
+  for(var gi=1;gi<gCols;gi++){
+    var gx=mx+gi*(mw/gCols);
+    ctx.beginPath();ctx.moveTo(gx,my);ctx.lineTo(gx,my+mh);ctx.stroke();
   }
+  for(var gj=1;gj<gRows;gj++){
+    var gy=my+gj*(mh/gRows);
+    ctx.beginPath();ctx.moveTo(mx,gy);ctx.lineTo(mx+mw,gy);ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // ── Rosa de vientos (arriba derecha) ──
+  dibujarRosa(ctx, mx+mw-42, my+38, 28);
+
+  // ── Línea divisoria mapa / barra ──
+  var bY = mapH;
+  ctx.strokeStyle='#000';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(8,bY);ctx.lineTo(W-8,bY);ctx.stroke();
+
+  // ═══════════════════════════════════════
+  // BARRA INFERIOR — 5 bloques horizontales
+  // ═══════════════════════════════════════
+  var bx=8, by=bY+2, bw=W-16, bh=H-bY-10;
+
+  // Proporciones de bloques (suma = 1)
+  var prop=[0.18, 0.14, 0.13, 0.13, 0.22, 0.20];
+  // [0] Título/entidad  [1] Escala  [2] DF1  [3] DF2  [4] Leyenda  [5] Datos técnicos
+  var blocks=[];
+  var cx2=bx;
+  prop.forEach(function(p){ blocks.push({x:cx2,w:Math.round(bw*p)}); cx2+=Math.round(bw*p); });
+  // Ajustar último para cubrir exactamente
+  blocks[5].w = bx+bw - blocks[5].x;
+
+  // Separadores verticales
+  ctx.strokeStyle='#999';ctx.lineWidth=1;
+  blocks.forEach(function(b,i){
+    if(i>0){ ctx.beginPath();ctx.moveTo(b.x,by);ctx.lineTo(b.x,by+bh);ctx.stroke(); }
+  });
+
+  // ── Bloque 0: Alcance geográfico / título ──
+  var b0=blocks[0];
+  fillBox(ctx,b0.x,by,b0.w,bh,'#f8f8f8',null);
+  txt(ctx,'ALCANCE GEOGRÁFICO',b0.x+b0.w/2,by+10,'bold 6.5px Arial','#555','center','top');
+  ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(b0.x+6,by+20);ctx.lineTo(b0.x+b0.w-6,by+20);ctx.stroke();
+  wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),b0.x+6,by+25,b0.w-12,12,'bold 8px Arial','#1a237e');
+  if(subtitulo) wrapText(ctx,subtitulo.toUpperCase(),b0.x+6,by+62,b0.w-12,10,'7px Arial','#3949ab');
+  if(entidad) wrapText(ctx,entidad.toUpperCase(),b0.x+6,by+bh-28,b0.w-12,10,'6.5px Arial','#444');
+
+  // ── Bloque 1: Escala ──
+  var b1=blocks[1];
+  fillBox(ctx,b1.x,by,b1.w,bh,'#ffffff',null);
+  txt(ctx,'ESCALA',b1.x+b1.w/2,by+10,'bold 7px Arial','#444','center','top');
+  txt(ctx,escala||'1:570.000',b1.x+b1.w/2,by+28,'bold 9px Arial','#000','center','top');
+  broseBar(ctx,b1.x+8,by+50,b1.w-16,100,1);
+  txt(ctx,'0',b1.x+8,by+64,'6px Arial','#444','left','top');
+  txt(ctx,'Metros',b1.x+b1.w-8,by+64,'6px Arial','#444','right','top');
+
+  // ── Bloque 2: Data Frame 1 (localización Colombia) ──
+  var b2=blocks[2];
+  fillBox(ctx,b2.x,by,b2.w,bh,'#fff',null);
+  txt(ctx,'LOCALIZACIÓN',b2.x+b2.w/2,by+8,'bold 6px Arial','#444','center','top');
+  // Renderizar desde iframe OSM si existe, sino dibujar localización clásica
+  var dfEl1=document.getElementById('df-simple-1');
+  if(dfEl1&&dfEl1._canvas){
+    try{ ctx.drawImage(dfEl1._canvas,b2.x+4,by+16,b2.w-8,bh-22); }catch(e){ dibujarLocalizacion(ctx,b2.x+4,by+16,b2.w-8,bh-22); }
+  } else {
+    dibujarLocalizacion(ctx,b2.x+4,by+16,b2.w-8,bh-22);
+  }
+  ctx.strokeStyle='#aaa';ctx.lineWidth=0.7;ctx.strokeRect(b2.x+4,by+16,b2.w-8,bh-22);
+
+  // ── Bloque 3: Data Frame 2 (zoom municipio) ──
+  var b3=blocks[3];
+  fillBox(ctx,b3.x,by,b3.w,bh,'#fff',null);
+  txt(ctx,'ÁREA DE INTERÉS',b3.x+b3.w/2,by+8,'bold 6px Arial','#444','center','top');
+  var dfEl2=document.getElementById('df-simple-2');
+  if(dfEl2&&dfEl2._canvas){
+    try{ ctx.drawImage(dfEl2._canvas,b3.x+4,by+16,b3.w-8,bh-22); }catch(e){ dibujarLocalizacion(ctx,b3.x+4,by+16,b3.w-8,bh-22); }
+  } else {
+    dibujarLocalizacion(ctx,b3.x+4,by+16,b3.w-8,bh-22);
+  }
+  ctx.strokeStyle='#aaa';ctx.lineWidth=0.7;ctx.strokeRect(b3.x+4,by+16,b3.w-8,bh-22);
+
+  // ── Bloque 4: Leyenda ──
+  var b4=blocks[4];
+  fillBox(ctx,b4.x,by,b4.w,bh,'#fafafa',null);
+  txt(ctx,'Leyenda',b4.x+b4.w/2,by+10,'bold 9px Arial','#222','center','top');
+  ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(b4.x+6,by+23);ctx.lineTo(b4.x+b4.w-6,by+23);ctx.stroke();
+  if(leyItems.length===0){
+    txt(ctx,'(Sin ítems)',b4.x+b4.w/2,by+bh/2,'italic 8px Arial','#aaa','center','middle');
+  } else {
+    leyItems.slice(0,6).forEach(function(it,i){
+      var iy=by+26+i*20;
+      ctx.fillStyle=it.color;ctx.fillRect(b4.x+8,iy,18,13);
+      ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(b4.x+8,iy,18,13);
+      ctx.font='7.5px Arial';ctx.fillStyle='#222';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(it.texto.substring(0,30),b4.x+30,iy+6);
+    });
+  }
+
+  // ── Bloque 5: Datos técnicos ──
+  var b5=blocks[5];
+  fillBox(ctx,b5.x,by,b5.w,bh,'#f5f5f5',null);
+  var datos=[
+    'Coordinate System: '+scs,
+    'Projection: '+proy,
+    'Datum: MAGNA-SIRGAS',
+    'False Easting: 1.000.000,0000',
+    'False Northing: 1.000.000,0000',
+    'Central Meridian: -74,0775',
+    'Scale Factor: 1,0000',
+    'Units: Meter'
+  ];
+  ctx.font='bold 6.5px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('INFORMACIÓN CARTOGRÁFICA',b5.x+6,by+8);
+  ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(b5.x+6,by+19);ctx.lineTo(b5.x+b5.w-6,by+19);ctx.stroke();
+  ctx.font='6.5px Arial';ctx.fillStyle='#444';
+  datos.forEach(function(d,i){ ctx.fillText(d,b5.x+6,by+23+i*18); });
 }
 
 // ── 3. MAPA HORIZONTAL BLANCO ──
@@ -1397,7 +1500,86 @@ function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
 }
 
 // Redimensionar preview automáticamente
-window.addEventListener('resize', actualizarPreview);
+window.addEventListener('resize', function(){ actualizarPreview(); posicionarDataFrames(); });
+
+// ── DATA FRAMES LEAFLET (para mapa horizontal simple) ──
+var _dfMaps = [null, null];
+
+function initDataFrames(){
+  [1,2].forEach(function(n){
+    var el = document.getElementById('df-map-'+n);
+    if(!el || _dfMaps[n-1]) return;
+    var center = n===1 ? [4.5,-73.5] : [7.07,-70.75]; // Colombia / Arauca
+    var zoom   = n===1 ? 4 : 7;
+    var m = L.map(el, {
+      center: center, zoom: zoom,
+      zoomControl: true, attributionControl: false
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19, attribution:''
+    }).addTo(m);
+    _dfMaps[n-1] = m;
+    // Invalidar tamaño al mostrar
+    setTimeout(function(){ m.invalidateSize(); }, 200);
+  });
+}
+
+function posicionarDataFrames(){
+  if(tipoActual !== 'horizontal-simple'){ ocultarDataFrames(); return; }
+
+  var cvs = document.getElementById('sal-canvas');
+  var wrap = document.getElementById('sal-canvas-wrap');
+  if(!cvs||!wrap) return;
+
+  var scale = parseFloat((cvs.style.transform||'scale(1)').replace('scale(','').replace(')',''))||1;
+  var cw = 1100, ch = 780;
+  var barH = 175, mapH = ch - barH;
+  var bY = mapH;
+
+  // Proporciones de bloques (mismas que en dibujarHorizontalSimple)
+  var bx=8, bw=cw-16;
+  var prop=[0.18,0.14,0.13,0.13,0.22,0.20];
+  var blocks=[], cx2=bx;
+  prop.forEach(function(p){ blocks.push({x:cx2,w:Math.round(bw*p)}); cx2+=Math.round(bw*p); });
+
+  // Posición del canvas en la pantalla
+  var rect = cvs.getBoundingClientRect();
+  var wrapRect = wrap.getBoundingClientRect();
+
+  // Offset del canvas dentro del wrap (centrado)
+  var canvasLeft = rect.left - wrapRect.left;
+  var canvasTop  = rect.top  - wrapRect.top;
+
+  // Bloques 2 y 3 = data frames
+  [[2,1],[3,2]].forEach(function(pair){
+    var bi=pair[0], n=pair[1];
+    var b=blocks[bi];
+    var dfWrap=document.getElementById('df-wrap-'+n);
+    if(!dfWrap) return;
+
+    var fx = canvasLeft + (b.x+4)*scale;
+    var fy = canvasTop  + (bY+18)*scale;
+    var fw = (b.w-8)*scale;
+    var fh = (barH-24)*scale;
+
+    dfWrap.style.display='block';
+    dfWrap.style.left   = fx+'px';
+    dfWrap.style.top    = fy+'px';
+    dfWrap.style.width  = fw+'px';
+    dfWrap.style.height = fh+'px';
+
+    if(_dfMaps[n-1]) setTimeout(function(){ _dfMaps[n-1].invalidateSize(); },50);
+  });
+
+  initDataFrames();
+}
+
+function ocultarDataFrames(){
+  [1,2].forEach(function(n){
+    var d=document.getElementById('df-wrap-'+n);
+    if(d) d.style.display='none';
+  });
+}
 </script>
 </body>
 </html>
