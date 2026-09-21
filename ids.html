@@ -1426,38 +1426,131 @@ function dibujarHorizontalSimple(ctx,W,H,entidad,titulo,subtitulo,escala,scs,pro
 // ── 3. MAPA HORIZONTAL BLANCO ──
 function dibujarHorizontalBlanco(ctx,W,H,titulo,subtitulo,scs,proy){
   fillBox(ctx,0,0,W,H,'#ffffff',null);
-  ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(12,12,W-24,H-24);
 
-  // Mapa casi completo
-  dibujarMapaFondo(ctx,16,16,W-32,H-200,capasActivas);
-  dibujarRosa(ctx,W-60,52,32);
+  // Borde doble exterior
+  ctx.strokeStyle='#000';ctx.lineWidth=2.5;ctx.strokeRect(8,8,W-16,H-16);
+  ctx.strokeStyle='#000';ctx.lineWidth=0.8;ctx.strokeRect(12,12,W-24,H-24);
 
-  // Barra inferior con datos
-  var bY=H-180;
-  fillBox(ctx,16,bY,W-32,164,'#f5f5f5','#ccc');
+  // ── TÍTULO arriba, dentro del borde ──
+  var titleH=46;
+  fillBox(ctx,13,13,W-26,titleH,'#ffffff',null);
+  // Borde inferior del título
+  ctx.strokeStyle='#000';ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(13,13+titleH);ctx.lineTo(W-13,13+titleH);ctx.stroke();
+  // Texto título (negrita, centrado, con itálica si hay subtítulo tipo especie)
+  var tituloU=titulo||'TÍTULO DEL MAPA';
+  // Dividir en dos líneas si es largo
+  ctx.font='bold 13px Arial';
+  ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
+  var words=tituloU.toUpperCase().split(' ');
+  var line1='',line2='',mid=Math.ceil(words.length/2);
+  // intentar partir en mitad natural
+  var testLine=words.join(' ');
+  if(ctx.measureText(testLine).width>W-100){
+    line1=words.slice(0,mid).join(' ');
+    line2=words.slice(mid).join(' ');
+    ctx.font='bold 12px Arial';
+    ctx.fillText(line1,W/2,13+titleH*0.36);
+    ctx.fillText(line2,W/2,13+titleH*0.72);
+  } else {
+    ctx.font='bold 13px Arial';
+    ctx.fillText(testLine,W/2,13+titleH/2);
+  }
 
-  // Título centrado
-  txt(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),W/2,bY+22,'bold 13px Arial','#1a237e','center','middle');
-  if(subtitulo) txt(ctx,subtitulo.toUpperCase(),W/2,bY+40,'9px Arial','#333','center','middle');
+  // ── ÁREA DEL MAPA ──
+  var mapTop=13+titleH+1;
+  var barH=155; // barra inferior
+  var mapBot=H-13-barH;
+  var mapH=mapBot-mapTop;
+  dibujarMapaFondo(ctx,13,mapTop,W-26,mapH,capasActivas);
 
-  // Escala gráfica
-  txt(ctx,'ESCALA',W/2,bY+60,'bold 7px Arial','#444','center','top');
-  broseBar(ctx,W/2-70,bY+70,140,100,1);
+  // Rosa de vientos — esquina superior derecha del mapa
+  dibujarRosa(ctx,W-55,mapTop+45,36);
 
-  // Leyenda horizontal
-  var lx=28;
-  txt(ctx,'LEYENDA',lx,bY+60,'bold 7px Arial','#333','left','top');
-  leyItems.slice(0,5).forEach(function(it,i){
-    var lxi=lx+i*120;
-    ctx.fillStyle=it.color;ctx.fillRect(lxi,bY+73,14,11);
-    ctx.font='7px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
-    ctx.fillText(it.texto.substring(0,14),lxi+18,bY+73);
+  // Borde inferior del área del mapa
+  ctx.strokeStyle='#000';ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(13,mapBot);ctx.lineTo(W-13,mapBot);ctx.stroke();
+
+  // ── BARRA INFERIOR ──
+  var bY=mapBot;
+  fillBox(ctx,13,bY,W-26,barH,'#ffffff',null);
+
+  // Dividir barra en zonas: [escala 220px][leyenda flex][diag loc 2x75px][logo+entidad 150px]
+  var bx=13, bw=W-26;
+  var escW=220, locW2=75, logoW=155, leyW=bw-escW-locW2*2-logoW-4;
+  var escX=bx, leyX=bx+escW+2, locX=leyX+leyW+2, logoX=locX+locW2*2+2;
+
+  // Separadores verticales
+  ctx.strokeStyle='#bbb';ctx.lineWidth=0.7;
+  [escX+escW, leyX+leyW, locX+locW2*2].forEach(function(sx){
+    ctx.beginPath();ctx.moveTo(sx,bY+6);ctx.lineTo(sx,bY+barH-6);ctx.stroke();
   });
 
-  // Localizacion + datos técnicos
-  dibujarLocalizacion(ctx,W-170,bY+55,70,55);
-  dibujarLocalizacion(ctx,W-95,bY+55,70,55);
-  panelDatosTecnicos(ctx,W-200,bY+112,190,scs,proy);
+  // ── ZONA ESCALA ──
+  var escY=bY+10;
+  // Escala numérica
+  var escalaNum=(document.getElementById('s-escala')||{}).value||'1:1.200.000';
+  ctx.font='bold 9px Arial';ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('ESCALA  '+escalaNum, escX+escW/2, escY);
+  // Barra gráfica de escala
+  broseBar(ctx,escX+14,escY+18,escW-28,100,1);
+  // Coordenadas SCS/Proyección
+  ctx.font='6.5px Arial';ctx.fillStyle='#555';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('S.C.S.: '+(scs||'MAGNA Colombia Este'),escX+6,escY+62);
+  ctx.fillText('Proy.: '+(proy||'Transverse Mercator'),escX+6,escY+75);
+  ctx.fillText('Datum: MAGNA-SIRGAS',escX+6,escY+88);
+
+  // ── ZONA LEYENDA ──
+  var leyY=bY+8;
+  ctx.font='bold 8.5px Arial';ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('LEYENDA',leyX+leyW/2,leyY);
+  // Línea divisoria bajo título leyenda
+  ctx.strokeStyle='#999';ctx.lineWidth=0.6;
+  ctx.beginPath();ctx.moveTo(leyX+6,leyY+16);ctx.lineTo(leyX+leyW-6,leyY+16);ctx.stroke();
+
+  var leyItemsShow=leyItems.slice(0,8);
+  var cols2=leyItemsShow.length>4?2:1;
+  var colWL=Math.floor((leyW-12)/cols2);
+  var rowHL=22;
+  leyItemsShow.forEach(function(it,i){
+    var col2=i%cols2, row2=Math.floor(i/cols2);
+    var lxi=leyX+6+col2*colWL;
+    var lyi=leyY+22+row2*rowHL;
+    // Recuadro de color con borde
+    ctx.fillStyle=it.color;
+    ctx.fillRect(lxi,lyi,20,14);
+    ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=0.7;
+    ctx.strokeRect(lxi,lyi,20,14);
+    // Texto
+    ctx.font='7.5px Arial';ctx.fillStyle='#111';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(it.texto.substring(0,28),lxi+24,lyi+7);
+  });
+  if(leyItemsShow.length===0){
+    ctx.font='italic 8px Arial';ctx.fillStyle='#aaa';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('(Sin ítems de leyenda)',leyX+leyW/2,bY+barH/2);
+  }
+
+  // ── ZONA LOCALIZACIÓN (2 mini-mapas) ──
+  var locY=bY+10;
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',locX+locW2,locY+6,'bold 6px Arial','#333','center','top');
+  dibujarLocalizacion(ctx,locX+2,locY+20,locW2-4,barH-34);
+  dibujarLocalizacion(ctx,locX+locW2+2,locY+20,locW2-4,barH-34);
+
+  // ── ZONA LOGO + ENTIDAD ──
+  var logY=bY+6;
+  var logH=Math.floor(barH*0.45);
+  dibujarLogo(ctx,logoX+4,logY,logoW-8,logH);
+  // Nombre entidad
+  ctx.font='bold 7px Arial';ctx.fillStyle='#1a237e';ctx.textAlign='center';ctx.textBaseline='top';
+  wrapText(ctx,'INSTITUTO DEPARTAMENTAL DE SALUD\nDE NORTE DE SANTANDER',logoX+4+(logoW-8)/2,logY+logH+4,logoW-12,10,'bold 7px Arial','#1a237e');
+  // Fecha
+  var now=new Date();
+  var fechaStr=now.toLocaleDateString('es-CO',{year:'numeric',month:'long'});
+  ctx.font='6.5px Arial';ctx.fillStyle='#555';ctx.textAlign='center';
+  ctx.fillText(fechaStr.toUpperCase(),logoX+4+(logoW-8)/2,logY+logH+32);
+  // SCS/Proyección mini
+  ctx.font='5.5px Arial';ctx.fillStyle='#888';
+  ctx.fillText('Elaborado: Grupo SIG - IDS',logoX+4+(logoW-8)/2,logY+logH+44);
 }
 
 // ── 4/5. MULTIMAPA ──
@@ -1728,7 +1821,10 @@ function calcAreasPorTipo(tipo){
     ];
   }
   if(tipo==='horizontal-blanco'){
-    return [{x:16,y:16,w:W-32,h:H-200}];
+    var titleH=46, barH=155;
+    var mapTop=13+titleH+1;
+    var mapBot=H-13-barH;
+    return [{x:13,y:mapTop,w:W-26,h:mapBot-mapTop}];
   }
   if(tipo==='multi6'||tipo==='multi4'){
     var count=tipo==='multi6'?6:4;
