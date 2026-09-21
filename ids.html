@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IDS · Producción Cartográfica</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:'Rajdhani',sans-serif;color:#e0e8f0;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:9999;background:#000814;display:flex;align-items:center;justify-content:center;}
+.login-box{background:rgba(0,8,24,0.95);border:1px solid rgba(229,57,53,0.35);border-radius:16px;padding:44px 44px 36px;width:340px;display:flex;flex-direction:column;align-items:center;gap:18px;box-shadow:0 0 60px rgba(229,57,53,0.15);}
+.login-icon{font-size:52px;filter:drop-shadow(0 0 14px rgba(229,57,53,0.6));}
+.login-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:3px;color:#ef9a9a;text-align:center;line-height:1.4;}
+.login-sub{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(229,57,53,0.45);text-align:center;}
+.login-sep{width:100%;height:1px;background:rgba(229,57,53,0.12);margin:4px 0;}
+.login-lbl{font-size:9px;letter-spacing:1.5px;color:rgba(180,200,190,0.45);align-self:flex-start;}
+.login-inp{width:100%;background:rgba(0,12,35,0.9);border:1px solid rgba(229,57,53,0.2);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:15px;border-radius:8px;padding:11px 14px;outline:none;transition:border-color 0.2s;letter-spacing:2px;}
+.login-inp:focus{border-color:rgba(229,57,53,0.6);}
+.login-btn{width:100%;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2.5px;color:#fff;background:linear-gradient(135deg,#e53935,#b71c1c);border:none;border-radius:9px;padding:14px;cursor:pointer;box-shadow:0 0 24px rgba(229,57,53,0.35);transition:all 0.3s;margin-top:6px;}
+.login-btn:hover{background:linear-gradient(135deg,#ef5350,#e53935);box-shadow:0 0 40px rgba(229,57,53,0.55);}
+.login-err{font-size:10px;color:#ef5350;letter-spacing:1px;display:none;text-align:center;}
+.login-back{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;color:rgba(229,57,53,0.4);cursor:pointer;text-decoration:none;transition:color 0.2s;margin-top:4px;}
+.login-back:hover{color:rgba(229,57,53,0.8);}
+
+/* ── DASHBOARD ── */
+#dashboard{position:fixed;inset:0;display:none;flex-direction:column;background:#000814;}
+
+/* Header */
+#dash-header{height:54px;flex-shrink:0;background:rgba(0,8,24,0.97);border-bottom:1px solid rgba(229,57,53,0.2);display:flex;align-items:center;padding:0 22px;gap:14px;}
+.dh-icon{font-size:24px;}
+.dh-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px;color:#ef9a9a;}
+.dh-sub{font-size:10px;color:rgba(180,200,190,0.4);letter-spacing:1px;}
+.dh-space{flex:1;}
+.dh-stats{display:flex;gap:18px;align-items:center;}
+.dh-stat{font-family:'Orbitron',monospace;font-size:9px;color:rgba(239,154,154,0.55);letter-spacing:1px;}
+.dh-stat span{color:#ef9a9a;font-size:14px;display:block;text-align:center;}
+.dh-back{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;color:rgba(229,57,53,0.5);border:1px solid rgba(229,57,53,0.2);padding:5px 12px;border-radius:5px;cursor:pointer;text-decoration:none;transition:all 0.2s;}
+.dh-back:hover{color:#ef9a9a;border-color:rgba(229,57,53,0.5);background:rgba(229,57,53,0.07);}
+
+/* Body */
+#dash-body{flex:1;display:flex;overflow:hidden;}
+
+/* Sidebar formulario */
+#form-panel{width:290px;flex-shrink:0;background:rgba(0,6,20,0.9);border-right:1px solid rgba(229,57,53,0.1);display:flex;flex-direction:column;overflow-y:auto;}
+.fp-sec{padding:14px 16px;border-bottom:1px solid rgba(229,57,53,0.07);}
+.fp-sec-title{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:2px;color:rgba(229,57,53,0.5);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.fp-sec-title::before{content:'';width:3px;height:10px;background:#e53935;border-radius:2px;}
+.fp-f{margin-bottom:10px;}
+.fp-lbl{font-size:8.5px;letter-spacing:1px;color:rgba(180,200,190,0.4);margin-bottom:4px;display:block;}
+.fp-inp,.fp-sel,.fp-ta{width:100%;background:rgba(0,12,35,0.85);border:1px solid rgba(229,57,53,0.15);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:6px;padding:8px 10px;outline:none;transition:border-color 0.2s;}
+.fp-inp:focus,.fp-sel:focus,.fp-ta:focus{border-color:rgba(229,57,53,0.5);}
+.fp-ta{resize:vertical;min-height:60px;}
+.fp-sel option{background:#001020;}
+.btn-registrar{margin:12px 16px;width:calc(100% - 32px);font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#e53935,#b71c1c);border:none;border-radius:8px;padding:12px;cursor:pointer;box-shadow:0 0 18px rgba(229,57,53,0.3);transition:all 0.3s;}
+.btn-registrar:hover{background:linear-gradient(135deg,#ef5350,#e53935);box-shadow:0 0 32px rgba(229,57,53,0.5);}
+
+/* Main */
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Toolbar */
+#toolbar{height:46px;flex-shrink:0;background:rgba(0,6,20,0.9);border-bottom:1px solid rgba(229,57,53,0.1);display:flex;align-items:center;padding:0 16px;gap:10px;}
+.tb-btn{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(239,154,154,0.6);border:1px solid rgba(229,57,53,0.18);background:transparent;border-radius:6px;padding:6px 12px;cursor:pointer;transition:all 0.2s;}
+.tb-btn:hover,.tb-btn.activo{color:#ef9a9a;border-color:rgba(229,57,53,0.5);background:rgba(229,57,53,0.08);}
+.tb-sep{width:1px;height:20px;background:rgba(229,57,53,0.1);}
+.tb-search{flex:1;max-width:220px;background:rgba(0,12,35,0.7);border:1px solid rgba(229,57,53,0.12);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:12px;border-radius:6px;padding:6px 10px;outline:none;}
+.tb-search::placeholder{color:rgba(180,200,190,0.25);}
+.tb-count{font-family:'Orbitron',monospace;font-size:8px;color:rgba(239,154,154,0.4);margin-left:auto;}
+
+/* Tabla */
+#tabla-wrap{flex:1;overflow:auto;padding:16px;}
+#tabla-mapas{width:100%;border-collapse:collapse;}
+#tabla-mapas th{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:1.5px;color:rgba(229,57,53,0.5);padding:10px 12px;border-bottom:1px solid rgba(229,57,53,0.12);text-align:left;white-space:nowrap;background:rgba(0,6,20,0.6);position:sticky;top:0;z-index:2;}
+#tabla-mapas td{padding:10px 12px;border-bottom:1px solid rgba(229,57,53,0.05);font-size:11.5px;color:rgba(220,235,230,0.8);vertical-align:middle;}
+#tabla-mapas tr:hover td{background:rgba(229,57,53,0.04);}
+.td-tipo{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;padding:3px 8px;border-radius:10px;display:inline-block;}
+.td-estado{font-family:'Orbitron',monospace;font-size:7.5px;letter-spacing:1px;padding:3px 8px;border-radius:10px;display:inline-block;}
+.estado-entregado{background:rgba(76,175,80,0.15);color:#81c784;border:1px solid rgba(76,175,80,0.25);}
+.estado-proceso{background:rgba(255,193,7,0.15);color:#ffd54f;border:1px solid rgba(255,193,7,0.25);}
+.estado-revision{background:rgba(33,150,243,0.15);color:#64b5f6;border:1px solid rgba(33,150,243,0.25);}
+.td-acciones{display:flex;gap:6px;align-items:center;}
+.td-btn{font-size:10px;cursor:pointer;padding:4px 8px;border-radius:5px;border:1px solid rgba(229,57,53,0.2);background:transparent;color:rgba(239,154,154,0.7);transition:all 0.2s;font-family:'Rajdhani',sans-serif;}
+.td-btn:hover{background:rgba(229,57,53,0.12);color:#ef9a9a;}
+.td-btn.del{border-color:rgba(229,57,53,0.15);color:rgba(229,57,53,0.4);}
+.td-btn.del:hover{background:rgba(229,57,53,0.1);color:#ef5350;}
+#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:14px;color:rgba(229,57,53,0.2);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;text-align:center;}
+#empty-state .es-icon{font-size:42px;opacity:0.3;}
+
+/* Dashboard KPIs */
+#kpi-bar{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(229,57,53,0.08);flex-shrink:0;}
+.kpi{flex:1;background:rgba(0,6,20,0.7);border:1px solid rgba(229,57,53,0.1);border-radius:10px;padding:12px 14px;}
+.kpi-val{font-family:'Orbitron',monospace;font-size:22px;font-weight:700;color:#ef9a9a;}
+.kpi-lbl{font-size:9px;color:rgba(180,200,190,0.4);letter-spacing:1px;margin-top:3px;}
+
+/* Modal detalle */
+#modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,4,14,0.85);display:none;align-items:center;justify-content:center;}
+#modal-box{background:rgba(0,8,24,0.98);border:1px solid rgba(229,57,53,0.3);border-radius:14px;padding:28px 32px;width:480px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 0 60px rgba(229,57,53,0.15);}
+.modal-title{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:#ef9a9a;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.modal-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(229,57,53,0.06);}
+.modal-row:last-child{border-bottom:none;}
+.modal-key{font-size:9px;color:rgba(180,200,190,0.4);letter-spacing:1px;min-width:130px;}
+.modal-val{font-size:12px;color:#c0d0e0;text-align:right;flex:1;}
+.modal-close{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:rgba(229,57,53,0.5);border:1px solid rgba(229,57,53,0.2);background:transparent;padding:8px 18px;border-radius:6px;cursor:pointer;margin-top:18px;width:100%;transition:all 0.2s;}
+.modal-close:hover{background:rgba(229,57,53,0.08);color:#ef9a9a;}
+
+/* Notificación */
+#notif{position:fixed;bottom:22px;right:22px;z-index:999;background:rgba(0,8,24,0.96);border:1px solid rgba(229,57,53,0.4);border-radius:10px;padding:12px 20px;font-family:'Orbitron',monospace;font-size:8.5px;letter-spacing:1.5px;color:#ef9a9a;display:none;box-shadow:0 0 30px rgba(229,57,53,0.2);}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🏥</div>
+    <div class="login-title">IDS<br>NORTE DE SANTANDER</div>
+    <div class="login-sub">PRODUCCIÓN CARTOGRÁFICA</div>
+    <div class="login-sep"></div>
+    <span class="login-lbl">CONTRASEÑA DE ACCESO</span>
+    <input class="login-inp" id="login-pass" type="password" placeholder="••••••••••" onkeydown="if(event.key==='Enter')verificarAcceso()">
+    <div class="login-err" id="login-err">⚠ CONTRASEÑA INCORRECTA</div>
+    <button class="login-btn" onclick="verificarAcceso()">INGRESAR</button>
+    <a class="login-back" href="index.html">← VOLVER AL INICIO</a>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+
+  <!-- Header -->
+  <div id="dash-header">
+    <div class="dh-icon">🏥</div>
+    <div>
+      <div class="dh-title">IDS · NORTE DE SANTANDER</div>
+      <div class="dh-sub">MÓDULO DE PRODUCCIÓN CARTOGRÁFICA</div>
+    </div>
+    <div class="dh-space"></div>
+    <div class="dh-stats">
+      <div class="dh-stat"><span id="kpi-total-h">0</span>TOTAL</div>
+      <div class="dh-stat"><span id="kpi-entregado-h">0</span>ENTREGADOS</div>
+      <div class="dh-stat"><span id="kpi-proceso-h">0</span>EN PROCESO</div>
+    </div>
+    <a class="dh-back" href="index.html">← INICIO</a>
+  </div>
+
+  <!-- Body -->
+  <div id="dash-body">
+
+    <!-- Formulario lateral -->
+    <div id="form-panel">
+      <div class="fp-sec">
+        <div class="fp-sec-title">NUEVO MAPA</div>
+        <div class="fp-f">
+          <span class="fp-lbl">NOMBRE DEL MAPA</span>
+          <input class="fp-inp" id="f-nombre" type="text" placeholder="Ej. Mapa de coberturas vacunación">
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">TIPO DE MAPA</span>
+          <select class="fp-sel" id="f-tipo">
+            <option value="">— Seleccionar —</option>
+            <option>Epidemiológico</option>
+            <option>Cobertura de servicios</option>
+            <option>Territorial / Administrativo</option>
+            <option>Infraestructura sanitaria</option>
+            <option>Riesgo y vulnerabilidad</option>
+            <option>Vacunación</option>
+            <option>Mortalidad</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">ÁREA / MUNICIPIO</span>
+          <input class="fp-inp" id="f-area" type="text" placeholder="Ej. Cúcuta, Ocaña, Departamental">
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">RESPONSABLE</span>
+          <input class="fp-inp" id="f-responsable" type="text" placeholder="Nombre del cartógrafo">
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">FECHA DE PRODUCCIÓN</span>
+          <input class="fp-inp" id="f-fecha" type="date">
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">ESCALA</span>
+          <select class="fp-sel" id="f-escala">
+            <option value="">— Seleccionar —</option>
+            <option>1:500</option>
+            <option>1:1.000</option>
+            <option>1:5.000</option>
+            <option>1:10.000</option>
+            <option>1:25.000</option>
+            <option>1:50.000</option>
+            <option>1:100.000</option>
+            <option>1:500.000</option>
+            <option>Sin escala definida</option>
+          </select>
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">FORMATO</span>
+          <select class="fp-sel" id="f-formato">
+            <option value="">— Seleccionar —</option>
+            <option>PDF</option>
+            <option>PNG</option>
+            <option>JPG</option>
+            <option>KMZ / KML</option>
+            <option>Shapefile (SHP)</option>
+            <option>GeoJSON</option>
+            <option>DWG / DXF</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">ESTADO</span>
+          <select class="fp-sel" id="f-estado">
+            <option value="">— Seleccionar —</option>
+            <option>En proceso</option>
+            <option>En revisión</option>
+            <option>Entregado</option>
+          </select>
+        </div>
+        <div class="fp-f">
+          <span class="fp-lbl">OBSERVACIONES</span>
+          <textarea class="fp-ta" id="f-obs" placeholder="Descripción, fuentes, notas..."></textarea>
+        </div>
+      </div>
+      <button class="btn-registrar" onclick="registrarMapa()">✚ REGISTRAR MAPA</button>
+    </div>
+
+    <!-- Área principal -->
+    <div id="main-area">
+
+      <!-- KPIs -->
+      <div id="kpi-bar">
+        <div class="kpi">
+          <div class="kpi-val" id="kpi-total">0</div>
+          <div class="kpi-lbl">MAPAS REGISTRADOS</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpi-entregado">0</div>
+          <div class="kpi-lbl">ENTREGADOS</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpi-proceso">0</div>
+          <div class="kpi-lbl">EN PROCESO</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpi-revision">0</div>
+          <div class="kpi-lbl">EN REVISIÓN</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div id="toolbar">
+        <button class="tb-btn activo" id="btn-todos" onclick="filtrar('todos',this)">TODOS</button>
+        <button class="tb-btn" id="btn-proceso" onclick="filtrar('En proceso',this)">EN PROCESO</button>
+        <button class="tb-btn" id="btn-revision" onclick="filtrar('En revisión',this)">EN REVISIÓN</button>
+        <button class="tb-btn" id="btn-entregado" onclick="filtrar('Entregado',this)">ENTREGADOS</button>
+        <div class="tb-sep"></div>
+        <input class="tb-search" id="buscar" placeholder="🔍  Buscar mapa..." oninput="renderTabla()">
+        <span class="tb-count" id="tb-count">0 registros</span>
+      </div>
+
+      <!-- Tabla -->
+      <div id="tabla-wrap">
+        <table id="tabla-mapas">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>NOMBRE</th>
+              <th>TIPO</th>
+              <th>ÁREA</th>
+              <th>RESPONSABLE</th>
+              <th>FECHA</th>
+              <th>ESCALA</th>
+              <th>FORMATO</th>
+              <th>ESTADO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+        <div id="empty-state">
+          <div class="es-icon">🗺️</div>
+          <div>AÚN NO HAY MAPAS REGISTRADOS<br><span style="font-size:8px;opacity:0.6;letter-spacing:1px;">USE EL FORMULARIO PARA REGISTRAR EL PRIMER MAPA</span></div>
+        </div>
+      </div>
+
+    </div><!-- /main-area -->
+  </div><!-- /dash-body -->
+</div><!-- /dashboard -->
+
+<!-- Modal detalle -->
+<div id="modal-overlay" onclick="cerrarModal(event)">
+  <div id="modal-box">
+    <div class="modal-title">📋 DETALLE DEL MAPA</div>
+    <div id="modal-contenido"></div>
+    <button class="modal-close" onclick="document.getElementById('modal-overlay').style.display='none'">CERRAR</button>
+  </div>
+</div>
+
+<!-- Notificación -->
+<div id="notif" id="notif"></div>
+
+<script>
+// ── DATOS en memoria ──
+var mapas = [];
+var filtroActual = 'todos';
+
+// ── LOGIN ──
+function verificarAcceso() {
+  var pass = document.getElementById('login-pass').value;
+  var err  = document.getElementById('login-err');
+  if (pass === '123456789') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+    // Establecer fecha de hoy por defecto
+    document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+    actualizarKPIs();
+    renderTabla();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-pass').style.borderColor = 'rgba(229,57,53,0.7)';
+    setTimeout(function(){ err.style.display='none'; document.getElementById('login-pass').style.borderColor=''; }, 2500);
+  }
+}
+
+// ── REGISTRAR MAPA ──
+function registrarMapa() {
+  var nombre      = document.getElementById('f-nombre').value.trim();
+  var tipo        = document.getElementById('f-tipo').value;
+  var area        = document.getElementById('f-area').value.trim();
+  var responsable = document.getElementById('f-responsable').value.trim();
+  var fecha       = document.getElementById('f-fecha').value;
+  var escala      = document.getElementById('f-escala').value;
+  var formato     = document.getElementById('f-formato').value;
+  var estado      = document.getElementById('f-estado').value;
+  var obs         = document.getElementById('f-obs').value.trim();
+
+  if (!nombre || !tipo || !estado) {
+    mostrarNotif('⚠ COMPLETE LOS CAMPOS OBLIGATORIOS: NOMBRE, TIPO Y ESTADO');
+    return;
+  }
+
+  var mapa = {
+    id: Date.now(),
+    nombre: nombre,
+    tipo: tipo,
+    area: area || '—',
+    responsable: responsable || '—',
+    fecha: fecha ? formatFecha(fecha) : '—',
+    escala: escala || '—',
+    formato: formato || '—',
+    estado: estado,
+    obs: obs || '—'
+  };
+
+  mapas.unshift(mapa);
+  limpiarFormulario();
+  actualizarKPIs();
+  renderTabla();
+  mostrarNotif('✅ MAPA REGISTRADO EXITOSAMENTE');
+}
+
+function formatFecha(iso) {
+  var p = iso.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+
+function limpiarFormulario() {
+  ['f-nombre','f-area','f-responsable','f-obs'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['f-tipo','f-escala','f-formato','f-estado'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+}
+
+// ── KPIs ──
+function actualizarKPIs() {
+  var total     = mapas.length;
+  var entregado = mapas.filter(function(m){ return m.estado==='Entregado'; }).length;
+  var proceso   = mapas.filter(function(m){ return m.estado==='En proceso'; }).length;
+  var revision  = mapas.filter(function(m){ return m.estado==='En revisión'; }).length;
+  ['kpi-total','kpi-total-h'].forEach(function(id){ document.getElementById(id).textContent=total; });
+  ['kpi-entregado','kpi-entregado-h'].forEach(function(id){ document.getElementById(id).textContent=entregado; });
+  ['kpi-proceso','kpi-proceso-h'].forEach(function(id){ document.getElementById(id).textContent=proceso; });
+  document.getElementById('kpi-revision').textContent = revision;
+}
+
+// ── FILTROS ──
+function filtrar(estado, btn) {
+  filtroActual = estado;
+  document.querySelectorAll('.tb-btn').forEach(function(b){ b.classList.remove('activo'); });
+  if (btn) btn.classList.add('activo');
+  renderTabla();
+}
+
+// ── RENDER TABLA ──
+function renderTabla() {
+  var busq = (document.getElementById('buscar').value || '').toLowerCase();
+  var lista = mapas.filter(function(m) {
+    if (filtroActual !== 'todos' && m.estado !== filtroActual) return false;
+    if (busq && !(
+      m.nombre.toLowerCase().includes(busq) ||
+      m.tipo.toLowerCase().includes(busq) ||
+      m.area.toLowerCase().includes(busq) ||
+      m.responsable.toLowerCase().includes(busq)
+    )) return false;
+    return true;
+  });
+
+  var tbody = document.getElementById('tabla-body');
+  var empty = document.getElementById('empty-state');
+
+  if (lista.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'flex';
+    document.getElementById('tb-count').textContent = '0 registros';
+    return;
+  }
+  empty.style.display = 'none';
+  document.getElementById('tb-count').textContent = lista.length + ' registro' + (lista.length!==1?'s':'');
+
+  var claseEstado = {'Entregado':'estado-entregado','En proceso':'estado-proceso','En revisión':'estado-revision'};
+  var colorTipo   = {'Epidemiológico':'rgba(229,57,53,0.15)','Cobertura de servicios':'rgba(33,150,243,0.15)','Vacunación':'rgba(76,175,80,0.15)'};
+
+  tbody.innerHTML = lista.map(function(m, i) {
+    var ce = claseEstado[m.estado] || 'estado-proceso';
+    return '<tr>' +
+      '<td style="font-family:Orbitron,monospace;font-size:9px;color:rgba(229,57,53,0.4);">'+(i+1)+'</td>' +
+      '<td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escHtml(m.nombre)+'</td>' +
+      '<td><span class="td-tipo" style="background:rgba(229,57,53,0.1);color:#ef9a9a;border:1px solid rgba(229,57,53,0.2);">'+escHtml(m.tipo)+'</span></td>' +
+      '<td>'+escHtml(m.area)+'</td>' +
+      '<td>'+escHtml(m.responsable)+'</td>' +
+      '<td style="font-family:Orbitron,monospace;font-size:9px;white-space:nowrap;">'+escHtml(m.fecha)+'</td>' +
+      '<td style="font-size:10px;">'+escHtml(m.escala)+'</td>' +
+      '<td style="font-size:10px;">'+escHtml(m.formato)+'</td>' +
+      '<td><span class="td-estado '+ce+'">'+escHtml(m.estado)+'</span></td>' +
+      '<td><div class="td-acciones">' +
+        '<button class="td-btn" onclick="verDetalle('+m.id+')">VER</button>' +
+        '<button class="td-btn del" onclick="eliminarMapa('+m.id+')">✕</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── VER DETALLE ──
+function verDetalle(id) {
+  var m = mapas.find(function(x){ return x.id===id; });
+  if (!m) return;
+  var campos = [
+    ['NOMBRE DEL MAPA', m.nombre],
+    ['TIPO', m.tipo],
+    ['ÁREA / MUNICIPIO', m.area],
+    ['RESPONSABLE', m.responsable],
+    ['FECHA DE PRODUCCIÓN', m.fecha],
+    ['ESCALA', m.escala],
+    ['FORMATO', m.formato],
+    ['ESTADO', m.estado],
+    ['OBSERVACIONES', m.obs]
+  ];
+  document.getElementById('modal-contenido').innerHTML = campos.map(function(c){
+    return '<div class="modal-row"><span class="modal-key">'+c[0]+'</span><span class="modal-val">'+escHtml(c[1])+'</span></div>';
+  }).join('');
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function cerrarModal(e) {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// ── ELIMINAR ──
+function eliminarMapa(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  mapas = mapas.filter(function(m){ return m.id !== id; });
+  actualizarKPIs();
+  renderTabla();
+  mostrarNotif('🗑 REGISTRO ELIMINADO');
+}
+
+// ── NOTIFICACIÓN ──
+function mostrarNotif(msg) {
+  var n = document.getElementById('notif');
+  n.textContent = msg;
+  n.style.display = 'block';
+  setTimeout(function(){ n.style.display='none'; }, 2800);
+}
+</script>
+</body>
+</html>
