@@ -367,9 +367,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
         <button class="map-type-btn full-width" id="mtype-m4" onclick="selTipo('multi4',this)">
           <span class="mti">🔲</span>MULTIMAPA X4
         </button>
-        <button class="map-type-btn full-width" id="mtype-v" onclick="selTipo('vertical',this)">
-          <span class="mti">🗂️</span>MAPA VERTICAL
-        </button>
       </div>
     </div>
 
@@ -932,7 +929,6 @@ function actualizarPreview() {
     case 'horizontal-blanco': dibujarHorizontalBlanco(ctx,baseW,baseH,titulo,subtitulo,scs,proy); break;
     case 'multi6':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,6); break;
     case 'multi4':            dibujarMulti(ctx,baseW,baseH,entidad,programa,titulo,escala,scs,proy,4); break;
-    case 'vertical':          dibujarVertical(ctx,baseW,baseH,entidad,programa,titulo,subtitulo,escala,scs,proy); break;
   }
   // Posicionar data frames OSM si corresponde
   setTimeout(posicionarDataFrames, 30);
@@ -1557,10 +1553,8 @@ function dibujarHorizontalBlanco(ctx,W,H,titulo,subtitulo,scs,proy){
   ctx.fillText('Elaborado: Grupo SIG - IDS',logoX+4+(logoW-8)/2,logY+logH+44);
 }
 
-// ── 6. MAPA VERTICAL ──
-// Canvas: 1100×780 orientado apaisado, pero el mapa ocupa toda la altura y el panel va a la DERECHA
-// Mapa: 65% del ancho, altura completa. Panel derecho: 35%.
-function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,proy){
+// ── MAPA VERTICAL ELIMINADO ──
+function dibujarVertical_DISABLED(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,proy){
   fillBox(ctx,0,0,W,H,'#ffffff',null);
 
   var panelW=Math.round(W*0.32);
@@ -1913,8 +1907,8 @@ function centroZoomDF(tipo, idx){
     if(idx===1) return {c:[4.5,-73.5],z:4};
     return {c:[6.9,-71.0],z:7};
   }
-  // Para horizontal, horizontal-blanco, vertical: único frame = área local
-  if(tipo==='horizontal'||tipo==='horizontal-blanco'||tipo==='vertical'){
+  // Para horizontal, horizontal-blanco: único frame = área local
+  if(tipo==='horizontal'||tipo==='horizontal-blanco'){
     return {c:[6.9,-71.0],z:8};
   }
   // Multimapa: primer frame con zoom amplio, los demás más cercanos
@@ -2000,11 +1994,6 @@ function calcAreasPorTipo(tipo){
     var mapTop=13+titleH+1;
     var mapBot=H-13-barH;
     return [{x:13,y:mapTop,w:W-26,h:mapBot-mapTop}];
-  }
-  if(tipo==='vertical'){
-    var panelW2=Math.round(W*0.32);
-    var mapW2=W-panelW2-8;
-    return [{x:12,y:12,w:mapW2-6,h:H-24}];
   }
   if(tipo==='multi6'||tipo==='multi4'){
     var count=tipo==='multi6'?6:4;
