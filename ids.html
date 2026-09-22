@@ -1020,7 +1020,7 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
   ctx.strokeRect(x,y,w,barH);
 
   // Etiquetas en los separadores
-  ctx.font='bold 32px Arial';
+  ctx.font='bold 48px Arial';
   ctx.fillStyle='#111';
   ctx.textAlign='center';
   ctx.textBaseline='bottom';
@@ -1360,7 +1360,7 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   txt(ctx,'ESCALA',px+pw/2,py+4,'bold 9px Arial','#555','center','top');
   // Mostrar escala real del data frame si está disponible
   var escDisplay=window._escalaReal||escala||'1:5.000';
-  txt(ctx,escDisplay,px+pw/2,py+16,'bold 20px Arial','#111','center','top');
+  txt(ctx,escDisplay,px+pw/2,py+16,'bold 30px Arial','#111','center','top');
   // Barra gráfica reducida al 60% del ancho del panel, centrada
   var barW60=Math.round((pw-10)*0.88);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
@@ -1605,7 +1605,7 @@ function dibujarHorizontalBlanco(ctx,W,H,titulo,subtitulo,scs,proy){
   var escY=bY+10;
   // Escala numérica
   var escalaNum=(document.getElementById('s-escala')||{}).value||'1:1.200.000';
-  ctx.font='bold 20px Arial';ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.font='bold 30px Arial';ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='top';
   ctx.fillText('ESCALA  '+escalaNum, escX+escW/2, escY);
   // Barra gráfica de escala
   broseBar(ctx,escX+10,escY+20,escW-20,100,1);
@@ -1750,7 +1750,7 @@ function dibujarVertical_DISABLED(ctx,W,H,entidad,programa,titulo,subtitulo,esca
   py+=16;
   // Escala numérica
   var escalaNum=(document.getElementById('s-escala')||{}).value||'1:5.000';
-  txt(ctx,escalaNum,px+pw/2,py+10,'bold 20px Arial','#111','center','middle');
+  txt(ctx,escalaNum,px+pw/2,py+10,'bold 30px Arial','#111','center','middle');
   py+=20;
   // Barra gráfica
   broseBar(ctx,px+4,py,pw-8,100,1);
@@ -1865,7 +1865,7 @@ function dibujarMulti(ctx,W,H,entidad,programa,titulo,escala,scs,proy,count){
 
   // Escala
   fillBox(ctx,px,py,pw,44,'#fafafa','#ddd');
-  txt(ctx,'ESCALA  '+escala,px+pw/2,py+6,'bold 17px Arial','#444','center','top');
+  txt(ctx,'ESCALA  '+escala,px+pw/2,py+6,'bold 26px Arial','#444','center','top');
   broseBar(ctx,px+4,py+22,pw-8,100,1);
   py+=44+4;
 
