@@ -1361,11 +1361,11 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Mostrar escala real del data frame si está disponible
   var escDisplay=window._escalaReal||escala||'1:5.000';
   txt(ctx,escDisplay,px+pw/2,py+16,'bold 13px Arial','#111','center','top');
-  // Barra gráfica reducida al 60% del ancho del panel, centrada
+  // Barra gráfica reducida al 88% del ancho del panel, centrada
   var barW60=Math.round((pw-10)*0.88);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
-  broseBar(ctx,barX60,py+32,barW60,100,1);
-  py+=hEsc+gap+16;  // espacio extra bajo la barra para no solapar leyenda
+  broseBar(ctx,barX60,py+48,barW60,100,1);
+  py+=hEsc+gap+32;  // espacio extra bajo la barra para no solapar leyenda
 
   // Leyenda — header
   fillBox(ctx,px,py,pw,hLeyTit,'#f5f5f5','#ddd');
