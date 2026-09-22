@@ -980,14 +980,14 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
   // Calcular denominador real de escala
   var denom = escalaNum || null;
   if(!denom && window._escalaReal){
-    // _escalaReal tiene formato "1:250.000" → extraer número
+    // _escalaReal tiene formato "1:250.000" → extraer número sin puntos
     var raw = window._escalaReal.replace('1:','').replace(/\./g,'').trim();
     denom = parseInt(raw,10) || null;
   }
 
-  // Distancia real que representa un segmento de la barra (en metros)
-  // 1 px en canvas = denom * 0.000264583 metros (a 96dpi, 1px = 0.264583mm)
-  var mPorPx = denom ? denom * 0.000264583 : null;
+  // Distancia real por px canvas = denom * mm_por_px_carta / 1000 (en metros)
+  var mmPPx = (typeof _MM_POR_PX_CARTA !== 'undefined') ? _MM_POR_PX_CARTA : 0.18415;
+  var mPorPx = denom ? denom * (mmPPx / 1000) : null;
   var mPorSeg = mPorPx ? mPorPx * (w / segs) : null;
 
   // Elegir unidad y redondear a valor "bonito"
@@ -1889,20 +1889,27 @@ var _dfMaps = [];        // instancias Leaflet
 var _dfAreas = [];       // áreas registradas por la función de dibujo actual
 var _dfLayers = {};      // capas GeoJSON por frame (para no duplicar)
 
-// ── Escala real basada en zoom Leaflet y latitud del centro ──
+// ── Escala real para impresión en hoja CARTA ──
+// Hoja carta: 215.9 × 279.4 mm
+// Área útil del mapa en canvas: 858px (78% de 1100px canvas)
+// El mapa ocupa ≈158mm del ancho útil en papel carta (con márgenes)
+// → mm por px canvas = 158 / 858 = 0.18415 mm/px
+// Escala = mPorPxLeaflet / (mmPorPxCanvas / 1000)
+var _MM_POR_PX_CARTA = 158.0 / 858.0;  // mm por px canvas para hoja carta
+
 function calcEscalaReal(map){
   try{
     var zoom=map.getZoom();
     var center=map.getCenter();
     var lat=center.lat;
-    // Metros por píxel en Leaflet: 156543.03392 * cos(lat) / 2^zoom
-    var mPorPx=156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,zoom);
-    // El canvas tiene 1100px de ancho representando el mapa;
-    // el DPI de pantalla típico es 96px/inch = 96px/25.4mm
-    // Escala = metrosPorPx * (pixeles por metro en papel a 96dpi)
-    // 1 metro papel = 96/0.0254 px → 1px papel = 0.0254/96 m
-    var escNum=Math.round(mPorPx/(0.0254/96));
-    // Formatear: 1:X.XXX.XXX
+    // Metros por píxel Leaflet (a resolución base 256-tile)
+    var mPorPxLeaflet=156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,zoom);
+    // Denominador de escala para hoja carta
+    var escNum=Math.round(mPorPxLeaflet/(_MM_POR_PX_CARTA/1000));
+    // Redondear a cifra significativa razonable
+    var mag=Math.pow(10,Math.floor(Math.log10(escNum))-1);
+    escNum=Math.round(escNum/mag)*mag;
+    // Formatear con puntos de miles: 1:250.000
     var s=escNum.toString();
     var fmt='';
     for(var i=0;i<s.length;i++){
