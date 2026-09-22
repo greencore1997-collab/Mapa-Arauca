@@ -998,6 +998,19 @@ function wrapText(ctx,s,x,y,maxW,lineH,font,color){
   ctx.fillText(line,x,y);
   return y+lineH;
 }
+// Versión centrada para títulos
+function wrapTextCenter(ctx,s,cx,y,maxW,lineH,font,color){
+  ctx.font=font;ctx.fillStyle=color;ctx.textBaseline='top';ctx.textAlign='center';
+  var words=s.split(' '),line='';
+  for(var i=0;i<words.length;i++){
+    var test=line+(line?' ':'')+words[i];
+    if(ctx.measureText(test).width>maxW && i>0){
+      ctx.fillText(line,cx,y); line=words[i]; y+=lineH;
+    } else { line=test; }
+  }
+  ctx.fillText(line,cx,y);
+  return y+lineH;
+}
 // Barra de escala gráfica con distancias reales
 // escalaNum: denominador numérico de la escala (ej 250000 para 1:250.000)
 // Si no se pasa, intenta leerlo de window._escalaReal
@@ -1529,7 +1542,10 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
   var hTit = (py + ph) - c1y - 2;
   if(hTit>4){
     fillBox(ctx,col1X,c1y,col1W,hTit,'#e8eaf6','#9fa8da');
-    wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),col1X+3,c1y+3,col1W-6,Math.floor(hTit*0.42),'bold '+fPeq+' Arial','#1a237e');
+    // Título +30% tamaño, centrado, con salto de línea automático
+    var fTit = Math.round(ph*0.039)+'px';
+    var lineHTit = Math.round(ph*0.042);
+    wrapTextCenter(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),col1X+col1W/2,c1y+4,col1W-8,lineHTit,'bold '+fTit+' Arial','#1a237e');
     if(subtitulo){
       ctx.font='italic '+fPeq+' Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='bottom';
       ctx.fillText(subtitulo.toUpperCase(),col1X+col1W/2,c1y+hTit-2);
