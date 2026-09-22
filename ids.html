@@ -1215,8 +1215,9 @@ function dibujarLogo(ctx,x,y,w,h){
 
 // ── 1. MAPA HORIZONTAL ──
 function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,proy){
-  var pad=12;
-  var mapW=Math.round(W*0.70), panelW=W-mapW-pad*2;
+  var pad=8;
+  // Panel más angosto (22%) → mapa más amplio (78%)
+  var mapW=Math.round(W*0.78), panelW=W-mapW-pad*2;
   var panelX=mapW+pad;
 
   // Fondo blanco general
@@ -1224,72 +1225,77 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Borde exterior doble
   ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(6,6,W-12,H-12);
   ctx.strokeStyle='#666';ctx.lineWidth=0.5;ctx.strokeRect(9,9,W-18,H-18);
+  // Separador vertical mapa | panel
+  ctx.strokeStyle='#aaa';ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(mapW+pad-1,10);ctx.lineTo(mapW+pad-1,H-10);ctx.stroke();
 
-  // DATA FRAME — mapa
-  dibujarMapaFondo(ctx,12,12,mapW-12,H-24,capasActivas);
+  // DATA FRAME — mapa (más amplio)
+  dibujarMapaFondo(ctx,12,12,mapW-4,H-24,capasActivas);
   // Rosa de vientos — arriba derecha del área de mapa
-  dibujarRosa(ctx,mapW-52,52,32);
+  dibujarRosa(ctx,mapW-50,52,32);
 
   // PANEL DERECHO
-  var px=panelX, py=12, pw=W-panelX-12;
+  var px=panelX, py=12, pw=W-panelX-10;
 
-  // Logo + entidad
-  dibujarLogo(ctx,px,py,pw,55);
-  py+=55+4;
-  fillBox(ctx,px,py,pw,38,'#f5f5f5','#ccc');
-  wrapText(ctx,entidad||'ENTIDAD',px+6,py+5,pw-12,11,'bold 8.5px Arial','#1a237e');
+  // Logo
+  var logoH=48;
+  dibujarLogo(ctx,px,py,pw,logoH);
+  py+=logoH+3;
+
+  // Entidad
+  fillBox(ctx,px,py,pw,30,'#f5f5f5','#ccc');
+  wrapText(ctx,entidad||'ENTIDAD',px+4,py+4,pw-8,9,'bold 7px Arial','#1a237e');
+  py+=30+2;
+
+  // Programa
+  fillBox(ctx,px,py,pw,18,'#e8eaf6','#9fa8da');
+  txt(ctx,programa||'PROGRAMA',px+pw/2,py+9,'bold 6.5px Arial','#1a237e','center','middle');
+  py+=18+3;
+
+  // Título mapa
+  fillBox(ctx,px,py,pw,38,'#e8eaf6','#9fa8da');
+  wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+4,py+3,pw-8,10,'bold 7px Arial','#1a237e');
+  if(subtitulo){txt(ctx,subtitulo.toUpperCase(),px+pw/2,py+30,'5.5px Arial','#3949ab','center','top');}
   py+=38+3;
 
-  // Separador programa
-  fillBox(ctx,px,py,pw,22,'#e8eaf6','#9fa8da');
-  txt(ctx,programa||'PROGRAMA',px+pw/2,py+13,'bold 8px Arial','#1a237e','center','middle');
-  py+=22+4;
-
   // Escala
-  fillBox(ctx,px,py,pw,42,'#fafafa','#ddd');
-  txt(ctx,'ESCALA',px+pw/2,py+8,'bold 7px Arial','#555','center','top');
-  txt(ctx,escala,px+pw/2,py+18,'8px Arial','#000','center','top');
-  broseBar(ctx,px+10,py+28,pw-20,100,1);
-  txt(ctx,'Metros',px+pw-14,py+40,'6px Arial','#555','right','middle');
-  py+=42+4;
+  fillBox(ctx,px,py,pw,36,'#fafafa','#ddd');
+  txt(ctx,'ESCALA',px+pw/2,py+6,'bold 6.5px Arial','#555','center','top');
+  txt(ctx,escala,px+pw/2,py+15,'7px Arial','#000','center','top');
+  broseBar(ctx,px+6,py+24,pw-12,100,1);
+  py+=36+3;
 
   // Leyenda
-  fillBox(ctx,px,py,pw,24,'#f5f5f5','#ddd');
-  txt(ctx,'LEYENDA',px+pw/2,py+14,'bold 7.5px Arial','#333','center','middle');
-  py+=24;
-  fillBox(ctx,px,py,pw,1,'#ddd',null);
-  py+=2;
-  var leyH=Math.min(leyItems.length,6)*18+8;
-  fillBox(ctx,px,py,pw,leyH>18?leyH:18,'#fafafa',null);
+  fillBox(ctx,px,py,pw,16,'#f5f5f5','#ddd');
+  txt(ctx,'LEYENDA',px+pw/2,py+8,'bold 6.5px Arial','#333','center','middle');
+  py+=16+1;
+  var leyH=Math.min(leyItems.length,6)*16+4;
+  fillBox(ctx,px,py,pw,leyH>16?leyH:16,'#fafafa',null);
   leyItems.slice(0,6).forEach(function(it,i){
-    ctx.fillStyle=it.color;ctx.fillRect(px+8,py+4+i*18,16,12);
-    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=0.5;ctx.strokeRect(px+8,py+4+i*18,16,12);
-    ctx.font='7.5px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
-    ctx.fillText(it.texto.substring(0,34),px+28,py+5+i*18);
+    ctx.fillStyle=it.color;ctx.fillRect(px+5,py+2+i*16,13,10);
+    ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=0.4;ctx.strokeRect(px+5,py+2+i*16,13,10);
+    ctx.font='6.5px Arial';ctx.fillStyle='#333';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(it.texto.substring(0,26),px+21,py+3+i*16);
   });
-  py+=leyH>18?leyH:18;
-  py+=4;
+  py+=leyH>16?leyH:16;
+  py+=3;
 
-  // Diagrama localización
-  fillBox(ctx,px,py,pw,18,'#f5f5f5','#ddd');
-  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+10,'bold 6.5px Arial','#444','center','middle');
-  py+=18;
-  var locW=Math.floor((pw-6)/2);
-  dibujarLocalizacion(ctx,px,py,locW,65);
-  dibujarLocalizacion(ctx,px+locW+6,py,locW,65);
-  py+=65+4;
+  // Diagrama localización — los 2 frames APILADOS (uno encima del otro)
+  fillBox(ctx,px,py,pw,14,'#f5f5f5','#ddd');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+7,'bold 5.5px Arial','#444','center','middle');
+  py+=14;
+  var locH2=Math.floor((H-py-70)/2);  // altura de cada mini-mapa
+  locH2=Math.max(locH2,45);
+  dibujarLocalizacion(ctx,px,py,pw,locH2);        // frame 1 — Colombia
+  py+=locH2+3;
+  dibujarLocalizacion(ctx,px,py,pw,locH2);        // frame 2 — región
+  py+=locH2+3;
 
-  // Título principal mapa
-  fillBox(ctx,px,py,pw,48,'#e8eaf6','#9fa8da');
-  wrapText(ctx,(titulo||'TÍTULO').toUpperCase(),px+6,py+5,pw-12,13,'bold 8.5px Arial','#1a237e');
-  if(subtitulo){txt(ctx,subtitulo.toUpperCase(),px+pw/2,py+38,'6.5px Arial','#3949ab','center','top');}
-  py+=48+4;
-
-  // Datos técnicos
-  var techH=H-py-12;
-  if(techH>40){
+  // Datos técnicos — resto del espacio disponible
+  var techH=H-py-10;
+  if(techH>35){
     fillBox(ctx,px,py,pw,techH,'#fafafa','#eee');
-    panelDatosTecnicos(ctx,px+6,py+4,pw-12,scs,proy);
+    panelDatosTecnicos(ctx,px+4,py+3,pw-8,scs,proy);
   }
 }
 
@@ -1971,8 +1977,8 @@ function posicionarDataFrames(){
 function calcAreasPorTipo(tipo){
   var W=1100,H=780;
   if(tipo==='horizontal'){
-    var mapW=Math.round(W*0.70);
-    return [{x:12,y:12,w:mapW-12,h:H-24}];
+    var mapW=Math.round(W*0.78);
+    return [{x:12,y:12,w:mapW-4,h:H-24}];
   }
   if(tipo==='horizontal-simple'){
     var barH=175, mapH=H-barH;
