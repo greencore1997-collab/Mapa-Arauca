@@ -1264,23 +1264,28 @@ function dibujarLocalizacion(ctx,x,y,w,h){
   ctx.fillStyle='#f44336';ctx.fillRect(x+w*0.25,y+h*0.15,w*0.2,h*0.35);
   ctx.strokeStyle='#aaa';ctx.lineWidth=0.5;ctx.strokeRect(x,y,w,h);
 }
-function panelDatosTecnicos(ctx,x,y,w,scs,proy){
+function panelDatosTecnicos(ctx,x,y,w,scs,proy,avail){
   var datos=[
-    ['Sistema de Coord.','GCS WGS 1984'],
+    ['Sist. Coord.','GCS WGS 1984'],
     ['Datum','WGS 1984'],
-    ['Unidades','Grados Decimales'],
+    ['Unidades','Grad. Decimales'],
     ['Meridiano','Greenwich'],
     ['EPSG','4326']
   ];
+  // Calcula tamaño de fuente que quepa en el espacio disponible
+  var n=datos.length;
+  var maxLH = avail ? Math.floor(avail/n) : 11;
+  var lh = Math.min(maxLH, 11);
+  lh = Math.max(lh, 7);
+  var fs = (lh-1)+'px';
   ctx.textAlign='left';ctx.textBaseline='top';
-  var lh=Math.min(10, Math.floor((w<80?w:w)*0.13));
-  lh=Math.max(lh,8);
+  var col2x = x + Math.floor(w*0.48);
   datos.forEach(function(d,i){
     var yy=y+i*lh;
-    ctx.font='bold '+(lh-1)+'px Arial';ctx.fillStyle='#444';
+    ctx.font='bold '+fs+' Arial';ctx.fillStyle='#444';
     ctx.fillText(d[0]+':',x,yy);
-    ctx.font=(lh-1)+'px Arial';ctx.fillStyle='#222';
-    ctx.fillText(d[1],x+w*0.46,yy);
+    ctx.font=fs+' Arial';ctx.fillStyle='#111';
+    ctx.fillText(d[1],col2x,yy);
   });
 }
 
@@ -1564,23 +1569,26 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
 
   // ── COL 3: Localización + Datos técnicos ──
   var c3y = py + 2;
-  var hLocHdr3 = Math.round(ph*0.10);
+  var hLocHdr3 = Math.round(ph*0.09);
   fillBox(ctx,col3X,c3y,col3W,hLocHdr3,'#f5f5f5','#ddd');
   txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',col3X+col3W/2,c3y+hLocHdr3/2,'bold '+fPeq+' Arial','#444','center','middle');
   c3y += hLocHdr3 + gap;
-  // 2 mini-mapas — reparten el espacio disponible menos datos técnicos
-  var hTech3 = Math.round(ph*0.18);
-  var locH3  = Math.round(((py+ph) - c3y - hTech3 - gap*3) / 2);
-  locH3 = Math.max(locH3, 18);
-  dibujarLocalizacion(ctx,col3X,c3y,col3W,locH3);
+  // 2 mini-mapas LADO A LADO (cuadrado)
+  var hTech3  = Math.round(ph*0.22);
+  var locH3   = Math.round((py+ph) - c3y - hTech3 - gap*2);
+  locH3 = Math.max(locH3, 16);
+  var locW3   = Math.floor((col3W - gap) / 2);
+  dibujarLocalizacion(ctx, col3X,           c3y, locW3, locH3);
+  dibujarLocalizacion(ctx, col3X+locW3+gap, c3y, col3W-locW3-gap, locH3);
   c3y += locH3 + gap;
-  dibujarLocalizacion(ctx,col3X,c3y,col3W,locH3);
-  c3y += locH3 + gap;
-  // Datos técnicos
+  // Datos técnicos — cabecera + tabla compacta
   var techHv = (py+ph) - c3y - 2;
   if(techHv > 10){
-    fillBox(ctx,col3X,c3y,col3W,techHv,'#fafafa','#e0e0e0');
-    panelDatosTecnicos(ctx,col3X+3,c3y+2,col3W-6,scs,proy);
+    fillBox(ctx,col3X,c3y,col3W,Math.round(techHv*0.28),'#f5f5f5','#ddd');
+    txt(ctx,'SISTEMA DE REFERENCIA',col3X+col3W/2,c3y+Math.round(techHv*0.14),'bold '+fPeq+' Arial','#444','center','middle');
+    var ty = c3y + Math.round(techHv*0.28) + 1;
+    fillBox(ctx,col3X,ty,col3W,techHv-Math.round(techHv*0.28)-1,'#fafafa','#e0e0e0');
+    panelDatosTecnicos(ctx,col3X+3,ty+2,col3W-6,scs,proy,techHv-Math.round(techHv*0.28)-4);
   }
 }
 
