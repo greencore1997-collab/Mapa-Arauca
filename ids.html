@@ -155,6 +155,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 /* Botón actualizar preview */
 .btn-preview{margin:10px 16px;width:calc(100% - 32px);font-family:'Orbitron',monospace;font-size:8.5px;font-weight:700;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#e53935,#b71c1c);border:none;border-radius:8px;padding:11px;cursor:pointer;transition:all 0.3s;box-shadow:0 0 16px rgba(229,57,53,0.3);}
 .btn-preview:hover{background:linear-gradient(135deg,#ef5350,#e53935);box-shadow:0 0 28px rgba(229,57,53,0.5);}
+/* Botones descarga */
+.btn-dl-wrap{margin:0 16px 10px;display:flex;gap:8px;}
+.btn-dl{flex:1;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;letter-spacing:1.5px;color:#fff;border:none;border-radius:8px;padding:10px 4px;cursor:pointer;transition:all 0.3s;}
+.btn-dl-jpg{background:linear-gradient(135deg,#1565c0,#0d47a1);box-shadow:0 0 12px rgba(21,101,192,0.35);}
+.btn-dl-jpg:hover{background:linear-gradient(135deg,#1976d2,#1565c0);box-shadow:0 0 22px rgba(21,101,192,0.55);}
+.btn-dl-pdf{background:linear-gradient(135deg,#2e7d32,#1b5e20);box-shadow:0 0 12px rgba(46,125,50,0.35);}
+.btn-dl-pdf:hover{background:linear-gradient(135deg,#388e3c,#2e7d32);box-shadow:0 0 22px rgba(46,125,50,0.55);}
 
 /* Área preview */
 #sal-preview{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:18px;gap:0;}
@@ -459,6 +466,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
     </div>
 
     <button class="btn-preview" onclick="actualizarPreview()">↻ ACTUALIZAR VISTA PREVIA</button>
+    <div class="btn-dl-wrap">
+      <button class="btn-dl btn-dl-jpg" onclick="descargarJPG()">⬇ JPG</button>
+      <button class="btn-dl btn-dl-pdf" onclick="descargarPDF()">⬇ PDF</button>
+    </div>
 
   </div><!-- /sal-sidebar -->
 
@@ -2370,6 +2381,55 @@ function ocultarDataFrames(){
     var d=document.getElementById('df-wrap-'+i);
     if(d) d.style.display='none';
   }
+}
+
+// ── DESCARGA JPG 750px ──
+function descargarJPG(){
+  var cvs = document.getElementById('sal-canvas');
+  if(!cvs){ alert('Genera la vista previa primero.'); return; }
+  // Canvas de salida 750px de ancho manteniendo proporción
+  var ratio = cvs.height / cvs.width;
+  var outW = 750, outH = Math.round(outW * ratio);
+  var out = document.createElement('canvas');
+  out.width = outW; out.height = outH;
+  var ctx2 = out.getContext('2d');
+  ctx2.fillStyle='#fff'; ctx2.fillRect(0,0,outW,outH);
+  ctx2.drawImage(cvs, 0,0, outW, outH);
+  var link = document.createElement('a');
+  link.download = 'mapa_ids_750px.jpg';
+  link.href = out.toDataURL('image/jpeg', 0.95);
+  link.click();
+}
+
+// ── DESCARGA PDF (usa canvas → imagen → PDF via print) ──
+function descargarPDF(){
+  var cvs = document.getElementById('sal-canvas');
+  if(!cvs){ alert('Genera la vista previa primero.'); return; }
+  var ratio = cvs.height / cvs.width;
+  var outW = 750, outH = Math.round(outW * ratio);
+  var out = document.createElement('canvas');
+  out.width = outW; out.height = outH;
+  var ctx2 = out.getContext('2d');
+  ctx2.fillStyle='#fff'; ctx2.fillRect(0,0,outW,outH);
+  ctx2.drawImage(cvs,0,0,outW,outH);
+  var imgData = out.toDataURL('image/jpeg',0.95);
+  // Abrir ventana de impresión con la imagen — el navegador la convierte a PDF
+  var w = window.open('','_blank');
+  var isVert = (outH > outW);
+  var orient = isVert ? 'portrait' : 'landscape';
+  w.document.write(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<title>Mapa IDS</title>'+
+    '<style>'+
+    '@page{size:'+orient+';margin:0}'+
+    'body{margin:0;padding:0;background:#fff}'+
+    'img{width:100%;height:auto;display:block}'+
+    '</style></head><body>'+
+    '<img src="'+imgData+'">'+
+    '<script>window.onload=function(){window.print();}<\/script>'+
+    '</body></html>'
+  );
+  w.document.close();
 }
 </script>
 </body>
