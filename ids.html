@@ -990,13 +990,9 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
   var mPorPx = denom ? denom * (mmPPx / 1000) : null;
   var mPorSeg = mPorPx ? mPorPx * (w / segs) : null;
 
-  // Elegir unidad y redondear a valor "bonito"
-  var unidad = 'm', factor = 1;
-  if(mPorSeg && mPorSeg >= 1000){ unidad = 'km'; factor = 0.001; }
-
-  // Calcular valor bonito por segmento (redondear al entero "agradable" más cercano)
-  function valorBonito(v){
-    if(!v) return null;
+  // Redondear mPorSeg a valor "bonito" (siempre en metros)
+  function valorBonitoM(v){
+    if(!v||v<=0) return null;
     var mag=Math.pow(10,Math.floor(Math.log10(v)));
     var choices=[1,2,2.5,5,10];
     var best=choices[0]*mag;
@@ -1005,7 +1001,11 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
     });
     return best;
   }
-  var valSeg = mPorSeg ? valorBonito(mPorSeg*factor) : null;
+  // valSegM: distancia por segmento en METROS (redondeada)
+  var valSegM = mPorSeg ? valorBonitoM(mPorSeg) : null;
+  // Elegir unidad según la distancia por segmento
+  var unidad = 'm';
+  if(valSegM && valSegM >= 1000) unidad = 'km';
 
   // Dibujar barra bicolor
   ctx.save();
@@ -1017,10 +1017,9 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
     ctx.fillRect(xi,y,w/segs+0.5,barH);
     ctx.strokeRect(xi,y,w/segs,barH);
   }
-  // Borde exterior
   ctx.strokeRect(x,y,w,barH);
 
-  // Etiquetas sobre los separadores
+  // Etiquetas en los separadores
   ctx.font='bold 5.5px Arial';
   ctx.fillStyle='#111';
   ctx.textAlign='center';
@@ -1028,14 +1027,16 @@ function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
   for(var j=0;j<=segs;j++){
     var xj=x+j*(w/segs);
     var label;
-    if(valSeg!==null){
-      var val=valSeg*j*factor; // en unidad seleccionada
-      if(unidad==='km'){
-        label=(val%1===0?val.toFixed(0):val.toFixed(1))+' km';
+    if(valSegM!==null){
+      var valM = valSegM * j; // metros acumulados
+      if(j===0){
+        label='0';
+      } else if(unidad==='km'){
+        var valK=valM/1000;
+        label=(valK%1===0?valK.toFixed(0):valK.toFixed(1))+' km';
       } else {
-        label=Math.round(val)+' m';
+        label=Math.round(valM)+' m';
       }
-      if(j===0) label='0';
     } else {
       label=j===0?'0':(j*(w/segs)).toFixed(0)+' px';
     }
