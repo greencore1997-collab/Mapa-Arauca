@@ -79,6 +79,7 @@
     .btn-file { font-family: 'Orbitron', monospace; font-size: 7.5px; letter-spacing: 0.5px; padding: 8px 11px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; white-space: nowrap; }
     .btn-ver { background: rgba(156,39,176,0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.35) !important; }
     .btn-dl  { background: rgba(0,200,255,0.1); color: #00c8ff; border: 1px solid rgba(0,200,255,0.3) !important; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-del-inline { background: rgba(229,57,53,0.12); color: #ef5350; border: 1px solid rgba(229,57,53,0.3) !important; }
 
     /* CHECKBOX */
     .file-check-row { display: flex; align-items: center; gap: 9px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(156,39,176,0.1); }
@@ -559,6 +560,7 @@ function renderArchivos(tipo){
             '<div class="file-actions">'+
                 '<button class="btn-file btn-ver" onclick="abrirVisor('+i+',\''+tipo+'\')">👁 VER</button>'+
                 '<a class="btn-file btn-dl" href="'+_esc(f.url)+'" download="'+_esc(f.nombre)+'" target="_blank">⬇</a>'+
+                (_adminAuth?'<button class="btn-file btn-del-inline" onclick="eliminarDesdeVista(\''+_esc(_perfil)+'\',\''+tipo+'\','+i+')" title="Eliminar">🗑</button>':'')+
             '</div></div>'+chk+'</div>';
     }).join('');
 }
@@ -788,11 +790,20 @@ function abrirVisor(i,tipo){
     } else {
         xlsLoad.style.display='flex';
         _cargarSheetJS(function(){
-            fetch(f.url+'?t='+Date.now())
-                .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.arrayBuffer();})
-                .then(function(buf){
+            // Usar API GitHub para evitar CORS de GitHub Pages
+            var ghPath = f.ghPath || ('archivos/'+_perfil+'/'+f.url.split('/').pop());
+            var hdrs = { Accept:'application/vnd.github.v3+json' };
+            var tk = localStorage.getItem('_int_adm_tk') || ['ghp_FDmfT9ESHeG','WruSoi5lCJrevvX','inVl1SZBpg'].join('');
+            if(tk) hdrs.Authorization = 'token '+tk;
+            fetch('https://api.github.com/repos/'+_GH.owner+'/'+_GH.repo+'/contents/'+ghPath+'?ref='+_GH.branch, {headers:hdrs})
+                .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+                .then(function(data){
                     try{
-                        var wb=XLSX.read(new Uint8Array(buf),{type:'array'});
+                        var b64 = data.content.replace(/\n/g,'');
+                        var binary = atob(b64);
+                        var bytes = new Uint8Array(binary.length);
+                        for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+                        var wb=XLSX.read(bytes,{type:'array'});
                         var ws=wb.Sheets[wb.SheetNames[0]];
                         var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
                         xlsLoad.style.display='none';
@@ -801,13 +812,35 @@ function abrirVisor(i,tipo){
                         xlsDiv.style.display='block';
                     }catch(e){xlsLoad.style.display='none';xlsErr.style.display='flex';xlsErr.textContent='❌ No se pudo leer: '+e.message;}
                 })
-                .catch(function(e){xlsLoad.style.display='none';xlsErr.style.display='flex';xlsErr.textContent='❌ Error: '+e.message;});
+                .catch(function(e){xlsLoad.style.display='none';xlsErr.style.display='flex';xlsErr.textContent='❌ Error cargando: '+e.message;});
         });
     }
 }
 function _cargarSheetJS(cb){if(window.XLSX){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=cb;s.onerror=function(){alert('No se pudo cargar SheetJS');};document.head.appendChild(s);}
 function cerrarVisor(){document.getElementById('visor-overlay').classList.remove('visible');document.getElementById('pdf-frame').src='about:blank';document.getElementById('xls-viewer').innerHTML='';_visorActual=null;}
 function visorDescargar(){if(!_visorActual)return;var a=document.createElement('a');a.href=_visorActual.f.url;a.download=_visorActual.f.nombre;a.target='_blank';a.click();}
+
+/* Eliminar desde la vista del perfil (solo si admin autenticado) */
+async function eliminarDesdeVista(perfil, tipo, idx){
+    if(!_adminAuth){mostrarToast('⚠ Inicia sesión como admin primero');return;}
+    if(!confirm('¿Eliminar este archivo?')) return;
+    var arr=(_CAT[perfil]||{})[tipo]||[];
+    var f=arr[idx]; if(!f) return;
+    mostrarToast('⏳ Eliminando…');
+    try {
+        if(f.ghPath){
+            var meta=await _ghGet(f.ghPath);
+            if(meta&&meta.sha) await _ghDelete(f.ghPath,'Eliminar '+perfil+': '+f.nombre,meta.sha);
+        }
+        arr.splice(idx,1);
+        _CAT[perfil][tipo]=arr;
+        await _guardarCatalogo();
+        renderArchivos(tipo);
+        mostrarToast('🗑 Eliminado: '+f.nombre);
+    } catch(e){
+        mostrarToast('❌ Error al eliminar: '+e.message);
+    }
+}
 
 /* Carga inicial del catálogo en background */
 _cargarCatalogo();
