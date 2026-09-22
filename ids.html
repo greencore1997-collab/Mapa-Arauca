@@ -1451,7 +1451,7 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
   ctx.strokeStyle='#555';ctx.lineWidth=0.6;ctx.strokeRect(10,10,W-20,H-20);
 
   // ── ÁREA DE MAPA ──
-  dibujarMapaFondo(ctx,borde,borde,W-borde*2,mapH-borde,'#e8f4e8');
+  dibujarMapaFondo(ctx,borde,borde,W-borde*2,mapH-borde,capasActivas);
   dibujarRosa(ctx,W-borde-36,borde+36,26);
 
   // Separador horizontal
@@ -1505,8 +1505,8 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
   ctx.font='bold 7px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText((programa||'PROGRAMA').toUpperCase(),col1X+col1W/2,c1y+hProg/2);
   c1y += hProg + gap;
-  // Título
-  var hTit = H - borde - c1y - gap;
+  // Título — ocupa el resto de la col 1 hasta el borde inferior del panel
+  var hTit = (py + ph) - c1y - 2;
   fillBox(ctx,col1X,c1y,col1W,hTit,'#e8eaf6','#9fa8da');
   wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),col1X+4,c1y+4,col1W-8,Math.floor(hTit*0.4),'bold 8px Arial','#1a237e');
   if(subtitulo){
