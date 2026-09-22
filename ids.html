@@ -1239,8 +1239,8 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // espacio reservado para bloques fijos
   var fixed=hLogo+hEnt+hProg+hTit+hEsc+hLeyTit+hLeyBody+hLocTit+hTech
             +gap*9;
-  // los 2 mini-mapas se reparten lo que queda
-  var locH=Math.max(Math.floor((inner-fixed)/2),38);
+  // los 2 mini-mapas se reparten lo que queda, reducidos al 60%
+  var locH=Math.max(Math.floor((inner-fixed)/2*0.60),28);
 
   // ── Fondos generales ──
   fillBox(ctx,0,0,W,H,'#ffffff',null);
