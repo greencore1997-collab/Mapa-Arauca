@@ -700,8 +700,11 @@ async function adminAgregar(){
     document.getElementById('adm-prog-label').textContent='Subiendo a GitHub Pages…';
 
     try {
-        // Subir archivo al repo
-        await _ghPut(ghPath, _admB64, 'Agregar '+perfil+': '+nombre);
+        // Verificar si el archivo ya existe para obtener su SHA
+        var existente = await _ghGet(ghPath);
+        var shaPrev = (existente && existente.sha) ? existente.sha : undefined;
+        // Subir archivo al repo (con SHA si ya existe, para sobreescribir)
+        await _ghPut(ghPath, _admB64, 'Agregar '+perfil+': '+nombre, shaPrev);
 
         // Actualizar catálogo
         if(!_CAT[perfil]) _CAT[perfil]={pdf:[],xls:[]};
