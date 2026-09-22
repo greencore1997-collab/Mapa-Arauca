@@ -1938,7 +1938,7 @@ function asegurarDivs(n){
       // Fondo gris (visible cuando OSM está desactivado)
       var bg=document.createElement('div');
       bg.id='df-bg-'+i;
-      bg.style.cssText='position:absolute;inset:0;background:#e8e0d0;z-index:0;';
+      bg.style.cssText='position:absolute;inset:0;background:#ffffff;z-index:0;';
       dw.appendChild(bg);
 
       // Contenedor del mapa Leaflet
@@ -1985,7 +1985,7 @@ function toggleOsm(idx){
     if(_dfMaps[idx-1]) setTimeout(function(){ _dfMaps[idx-1].invalidateSize(); },30);
   } else {
     if(mapEl) mapEl.style.visibility='hidden';
-    if(bg)    bg.style.background='#e8e0d0';
+    if(bg)    bg.style.background='#ffffff';
     if(btn){  btn.innerHTML='◻ OSM'; btn.style.background='rgba(220,210,195,0.9)'; btn.style.color='#888'; }
   }
 }
