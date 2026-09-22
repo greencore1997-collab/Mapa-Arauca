@@ -145,12 +145,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:
 .layer-drop:hover,.layer-drop.drag-over{border-color:rgba(229,57,53,0.6);background:rgba(229,57,53,0.05);}
 .layer-drop-icon{font-size:22px;display:block;margin-bottom:6px;}
 .layer-drop-txt{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1.5px;color:rgba(239,154,154,0.4);line-height:1.6;}
-.layer-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
-.layer-chip{background:rgba(0,15,40,0.8);border:1px solid rgba(229,57,53,0.2);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:10px;color:#c0d4e0;}
-.layer-chip-icon{font-size:12px;}
-.layer-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.layer-chip-rm{font-size:10px;cursor:pointer;color:rgba(229,57,53,0.35);border:none;background:transparent;transition:color 0.2s;}
+.layer-list{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+/* chip cabecera */
+.layer-chip{background:rgba(0,15,40,0.85);border:1px solid rgba(229,57,53,0.22);border-radius:8px;overflow:hidden;font-size:10px;color:#c0d4e0;}
+.layer-chip-head{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;user-select:none;}
+.layer-chip-head:hover{background:rgba(229,57,53,0.06);}
+.layer-chip-icon{font-size:13px;}
+.layer-chip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;}
+.layer-chip-toggle{font-size:10px;color:rgba(239,154,154,0.5);transition:transform 0.2s;}
+.layer-chip-toggle.open{transform:rotate(180deg);}
+.layer-chip-rm{font-size:11px;cursor:pointer;color:rgba(229,57,53,0.4);border:none;background:transparent;transition:color 0.2s;padding:0 2px;}
 .layer-chip-rm:hover{color:#ef5350;}
+/* panel atributos / filtros */
+.layer-attr-panel{display:none;padding:8px 10px 10px;border-top:1px solid rgba(229,57,53,0.1);background:rgba(0,8,24,0.6);}
+.layer-attr-panel.open{display:block;}
+.lap-lbl{font-size:7.5px;letter-spacing:1px;color:rgba(180,200,190,0.4);display:block;margin-bottom:3px;margin-top:6px;}
+.lap-sel,.lap-inp{width:100%;background:rgba(0,12,35,0.9);border:1px solid rgba(229,57,53,0.15);color:#e0e8f0;font-family:'Rajdhani',sans-serif;font-size:11px;border-radius:5px;padding:5px 8px;outline:none;}
+.lap-sel:focus,.lap-inp:focus{border-color:rgba(229,57,53,0.4);}
+.lap-sel option{background:#001020;}
+.lap-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;max-height:70px;overflow-y:auto;}
+.lap-tag{font-size:9px;background:rgba(21,101,192,0.25);border:1px solid rgba(21,101,192,0.4);color:#90caf9;border-radius:4px;padding:2px 6px;cursor:pointer;transition:all 0.15s;}
+.lap-tag:hover,.lap-tag.active{background:rgba(21,101,192,0.55);color:#fff;}
+.lap-tag.active{border-color:#1976d2;}
+.lap-count{font-size:8px;color:rgba(180,200,190,0.35);margin-top:4px;}
+.lap-btn-apply{width:100%;margin-top:7px;font-family:'Orbitron',monospace;font-size:7.5px;font-weight:700;letter-spacing:1.5px;color:#fff;background:linear-gradient(135deg,#1565c0,#0d47a1);border:none;border-radius:5px;padding:7px;cursor:pointer;}
+.lap-btn-apply:hover{background:linear-gradient(135deg,#1976d2,#1565c0);}
 
 /* Botón actualizar preview */
 .btn-preview{margin:10px 16px;width:calc(100% - 32px);font-family:'Orbitron',monospace;font-size:8.5px;font-weight:700;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#e53935,#b71c1c);border:none;border-radius:8px;padding:11px;cursor:pointer;transition:all 0.3s;box-shadow:0 0 16px rgba(229,57,53,0.3);}
@@ -815,13 +834,33 @@ function agregarCapas(files) {
   actualizarPreview();
 }
 
-// Extrae features de un GeoJSON
+// Extrae features de un GeoJSON y devuelve también los atributos disponibles
 function extraerFeatures(gj){
   var feats=[];
   if(gj.type==='FeatureCollection') feats=gj.features||[];
   else if(gj.type==='Feature') feats=[gj];
   else if(gj.type) feats=[{type:'Feature',geometry:gj,properties:{}}];
   return feats;
+}
+
+// Obtiene lista de claves de atributos de un array de features
+function extraerAtributos(feats){
+  var keys={};
+  (feats||[]).forEach(function(f){
+    if(f&&f.properties) Object.keys(f.properties).forEach(function(k){ keys[k]=true; });
+  });
+  return Object.keys(keys);
+}
+
+// Obtiene valores únicos de un atributo
+function valoresUnicos(feats, campo){
+  var vals={};
+  (feats||[]).forEach(function(f){
+    if(f&&f.properties&&f.properties[campo]!==undefined&&f.properties[campo]!==null){
+      vals[String(f.properties[campo])]=true;
+    }
+  });
+  return Object.keys(vals).sort();
 }
 
 // Extrae features de KML/GPX (coordenadas como [lon,lat])
@@ -894,13 +933,133 @@ function renderCapas() {
   var ll = document.getElementById('layer-list');
   ll.innerHTML = '';
   capasActivas.forEach(function(c, i){
+    var attrs = extraerAtributos(c.features);
+    var nFeat = (c.features||[]).length;
+
     var d = document.createElement('div');
     d.className = 'layer-chip';
-    d.innerHTML = '<span class="layer-chip-icon">'+c.icono+'</span>' +
-      '<span class="layer-chip-name">'+escHtml(c.name)+'</span>' +
-      '<button class="layer-chip-rm" onclick="quitarCapa('+i+')">✕</button>';
+    d.id = 'chip-'+i;
+
+    // Cabecera clicable
+    var head = '<div class="layer-chip-head" onclick="toggleAttrPanel('+i+')">'
+      +'<span class="layer-chip-icon">'+c.icono+'</span>'
+      +'<span class="layer-chip-name">'+escHtml(c.name)+'</span>'
+      +'<span class="layer-chip-toggle" id="toggle-'+i+'">▾</span>'
+      +'<button class="layer-chip-rm" onclick="event.stopPropagation();quitarCapa('+i+')">✕</button>'
+      +'</div>';
+
+    // Panel de atributos
+    var panel = '<div class="layer-attr-panel" id="attr-panel-'+i+'">';
+    panel += '<span class="lap-lbl">FEATURES: '+nFeat+'</span>';
+
+    if(attrs.length > 0){
+      // Selector de atributo de análisis
+      panel += '<span class="lap-lbl">ATRIBUTO A ANALIZAR</span>';
+      panel += '<select class="lap-sel" id="attr-sel-'+i+'" onchange="onAttrChange('+i+')">';
+      panel += '<option value="">— Seleccionar —</option>';
+      attrs.forEach(function(a){ panel += '<option value="'+escHtml(a)+'">'+escHtml(a)+'</option>'; });
+      panel += '</select>';
+
+      // Área de valores únicos (filtros)
+      panel += '<span class="lap-lbl">FILTRAR POR VALOR</span>';
+      panel += '<div class="lap-tags" id="tags-'+i+'"><span style="font-size:9px;color:rgba(180,200,190,0.3)">Selecciona un atributo primero</span></div>';
+      panel += '<div class="lap-count" id="count-'+i+'"></div>';
+
+      // Filtro de texto libre
+      panel += '<span class="lap-lbl">BUSCAR VALOR</span>';
+      panel += '<input class="lap-inp" id="filter-txt-'+i+'" placeholder="Escribe para filtrar valores…" oninput="onFilterTxt('+i+')">';
+
+      // Botón aplicar filtro
+      panel += '<button class="lap-btn-apply" onclick="aplicarFiltro('+i+')">✔ APLICAR FILTRO</button>';
+    } else {
+      panel += '<span style="font-size:9px;color:rgba(180,200,190,0.25)">Sin atributos detectados</span>';
+    }
+    panel += '</div>';
+
+    d.innerHTML = head + panel;
     ll.appendChild(d);
   });
+}
+
+function toggleAttrPanel(i){
+  var panel = document.getElementById('attr-panel-'+i);
+  var toggle = document.getElementById('toggle-'+i);
+  if(!panel) return;
+  var open = panel.classList.toggle('open');
+  if(toggle) toggle.classList.toggle('open', open);
+}
+
+function onAttrChange(i){
+  var c = capasActivas[i];
+  if(!c) return;
+  var sel = document.getElementById('attr-sel-'+i);
+  var campo = sel ? sel.value : '';
+  c._attrActivo = campo;
+  c._filtrosActivos = null; // limpiar filtros anteriores
+  renderTagsFiltro(i, campo, '');
+}
+
+function renderTagsFiltro(i, campo, textoBusq){
+  var c = capasActivas[i];
+  if(!c) return;
+  var container = document.getElementById('tags-'+i);
+  var countEl = document.getElementById('count-'+i);
+  if(!container) return;
+  if(!campo){ container.innerHTML='<span style="font-size:9px;color:rgba(180,200,190,0.3)">Selecciona un atributo primero</span>'; return; }
+  var vals = valoresUnicos(c.features, campo);
+  if(textoBusq) vals = vals.filter(function(v){ return v.toLowerCase().indexOf(textoBusq.toLowerCase())!==-1; });
+  container.innerHTML = '';
+  var activos = c._filtrosActivos || [];
+  vals.slice(0,80).forEach(function(v){
+    var tag = document.createElement('span');
+    tag.className = 'lap-tag' + (activos.indexOf(v)!==-1 ? ' active' : '');
+    tag.textContent = v;
+    tag.title = v;
+    tag.onclick = function(){
+      tag.classList.toggle('active');
+      var idx = activos.indexOf(v);
+      if(idx===-1) activos.push(v); else activos.splice(idx,1);
+      c._filtrosActivos = activos;
+      if(countEl) countEl.textContent = activos.length>0 ? activos.length+' valor(es) seleccionado(s)' : '';
+    };
+    container.appendChild(tag);
+  });
+  if(vals.length>80){
+    var more = document.createElement('span');
+    more.style.cssText='font-size:9px;color:rgba(180,200,190,0.3);align-self:center;';
+    more.textContent='…+'+(vals.length-80)+' más. Usa el buscador.';
+    container.appendChild(more);
+  }
+  if(countEl) countEl.textContent = activos.length>0 ? activos.length+' valor(es) seleccionado(s)' : '';
+}
+
+function onFilterTxt(i){
+  var c = capasActivas[i];
+  var campo = c ? c._attrActivo : '';
+  var txt = (document.getElementById('filter-txt-'+i)||{}).value||'';
+  renderTagsFiltro(i, campo, txt);
+}
+
+function aplicarFiltro(i){
+  var c = capasActivas[i];
+  if(!c) return;
+  var campo = c._attrActivo;
+  var filtros = c._filtrosActivos;
+  if(!campo){ alert('Selecciona un atributo primero.'); return; }
+
+  // Aplicar filtro: crear featuresFiltered
+  if(!filtros || filtros.length===0){
+    c.featuresFiltered = null; // sin filtro activo → mostrar todo
+  } else {
+    c.featuresFiltered = (c.features||[]).filter(function(f){
+      return f && f.properties && filtros.indexOf(String(f.properties[campo]))!==-1;
+    });
+    c.bbox = calcBbox(c.featuresFiltered);
+  }
+  actualizarPreview();
+  // Feedback visual
+  var btn = document.querySelector('#chip-'+i+' .lap-btn-apply');
+  if(btn){ btn.textContent='✔ FILTRO APLICADO ('+( c.featuresFiltered ? c.featuresFiltered.length : (c.features||[]).length )+' feat.)'; }
 }
 
 function quitarCapa(i) {
@@ -1166,7 +1325,9 @@ function dibujarMapaFondo(ctx,x,y,w,h,capas){
   // Fondo crema
   fillBox(ctx,x,y,w,h,'#f0ede6',null);
 
-  var capasConGeom = capas.filter(function(c){ return c.features&&c.features.length>0&&c.bbox; });
+  // Usa featuresFiltered si hay filtro activo, de lo contrario features completo
+  capas.forEach(function(c){ c._featsDraw = c.featuresFiltered || c.features; });
+  var capasConGeom = capas.filter(function(c){ return c._featsDraw&&c._featsDraw.length>0&&c.bbox; });
 
   if(capasConGeom.length>0){
     // Calcular bbox global de todas las capas
@@ -1195,7 +1356,7 @@ function dibujarMapaFondo(ctx,x,y,w,h,capas){
 
     capasConGeom.forEach(function(cap,ci){
       var col=colors[ci%colors.length];
-      cap.features.forEach(function(f){
+      cap._featsDraw.forEach(function(f){
         if(!f||!f.geometry) return;
         var g=f.geometry;
         drawGeom(ctx,g,col,toCanvasX,toCanvasY);
