@@ -1296,25 +1296,26 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   var inner=H-20; // altura útil del panel (de py=10 a H-10)
 
   // ── Alturas fijas proporcionales ──
-  var hLogo  =Math.round(inner*0.068); // ~53px  logo
-  var hEnt   =Math.round(inner*0.040); // ~31px  entidad
-  var hProg  =Math.round(inner*0.026); // ~20px  programa
-  var hTit   =Math.round(inner*0.052); // ~40px  título mapa
-  var hEsc   =Math.round(inner*0.052); // ~40px  escala
-  var hLeyTit=Math.round(inner*0.024); // ~18px  header leyenda
-  var hLeyIt =16;                      // px por ítem leyenda (más alto para fuente +30%)
-  var nLey   =Math.min(leyItems.length,6);
-  var hLeyBody=nLey*hLeyIt+4;
-  if(hLeyBody<hLeyIt+4) hLeyBody=hLeyIt+4;
-  var hLocTit=Math.round(inner*0.018); // ~14px  header localiz.
-  var hTech  =Math.round(inner*0.082); // ~64px  datos técnicos
+  var hLogo  =Math.round(inner*0.068); // logo
+  var hEnt   =Math.round(inner*0.040); // entidad
+  var hProg  =Math.round(inner*0.026); // programa
+  var hTit   =Math.round(inner*0.052); // título mapa
+  var hLeyTit=Math.round(inner*0.024); // header leyenda
+  var hLeyIt =16;                      // px por ítem leyenda
+  var nLey   =Math.min(leyItems.length,10); // hasta 10 capas
+  var hLeyBody=Math.max(nLey*hLeyIt+4, hLeyIt+4);
+  var hLocTit=Math.round(inner*0.018); // header localiz.
+  var hTech  =Math.round(inner*0.082); // datos técnicos
   var gap=2; // separación entre bloques
 
-  // espacio reservado para bloques fijos
+  // Altura real del bloque escala: etiq(14) + num(18) + espacio(14) + barra(11) + nums_barra(14)
+  var hEsc = 14 + 18 + 14 + 11 + 14 + 6; // ~77px total
+
+  // espacio reservado para bloques fijos (escala ya es real)
   var fixed=hLogo+hEnt+hProg+hTit+hEsc+hLeyTit+hLeyBody+hLocTit+hTech
-            +gap*9;
-  // los 2 mini-mapas se reparten lo que queda, reducidos al 60%
-  var locH=Math.max(Math.floor((inner-fixed)/2*0.60),28);
+            +gap*10;
+  // los 2 mini-mapas se reparten lo que queda
+  var locH=Math.max(Math.floor((inner-fixed)/2),24);
 
   // ── Fondos generales ──
   fillBox(ctx,0,0,W,H,'#ffffff',null);
@@ -1355,29 +1356,41 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   }
   py+=hTit+gap;
 
-  // Escala
+  // Escala — altura dinámica real
   fillBox(ctx,px,py,pw,hEsc,'#fafafa','#ddd');
-  txt(ctx,'ESCALA',px+pw/2,py+4,'bold 9px Arial','#555','center','top');
-  // Mostrar escala real del data frame si está disponible
+  var escY0=py+4;
+  txt(ctx,'ESCALA',px+pw/2,escY0,'bold 9px Arial','#555','center','top');
   var escDisplay=window._escalaReal||escala||'1:5.000';
-  txt(ctx,escDisplay,px+pw/2,py+16,'bold 13px Arial','#111','center','top');
-  // Barra gráfica reducida al 88% del ancho del panel, centrada
+  txt(ctx,escDisplay,px+pw/2,escY0+14,'bold 13px Arial','#111','center','top');
+  // Barra al 88% del panel, centrada, debajo del número con separación clara
   var barW60=Math.round((pw-10)*0.88);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
-  broseBar(ctx,barX60,py+72,barW60,100,1);
-  py+=hEsc+gap+56;  // espacio extra bajo la barra para no solapar leyenda
+  broseBar(ctx,barX60,escY0+14+18+14,barW60,100,1);
+  py+=hEsc+gap;
 
   // Leyenda — header
   fillBox(ctx,px,py,pw,hLeyTit,'#f5f5f5','#ddd');
   txt(ctx,'LEYENDA',px+pw/2,py+hLeyTit/2,'bold 7px Arial','#333','center','middle');
   py+=hLeyTit;
-  // Leyenda — items
+  // Leyenda — items (dinámico: crece con capas cargadas)
   fillBox(ctx,px,py,pw,hLeyBody,'#fafafa',null);
   ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.4;ctx.strokeRect(px,py,pw,hLeyBody);
-  leyItems.slice(0,6).forEach(function(it,i){
+  leyItems.slice(0,10).forEach(function(it,i){
     var iy=py+2+i*hLeyIt;
-    ctx.fillStyle=it.color;ctx.fillRect(px+4,iy,11,9);
-    ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=0.4;ctx.strokeRect(px+4,iy,11,9);
+    // símbolo según geometría
+    var geo=it.geo||'poly';
+    ctx.save();
+    if(geo==='line'){
+      ctx.strokeStyle=it.color;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(px+4,iy+4.5);ctx.lineTo(px+15,iy+4.5);ctx.stroke();
+    } else if(geo==='point'){
+      ctx.fillStyle=it.color;
+      ctx.beginPath();ctx.arc(px+9,iy+4.5,4,0,Math.PI*2);ctx.fill();
+    } else {
+      ctx.fillStyle=it.color;ctx.fillRect(px+4,iy,11,9);
+      ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=0.4;ctx.strokeRect(px+4,iy,11,9);
+    }
+    ctx.restore();
     ctx.font='bold 7px Arial';ctx.fillStyle='#111';ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.fillText(it.texto.substring(0,26),px+18,iy+4.5);
   });
