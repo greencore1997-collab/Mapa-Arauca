@@ -1266,16 +1266,22 @@ function dibujarLocalizacion(ctx,x,y,w,h){
 }
 function panelDatosTecnicos(ctx,x,y,w,scs,proy){
   var datos=[
-    'Coordinate System: '+scs,
-    'Projection: '+proy,
-    'Datum: MAGNA',
-    'False Easting: 1.000.000.0000',
-    'False Northing: 1.000.000.0000',
-    'Scale Factor: 1.0000',
-    'Units: Meter'
+    ['Sistema de Coord.','GCS WGS 1984'],
+    ['Datum','WGS 1984'],
+    ['Unidades','Grados Decimales'],
+    ['Meridiano','Greenwich'],
+    ['EPSG','4326']
   ];
-  ctx.font='7px Arial';ctx.fillStyle='#555';ctx.textAlign='left';ctx.textBaseline='top';
-  datos.forEach(function(d,i){ ctx.fillText(d,x,y+i*10); });
+  ctx.textAlign='left';ctx.textBaseline='top';
+  var lh=Math.min(10, Math.floor((w<80?w:w)*0.13));
+  lh=Math.max(lh,8);
+  datos.forEach(function(d,i){
+    var yy=y+i*lh;
+    ctx.font='bold '+(lh-1)+'px Arial';ctx.fillStyle='#444';
+    ctx.fillText(d[0]+':',x,yy);
+    ctx.font=(lh-1)+'px Arial';ctx.fillStyle='#222';
+    ctx.fillText(d[1],x+w*0.46,yy);
+  });
 }
 
 // ── LOGO PLACEHOLDER ──
