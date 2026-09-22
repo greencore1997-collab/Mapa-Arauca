@@ -958,17 +958,78 @@ function wrapText(ctx,s,x,y,maxW,lineH,font,color){
   ctx.fillText(line,x,y);
   return y+lineH;
 }
-function broseBar(ctx,x,y,w,maxVal,pixPerUnit){
-  // barra escala gráfica simple
-  var barW = w; var segs=4;
-  ctx.strokeStyle='#333';ctx.lineWidth=1;
-  ctx.strokeRect(x,y,barW,10);
-  for(var i=0;i<=segs;i++){
-    var xi=x+i*(barW/segs);
-    ctx.fillStyle=i%2===0?'#333':'#fff';
-    ctx.fillRect(xi,y,barW/segs,10);
-    ctx.strokeRect(xi,y,barW/segs,10);
+// Barra de escala gráfica con distancias reales
+// escalaNum: denominador numérico de la escala (ej 250000 para 1:250.000)
+// Si no se pasa, intenta leerlo de window._escalaReal
+function broseBar(ctx, x, y, w, maxVal, pixPerUnit, escalaNum){
+  var segs = 4;
+  var barH = 7; // grosor reducido 30% (original ~10px → 7px)
+
+  // Calcular denominador real de escala
+  var denom = escalaNum || null;
+  if(!denom && window._escalaReal){
+    // _escalaReal tiene formato "1:250.000" → extraer número
+    var raw = window._escalaReal.replace('1:','').replace(/\./g,'').trim();
+    denom = parseInt(raw,10) || null;
   }
+
+  // Distancia real que representa un segmento de la barra (en metros)
+  // 1 px en canvas = denom * 0.000264583 metros (a 96dpi, 1px = 0.264583mm)
+  var mPorPx = denom ? denom * 0.000264583 : null;
+  var mPorSeg = mPorPx ? mPorPx * (w / segs) : null;
+
+  // Elegir unidad y redondear a valor "bonito"
+  var unidad = 'm', factor = 1;
+  if(mPorSeg && mPorSeg >= 1000){ unidad = 'km'; factor = 0.001; }
+
+  // Calcular valor bonito por segmento (redondear al entero "agradable" más cercano)
+  function valorBonito(v){
+    if(!v) return null;
+    var mag=Math.pow(10,Math.floor(Math.log10(v)));
+    var choices=[1,2,2.5,5,10];
+    var best=choices[0]*mag;
+    choices.forEach(function(c){
+      if(Math.abs(c*mag-v)<Math.abs(best-v)) best=c*mag;
+    });
+    return best;
+  }
+  var valSeg = mPorSeg ? valorBonito(mPorSeg*factor) : null;
+
+  // Dibujar barra bicolor
+  ctx.save();
+  ctx.strokeStyle='#222';
+  ctx.lineWidth=0.7;
+  for(var i=0;i<segs;i++){
+    var xi=x+i*(w/segs);
+    ctx.fillStyle=i%2===0?'#222':'#fff';
+    ctx.fillRect(xi,y,w/segs+0.5,barH);
+    ctx.strokeRect(xi,y,w/segs,barH);
+  }
+  // Borde exterior
+  ctx.strokeRect(x,y,w,barH);
+
+  // Etiquetas sobre los separadores
+  ctx.font='bold 5.5px Arial';
+  ctx.fillStyle='#111';
+  ctx.textAlign='center';
+  ctx.textBaseline='bottom';
+  for(var j=0;j<=segs;j++){
+    var xj=x+j*(w/segs);
+    var label;
+    if(valSeg!==null){
+      var val=valSeg*j*factor; // en unidad seleccionada
+      if(unidad==='km'){
+        label=(val%1===0?val.toFixed(0):val.toFixed(1))+' km';
+      } else {
+        label=Math.round(val)+' m';
+      }
+      if(j===0) label='0';
+    } else {
+      label=j===0?'0':(j*(w/segs)).toFixed(0)+' px';
+    }
+    ctx.fillText(label, xj, y-1);
+  }
+  ctx.restore();
 }
 function dibujarRosa(ctx,cx,cy,r){
   ctx.save();
@@ -1227,8 +1288,8 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   var hProg  =Math.round(inner*0.026); // ~20px  programa
   var hTit   =Math.round(inner*0.052); // ~40px  título mapa
   var hEsc   =Math.round(inner*0.052); // ~40px  escala
-  var hLeyTit=Math.round(inner*0.020); // ~15px  header leyenda
-  var hLeyIt =13;                      // px por ítem leyenda
+  var hLeyTit=Math.round(inner*0.024); // ~18px  header leyenda
+  var hLeyIt =16;                      // px por ítem leyenda (más alto para fuente +30%)
   var nLey   =Math.min(leyItems.length,6);
   var hLeyBody=nLey*hLeyIt+4;
   if(hLeyBody<hLeyIt+4) hLeyBody=hLeyIt+4;
@@ -1261,41 +1322,41 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Entidad
   fillBox(ctx,px,py,pw,hEnt,'#f0f4ff','#c5cae9');
   ctx.save();ctx.beginPath();ctx.rect(px,py,pw,hEnt);ctx.clip();
-  ctx.font='bold 6px Arial';ctx.fillStyle='#1a237e';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold 8px Arial';ctx.fillStyle='#1a237e';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText((entidad||'ENTIDAD').toUpperCase(),px+pw/2,py+hEnt/2);
   ctx.restore();
   py+=hEnt+gap;
 
   // Programa
   fillBox(ctx,px,py,pw,hProg,'#e8eaf6','#9fa8da');
-  ctx.font='bold 5.5px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold 7px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText((programa||'PROGRAMA').toUpperCase(),px+pw/2,py+hProg/2);
   py+=hProg+gap;
 
   // Título mapa
   fillBox(ctx,px,py,pw,hTit,'#e8eaf6','#9fa8da');
-  wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),px+3,py+3,pw-6,Math.floor(hTit*0.38),'bold 6px Arial','#1a237e');
+  wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),px+3,py+3,pw-6,Math.floor(hTit*0.42),'bold 8px Arial','#1a237e');
   if(subtitulo){
-    ctx.font='italic 5px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.font='italic 6.5px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='bottom';
     ctx.fillText(subtitulo.toUpperCase(),px+pw/2,py+hTit-3);
   }
   py+=hTit+gap;
 
   // Escala
   fillBox(ctx,px,py,pw,hEsc,'#fafafa','#ddd');
-  txt(ctx,'ESCALA',px+pw/2,py+5,'bold 5.5px Arial','#555','center','top');
+  txt(ctx,'ESCALA',px+pw/2,py+5,'bold 7px Arial','#555','center','top');
   // Mostrar escala real del data frame si está disponible
   var escDisplay=window._escalaReal||escala||'1:5.000';
-  txt(ctx,escDisplay,px+pw/2,py+13,'bold 6px Arial','#111','center','top');
+  txt(ctx,escDisplay,px+pw/2,py+14,'bold 7.5px Arial','#111','center','top');
   // Barra gráfica reducida al 60% del ancho del panel, centrada
   var barW60=Math.round((pw-10)*0.60);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
-  broseBar(ctx,barX60,py+22,barW60,100,1);
+  broseBar(ctx,barX60,py+26,barW60,100,1);
   py+=hEsc+gap;
 
   // Leyenda — header
   fillBox(ctx,px,py,pw,hLeyTit,'#f5f5f5','#ddd');
-  txt(ctx,'LEYENDA',px+pw/2,py+hLeyTit/2,'bold 5.5px Arial','#333','center','middle');
+  txt(ctx,'LEYENDA',px+pw/2,py+hLeyTit/2,'bold 7px Arial','#333','center','middle');
   py+=hLeyTit;
   // Leyenda — items
   fillBox(ctx,px,py,pw,hLeyBody,'#fafafa',null);
@@ -1304,18 +1365,18 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
     var iy=py+2+i*hLeyIt;
     ctx.fillStyle=it.color;ctx.fillRect(px+4,iy,11,9);
     ctx.strokeStyle='rgba(0,0,0,0.18)';ctx.lineWidth=0.4;ctx.strokeRect(px+4,iy,11,9);
-    ctx.font='5.5px Arial';ctx.fillStyle='#222';ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.fillText(it.texto.substring(0,28),px+18,iy+4.5);
+    ctx.font='bold 7px Arial';ctx.fillStyle='#111';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(it.texto.substring(0,26),px+18,iy+4.5);
   });
   if(nLey===0){
-    ctx.font='italic 5.5px Arial';ctx.fillStyle='#bbb';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='italic 7px Arial';ctx.fillStyle='#bbb';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('(sin ítems)',px+pw/2,py+hLeyBody/2);
   }
   py+=hLeyBody+gap;
 
   // Localización — header
   fillBox(ctx,px,py,pw,hLocTit,'#f5f5f5','#ddd');
-  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+hLocTit/2,'bold 5px Arial','#444','center','middle');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',px+pw/2,py+hLocTit/2,'bold 6.5px Arial','#444','center','middle');
   py+=hLocTit;
 
   // Mini-mapa 1 (Colombia)
