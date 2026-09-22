@@ -1284,8 +1284,13 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Escala
   fillBox(ctx,px,py,pw,hEsc,'#fafafa','#ddd');
   txt(ctx,'ESCALA',px+pw/2,py+5,'bold 5.5px Arial','#555','center','top');
-  txt(ctx,escala||'1:5.000',px+pw/2,py+13,'6px Arial','#111','center','top');
-  broseBar(ctx,px+5,py+22,pw-10,100,1);
+  // Mostrar escala real del data frame si está disponible
+  var escDisplay=window._escalaReal||escala||'1:5.000';
+  txt(ctx,escDisplay,px+pw/2,py+13,'bold 6px Arial','#111','center','top');
+  // Barra gráfica reducida al 60% del ancho del panel, centrada
+  var barW60=Math.round((pw-10)*0.60);
+  var barX60=px+5+Math.round(((pw-10)-barW60)/2);
+  broseBar(ctx,barX60,py+22,barW60,100,1);
   py+=hEsc+gap;
 
   // Leyenda — header
@@ -1811,6 +1816,30 @@ var _dfMaps = [];        // instancias Leaflet
 var _dfAreas = [];       // áreas registradas por la función de dibujo actual
 var _dfLayers = {};      // capas GeoJSON por frame (para no duplicar)
 
+// ── Escala real basada en zoom Leaflet y latitud del centro ──
+function calcEscalaReal(map){
+  try{
+    var zoom=map.getZoom();
+    var center=map.getCenter();
+    var lat=center.lat;
+    // Metros por píxel en Leaflet: 156543.03392 * cos(lat) / 2^zoom
+    var mPorPx=156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,zoom);
+    // El canvas tiene 1100px de ancho representando el mapa;
+    // el DPI de pantalla típico es 96px/inch = 96px/25.4mm
+    // Escala = metrosPorPx * (pixeles por metro en papel a 96dpi)
+    // 1 metro papel = 96/0.0254 px → 1px papel = 0.0254/96 m
+    var escNum=Math.round(mPorPx/(0.0254/96));
+    // Formatear: 1:X.XXX.XXX
+    var s=escNum.toString();
+    var fmt='';
+    for(var i=0;i<s.length;i++){
+      if(i>0&&(s.length-i)%3===0) fmt+='.';
+      fmt+=s[i];
+    }
+    return '1:'+fmt;
+  }catch(e){ return null; }
+}
+
 // ── GeoJSON Norte de Santander — pendiente carga del archivo oficial ──
 var NDS_GEOJSON = null;
                          // cada área: {x,y,w,h} en coordenadas canvas (1100x780)
@@ -1896,6 +1925,23 @@ function getOrCreateMap(n, centerLL, zoom, isLocFrame){
   var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:!isLocFrame,attributionControl:false,scrollWheelZoom:!isLocFrame});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
   _dfMaps[n-1]=m;
+
+  // Frame principal (n===1): actualizar escala real al hacer zoom/pan
+  if(n===1){
+    function actualizarEscalaDesdeMap(){
+      var esc=calcEscalaReal(m);
+      if(esc){
+        window._escalaReal=esc;
+        // Actualizar también el input de escala si existe
+        var inp=document.getElementById('s-escala');
+        if(inp) inp.value=esc;
+        // Redibujar preview con debounce
+        clearTimeout(window._escTimer);
+        window._escTimer=setTimeout(function(){ actualizarPreview(); },300);
+      }
+    }
+    m.on('zoomend moveend',actualizarEscalaDesdeMap);
+  }
 
   // Si es frame de localización, agregar silueta NDS con sombreado 50%
   if(isLocFrame && NDS_GEOJSON){
