@@ -2187,7 +2187,7 @@ function getOrCreateMap(n, centerLL, zoom, isLocFrame){
   if(_dfMaps[n-1]) return _dfMaps[n-1];
   var el=document.getElementById('df-map-'+n);
   if(!el) return null;
-  var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:!isLocFrame,attributionControl:false,scrollWheelZoom:!isLocFrame});
+  var m=L.map(el,{center:centerLL,zoom:zoom,zoomControl:true,attributionControl:false,scrollWheelZoom:true,doubleClickZoom:true,dragging:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
   _dfMaps[n-1]=m;
 
