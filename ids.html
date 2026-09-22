@@ -1441,8 +1441,8 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
 // ── 2. MAPA VERTICAL (carta 780×1100) ──
 // Mapa principal 72% arriba | Panel convenciones 28% abajo
 function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,proy){
-  var panelH = Math.round(H*0.28);   // ~308px panel inferior
-  var mapH   = H - panelH - 8;       // ~784px mapa
+  var panelH = Math.round(H*0.20);   // ~220px panel inferior
+  var mapH   = H - panelH - 8;       // ~872px mapa
   var borde  = 10;
 
   // Fondo blanco + bordes
@@ -1464,18 +1464,22 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
   var px = borde;
   var pw = W - borde*2;
 
-  // Alturas de bloque — proporcionales al panel
-  var hLogo  = Math.round(ph*0.22);
-  var hLeyTit= Math.round(ph*0.07);
-  var hLeyIt = 14;
+  // Alturas de bloque — todo proporcional a ph para escalar automáticamente
+  var gap    = 2;
+  var hLogo  = Math.round(ph*0.32);
+  var hEnt   = Math.round(ph*0.14);
+  var hProg  = Math.round(ph*0.10);
+  var hEscHdr= Math.round(ph*0.10);
+  var hEscNum= Math.round(ph*0.14);
+  var hBar   = Math.round(ph*0.18);
+  var hLeyTit= Math.round(ph*0.10);
+  var hLeyIt = Math.max(Math.round(ph*0.09), 10);
   var nLey   = Math.min(leyItems.length,10);
-  var hLeyBody= Math.max(nLey*hLeyIt+4, hLeyIt+4);
-  var gap    = 3;
+  var hLeyBody= Math.max(nLey*hLeyIt+2, hLeyIt+2);
+  var fEnt   = Math.round(ph*0.035)+'px'; // fuente proporcional
+  var fPeq   = Math.round(ph*0.030)+'px';
 
   // ── LAYOUT: 3 columnas ──
-  // Col1: Logo + Entidad + Programa + Título
-  // Col2: Escala numérica + Barra + Leyenda
-  // Col3: Localización (2 mini-mapas) + Datos técnicos
   var col1W = Math.round(pw*0.28);
   var col2W = Math.round(pw*0.36);
   var col3W = pw - col1W - col2W - gap*2;
@@ -1488,52 +1492,44 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
 
   // ── COL 1: Identidad ──
   var c1y = py + 2;
-  // Logo
   dibujarLogo(ctx,col1X,c1y,col1W,hLogo);
   c1y += hLogo + gap;
-  // Entidad
-  var hEnt = Math.round(ph*0.10);
   fillBox(ctx,col1X,c1y,col1W,hEnt,'#f0f4ff','#c5cae9');
   ctx.save();ctx.beginPath();ctx.rect(col1X,c1y,col1W,hEnt);ctx.clip();
-  ctx.font='bold 8px Arial';ctx.fillStyle='#1a237e';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold '+fEnt+' Arial';ctx.fillStyle='#1a237e';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText((entidad||'ENTIDAD').toUpperCase(),col1X+col1W/2,c1y+hEnt/2);
   ctx.restore();
   c1y += hEnt + gap;
-  // Programa
-  var hProg = Math.round(ph*0.07);
   fillBox(ctx,col1X,c1y,col1W,hProg,'#e8eaf6','#9fa8da');
-  ctx.font='bold 7px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold '+fPeq+' Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText((programa||'PROGRAMA').toUpperCase(),col1X+col1W/2,c1y+hProg/2);
   c1y += hProg + gap;
-  // Título — ocupa el resto de la col 1 hasta el borde inferior del panel
   var hTit = (py + ph) - c1y - 2;
-  fillBox(ctx,col1X,c1y,col1W,hTit,'#e8eaf6','#9fa8da');
-  wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),col1X+4,c1y+4,col1W-8,Math.floor(hTit*0.4),'bold 8px Arial','#1a237e');
-  if(subtitulo){
-    ctx.font='italic 6px Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='bottom';
-    ctx.fillText(subtitulo.toUpperCase(),col1X+col1W/2,c1y+hTit-3);
+  if(hTit>4){
+    fillBox(ctx,col1X,c1y,col1W,hTit,'#e8eaf6','#9fa8da');
+    wrapText(ctx,(titulo||'TÍTULO DEL MAPA').toUpperCase(),col1X+3,c1y+3,col1W-6,Math.floor(hTit*0.42),'bold '+fPeq+' Arial','#1a237e');
+    if(subtitulo){
+      ctx.font='italic '+fPeq+' Arial';ctx.fillStyle='#3949ab';ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText(subtitulo.toUpperCase(),col1X+col1W/2,c1y+hTit-2);
+    }
   }
 
   // ── COL 2: Escala + Leyenda ──
   var c2y = py + 2;
-  // Escala — header
-  fillBox(ctx,col2X,c2y,col2W,16,'#f5f5f5','#ddd');
-  txt(ctx,'ESCALA',col2X+col2W/2,c2y+8,'bold 8px Arial','#444','center','middle');
-  c2y += 16 + gap;
-  // Escala numérica
+  fillBox(ctx,col2X,c2y,col2W,hEscHdr,'#f5f5f5','#ddd');
+  txt(ctx,'ESCALA',col2X+col2W/2,c2y+hEscHdr/2,'bold '+fPeq+' Arial','#444','center','middle');
+  c2y += hEscHdr + gap;
   var escDisplay = window._escalaReal||escala||'1:5.000';
-  fillBox(ctx,col2X,c2y,col2W,20,'#fafafa','#eee');
-  txt(ctx,escDisplay,col2X+col2W/2,c2y+10,'bold 13px Arial','#111','center','middle');
-  c2y += 20 + gap;
-  // Barra escala
+  fillBox(ctx,col2X,c2y,col2W,hEscNum,'#fafafa','#eee');
+  txt(ctx,escDisplay,col2X+col2W/2,c2y+hEscNum/2,'bold '+fEnt+' Arial','#111','center','middle');
+  c2y += hEscNum + gap;
   var barWv = Math.round(col2W*0.88);
   var barXv = col2X + Math.round((col2W-barWv)/2);
-  fillBox(ctx,col2X,c2y,col2W,24,'#fafafa',null);
-  broseBar(ctx,barXv,c2y+13,barWv,100,1);
-  c2y += 24 + gap*2;
-  // Leyenda — header
+  fillBox(ctx,col2X,c2y,col2W,hBar,'#fafafa',null);
+  broseBar(ctx,barXv,c2y+Math.round(hBar*0.55),barWv,100,1);
+  c2y += hBar + gap;
   fillBox(ctx,col2X,c2y,col2W,hLeyTit,'#f5f5f5','#ddd');
-  txt(ctx,'LEYENDA',col2X+col2W/2,c2y+hLeyTit/2,'bold 7px Arial','#333','center','middle');
+  txt(ctx,'LEYENDA',col2X+col2W/2,c2y+hLeyTit/2,'bold '+fPeq+' Arial','#333','center','middle');
   c2y += hLeyTit;
   // Leyenda — items
   fillBox(ctx,col2X,c2y,col2W,hLeyBody,'#fafafa',null);
@@ -1562,20 +1558,21 @@ function dibujarVertical(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,pr
 
   // ── COL 3: Localización + Datos técnicos ──
   var c3y = py + 2;
-  // Header localización
-  fillBox(ctx,col3X,c3y,col3W,14,'#f5f5f5','#ddd');
-  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',col3X+col3W/2,c3y+7,'bold 6px Arial','#444','center','middle');
-  c3y += 14 + gap;
-  // 2 mini-mapas apilados
-  var locH3 = Math.round((ph - 14 - gap - Math.round(ph*0.20) - gap*3) / 2);
-  locH3 = Math.max(locH3, 24);
+  var hLocHdr3 = Math.round(ph*0.10);
+  fillBox(ctx,col3X,c3y,col3W,hLocHdr3,'#f5f5f5','#ddd');
+  txt(ctx,'DIAGRAMA DE LOCALIZACIÓN',col3X+col3W/2,c3y+hLocHdr3/2,'bold '+fPeq+' Arial','#444','center','middle');
+  c3y += hLocHdr3 + gap;
+  // 2 mini-mapas — reparten el espacio disponible menos datos técnicos
+  var hTech3 = Math.round(ph*0.18);
+  var locH3  = Math.round(((py+ph) - c3y - hTech3 - gap*3) / 2);
+  locH3 = Math.max(locH3, 18);
   dibujarLocalizacion(ctx,col3X,c3y,col3W,locH3);
   c3y += locH3 + gap;
   dibujarLocalizacion(ctx,col3X,c3y,col3W,locH3);
   c3y += locH3 + gap;
-  // Datos técnicos — rellena el resto
-  var techHv = H - borde - c3y;
-  if(techHv > 14){
+  // Datos técnicos
+  var techHv = (py+ph) - c3y - 2;
+  if(techHv > 10){
     fillBox(ctx,col3X,c3y,col3W,techHv,'#fafafa','#e0e0e0');
     panelDatosTecnicos(ctx,col3X+3,c3y+2,col3W-6,scs,proy);
   }
@@ -2333,7 +2330,7 @@ function calcAreasPorTipo(tipo){
   }
   if(tipo==='vertical'){
     var W=780,H=1100;
-    var panelH=Math.round(H*0.28);
+    var panelH=Math.round(H*0.20);
     var mapH=H-panelH-8;
     return [{x:10,y:10,w:W-20,h:mapH-10}];
   }
