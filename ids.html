@@ -1364,8 +1364,8 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Barra gráfica reducida al 88% del ancho del panel, centrada
   var barW60=Math.round((pw-10)*0.88);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
-  broseBar(ctx,barX60,py+48,barW60,100,1);
-  py+=hEsc+gap+32;  // espacio extra bajo la barra para no solapar leyenda
+  broseBar(ctx,barX60,py+60,barW60,100,1);
+  py+=hEsc+gap+44;  // espacio extra bajo la barra para no solapar leyenda
 
   // Leyenda — header
   fillBox(ctx,px,py,pw,hLeyTit,'#f5f5f5','#ddd');
