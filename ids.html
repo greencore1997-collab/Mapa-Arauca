@@ -919,8 +919,20 @@ function actualizarPreview() {
   var scale = Math.min(maxW/baseW, maxH/baseH, 1);
   cvs.style.transform = 'scale('+scale+')';
 
+  // Canvas de alta resolución (anti-pixelado)
+  var dpr = window.devicePixelRatio || 1;
+  if(!cvs._hiDpiSet){
+    cvs.width  = baseW * dpr;
+    cvs.height = baseH * dpr;
+    cvs.style.width  = baseW + 'px';
+    cvs.style.height = baseH + 'px';
+    cvs._hiDpiSet = true;
+  }
   var ctx = cvs.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // escala todo por DPR
   ctx.clearRect(0,0,baseW,baseH);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   _locAreas=[];  // reset antes de dibujar — dibujarLocalizacion los llena
 
   switch(tipoActual) {
@@ -1351,7 +1363,7 @@ function dibujarHorizontal(ctx,W,H,entidad,programa,titulo,subtitulo,escala,scs,
   // Barra gráfica reducida al 60% del ancho del panel, centrada
   var barW60=Math.round((pw-10)*0.60);
   var barX60=px+5+Math.round(((pw-10)-barW60)/2);
-  broseBar(ctx,barX60,py+26,barW60,100,1);
+  broseBar(ctx,barX60,py+34,barW60,100,1);
   py+=hEsc+gap;
 
   // Leyenda — header
