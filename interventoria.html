@@ -789,9 +789,9 @@ function abrirVisor(i,tipo){
     xlsDiv.innerHTML='';frame.src='about:blank';
     document.getElementById('visor-overlay').classList.add('visible');
     if(tipo==='pdf'){
-        // Usar API GitHub para obtener download_url real (evita 404 de GitHub Pages)
+        // Obtener base64 vía API y convertir a Blob URL → vista previa sin descarga
         xlsLoad.style.display='flex';
-        xlsLoad.textContent='Cargando PDF…';
+        xlsLoad.textContent='Cargando vista previa…';
         var ghPath = f.ghPath || ('archivos/'+_perfil+'/'+f.url.split('/').pop());
         var hdrs = { Accept:'application/vnd.github.v3+json' };
         var tk = localStorage.getItem('_int_adm_tk') || ['ghp_FDmfT9ESHeG','WruSoi5lCJrevvX','inVl1SZBpg'].join('');
@@ -799,16 +799,20 @@ function abrirVisor(i,tipo){
         fetch('https://api.github.com/repos/'+_GH.owner+'/'+_GH.repo+'/contents/'+ghPath+'?ref='+_GH.branch, {headers:hdrs})
             .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
             .then(function(data){
+                var b64 = data.content.replace(/\n/g,'');
+                var binary = atob(b64);
+                var bytes = new Uint8Array(binary.length);
+                for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+                var blob = new Blob([bytes], {type:'application/pdf'});
+                var blobUrl = URL.createObjectURL(blob);
                 xlsLoad.style.display='none';
-                var url = data.download_url || f.url;
                 frame.style.display='block';
-                frame.src = url;
+                frame.src = blobUrl;
             })
             .catch(function(e){
                 xlsLoad.style.display='none';
-                // Fallback: intentar con URL directa
-                frame.style.display='block';
-                frame.src = f.url;
+                xlsErr.style.display='flex';
+                xlsErr.textContent='❌ No se pudo cargar la vista previa: '+e.message;
             });
     } else {
         xlsLoad.style.display='flex';
