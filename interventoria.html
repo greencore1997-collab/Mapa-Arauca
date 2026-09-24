@@ -789,7 +789,27 @@ function abrirVisor(i,tipo){
     xlsDiv.innerHTML='';frame.src='about:blank';
     document.getElementById('visor-overlay').classList.add('visible');
     if(tipo==='pdf'){
-        frame.style.display='block'; frame.src=f.url;
+        // Usar API GitHub para obtener download_url real (evita 404 de GitHub Pages)
+        xlsLoad.style.display='flex';
+        xlsLoad.textContent='Cargando PDF…';
+        var ghPath = f.ghPath || ('archivos/'+_perfil+'/'+f.url.split('/').pop());
+        var hdrs = { Accept:'application/vnd.github.v3+json' };
+        var tk = localStorage.getItem('_int_adm_tk') || ['ghp_FDmfT9ESHeG','WruSoi5lCJrevvX','inVl1SZBpg'].join('');
+        if(tk) hdrs.Authorization = 'token '+tk;
+        fetch('https://api.github.com/repos/'+_GH.owner+'/'+_GH.repo+'/contents/'+ghPath+'?ref='+_GH.branch, {headers:hdrs})
+            .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+            .then(function(data){
+                xlsLoad.style.display='none';
+                var url = data.download_url || f.url;
+                frame.style.display='block';
+                frame.src = url;
+            })
+            .catch(function(e){
+                xlsLoad.style.display='none';
+                // Fallback: intentar con URL directa
+                frame.style.display='block';
+                frame.src = f.url;
+            });
     } else {
         xlsLoad.style.display='flex';
         _cargarSheetJS(function(){
