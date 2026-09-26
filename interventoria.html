@@ -225,6 +225,11 @@
             <div class="sel-card-name">MIA</div>
             <div class="sel-card-role">Interventor · Perfil 2</div>
         </div>
+        <div class="sel-card" onclick="seleccionarInterventor('GEOVISOR')" style="border-left-color:#00bcd4">
+            <div class="sel-card-avatar">🗺️</div>
+            <div class="sel-card-name" style="color:#80deea">GEOVISOR</div>
+            <div class="sel-card-role">Mapa · Acometidas</div>
+        </div>
     </div>
     <a href="index.html" class="sel-back">← Volver al inicio</a>
 </div>
@@ -245,6 +250,16 @@
 </div>
 
 <!-- PANEL PRINCIPAL -->
+
+<!-- GEOVISOR SCREEN -->
+<div id="screen-geovisor" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0a1628">
+    <iframe id="geovisor-iframe" src="" style="width:100%;height:100%;border:none;display:block"></iframe>
+    <button onclick="cerrarGeovisor()" title="Cerrar Geovisor"
+        style="position:fixed;top:12px;right:12px;z-index:10000;background:rgba(10,22,40,0.85);color:#80deea;
+               border:1px solid #00bcd4;border-radius:8px;padding:7px 14px;font-size:12px;font-family:Orbitron,monospace;
+               cursor:pointer;letter-spacing:1px;backdrop-filter:blur(4px)">✕ SALIR</button>
+</div>
+
 <div id="main-panel">
     <div class="int-header">
         <div class="int-header-left">
@@ -443,8 +458,9 @@ async function _guardarCatalogo() {
 
 /* ── AUTH ── */
 var _PERFILES = {
-    'SAHAD': { pass:'SAHAD-INT1', avatar:'👷'   },
-    'MIA':   { pass:'MIA2026-',  avatar:'👷‍♀️' }
+    'SAHAD':    { pass:'SAHAD-INT1',       avatar:'👷'   },
+    'MIA':      { pass:'MIA2026-',         avatar:'👷‍♀️' },
+    'GEOVISOR': { pass:'ADG-ACOMETIDAS2026', avatar:'🗺️' }
 };
 var _ADMIN_PASS  = 'ADMIN-ARG2026';
 var _perfil      = null;
@@ -478,6 +494,11 @@ function validarLogin() {
     var err=document.getElementById('login-error');
     if (pw===_PERFILES[_perfil].pass) {
         document.getElementById('screen-login').classList.add('oculto');
+        if (_perfil === 'GEOVISOR') {
+            var gfr = document.getElementById('geovisor-iframe');
+            if (!gfr.src || gfr.src === window.location.href) gfr.src = 'index.html';
+            document.getElementById('screen-geovisor').style.display = 'block';
+        } else {
         document.getElementById('panel-avatar').textContent=_PERFILES[_perfil].avatar;
         document.getElementById('panel-nombre').textContent=_perfil;
         document.getElementById('main-panel').classList.add('visible');
@@ -485,6 +506,7 @@ function validarLogin() {
         if (!_catLoaded) _cargarCatalogo();
         else { renderArchivos('pdf'); renderArchivos('xls'); }
         setTimeout(mostrarBannerSync, 5000);
+        }
     } else {
         err.textContent='⚠ Contraseña incorrecta';
         document.getElementById('login-password').value='';
