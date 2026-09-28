@@ -980,49 +980,29 @@ _cargarCatalogo();
                 fillColor:fc, color:'rgba(0,0,0,0.5)', weight:1, fillOpacity:0.9
             });
 
-            /* ── build popup HTML ── */
-            var estadoTag = p.e==='SI'
-                ? '<span style="background:#1b5e20;color:#69f0ae;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">✅ S\xcd DESEA EL SERVICIO</span>'
-                : p.e==='NO'
-                ? '<span style="background:#b71c1c;color:#ef9a9a;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">❌ NO DESEA EL SERVICIO</span>'
-                : '<span style="background:#e65100;color:#ffe0b2;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">⏳ SIN RESPUESTA</span>';
+            var estadoColor = p.e==='SI' ? '#69f0ae' : p.e==='NO' ? '#ef9a9a' : '#ffe0b2';
+            var estadoBg    = p.e==='SI' ? '#1b5e20' : p.e==='NO' ? '#b71c1c' : '#e65100';
+            var estadoTxt   = p.e==='SI' ? 'SI DESEA EL SERVICIO' : p.e==='NO' ? 'NO DESEA EL SERVICIO' : 'SIN RESPUESTA';
+            var estadoIcon  = p.e==='SI' ? 'SI' : p.e==='NO' ? 'NO' : 'SR';
 
-            var fotoHtml = '';
-            if (p.p) {
-                fotoHtml += '<div style="margin-top:8px">'
-                    + '<img src="'+p.p+'" onerror="this.style.display=\'none\'" '
-                    + 'style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #1a3a5c" '
-                    + 'onclick="window.open(\''+p.p+'\',\'_blank\')" title="Ver foto 1 completa"/></div>';
-            }
-            if (p.q) {
-                fotoHtml += '<div style="margin-top:6px">'
-                    + '<img src="'+p.q+'" onerror="this.style.display=\'none\'" '
-                    + 'style="width:100%;max-height:160px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #1a3a5c" '
-                    + 'onclick="window.open(\''+p.q+'\',\'_blank\')" title="Ver foto 2 completa"/></div>';
-            }
+            var foto1 = p.p ? ('<img src="' + p.p + '" style="width:100%;max-height:180px;object-fit:cover;border-radius:6px;margin-top:8px;cursor:pointer;border:1px solid #1a3a5c;display:block" onclick="window.open(this.src,\'_blank\')" onerror="this.style.display=\'none\'">') : '';
+            var foto2 = p.q ? ('<img src="' + p.q + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:5px;cursor:pointer;border:1px solid #1a3a5c;display:block" onclick="window.open(this.src,\'_blank\')" onerror="this.style.display=\'none\'">') : '';
+            var barrio = (p.b && p.b !== 'SIN BARRIO') ? ('<div style="font-size:11px;color:#80deea;margin-bottom:5px">Barrio: <b>' + p.b + '</b></div>') : '';
+            var obs    = p.obs ? ('<div style="font-size:10px;color:#90a4ae;margin-top:6px;border-top:1px solid #1a3a5c;padding-top:5px">' + p.obs + '</div>') : '';
+            var dig    = p.d  ? ('<div style="font-size:9px;color:#4a6070;margin-top:3px">Digitador: ' + p.d + '</div>') : '';
 
-            var barrioHtml = (p.b && p.b!=='SIN BARRIO')
-                ? '<div style="font-size:11px;color:#80deea;margin-bottom:4px">🏘 <b>'+p.b+'</b></div>'
-                : '';
-            var obsHtml = p.obs
-                ? '<div style="font-size:10px;color:#90a4ae;margin-top:6px;padding-top:6px;border-top:1px solid #1a3a5c;line-height:1.5">📝 '+p.obs+'</div>'
-                : '';
-            var digHtml = p.d
-                ? '<div style="font-size:9px;color:#4a6070;margin-top:4px">👷 Digitador: <b>'+p.d+'</b></div>'
-                : '';
-            var coordHtml = '<div style="font-size:8px;color:#37474f;margin-top:3px">📍 '+p.a+', '+p.o+'</div>';
-
-            var popup = '<div style="background:#0a1628;color:#cfd8dc;min-width:220px;max-width:280px;font-family:sans-serif;padding:4px 2px">'
-                + '<div style="font-size:12px;font-weight:900;color:#ffa726;letter-spacing:1px;margin-bottom:6px">🔧 ACOMETIDA</div>'
-                + barrioHtml
-                + estadoTag
-                + fotoHtml
-                + obsHtml
-                + digHtml
-                + coordHtml
+            var popup = '<div style="background:#0a1628;color:#cfd8dc;min-width:210px;max-width:270px;font-family:sans-serif">'
+                + '<div style="font-size:11px;font-weight:900;color:#ffa726;margin-bottom:6px">ACOMETIDA</div>'
+                + barrio
+                + '<span style="background:' + estadoBg + ';color:' + estadoColor + ';padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700">' + estadoTxt + '</span>'
+                + foto1
+                + foto2
+                + obs
+                + dig
+                + '<div style="font-size:8px;color:#37474f;margin-top:3px">' + p.a + ', ' + p.o + '</div>'
                 + '</div>';
 
-            m.bindPopup(popup, {maxWidth:300, className:'geo-popup'});
+            m.bindPopup(popup, {maxWidth:290, className:'geo-popup'});
             _geoLayer.addLayer(m);
         });
         _geoLayer.addTo(_geoMap);
