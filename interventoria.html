@@ -338,6 +338,18 @@
     #geo-notif .gn-icon { font-size:20px; display:block; margin-bottom:4px; }
     #geo-notif .gn-msg { color:#cfd8dc; }
 
+
+    /* ── SIDEBAR TOGGLE (reapertura) ── */
+    #geo-sb-toggle { position:absolute; left:0; top:50%; transform:translateY(-50%);
+        z-index:9310; background:#071525; border:1px solid #1a4060;
+        border-left:none; border-radius:0 8px 8px 0;
+        padding:10px 6px; cursor:pointer; color:#00bcd4;
+        font-size:11px; writing-mode:vertical-rl; text-orientation:mixed;
+        font-family:'Orbitron',monospace; letter-spacing:1px; font-weight:700;
+        display:none; transition:all .2s; box-shadow:3px 0 10px rgba(0,0,0,0.4); }
+    #geo-sb-toggle:hover { background:#0d2a45; color:#00e5ff; border-color:#00bcd4; }
+    #geo-sb-toggle.visible { display:block; }
+
     /* popup geovisor */
     .geo-popup .leaflet-popup-content-wrapper {
         background:#0a1628 !important; border:1px solid #1a3a5c !important;
@@ -586,6 +598,7 @@
         </div>
         <div id="geo-map"></div>
     </div>
+    <button id="geo-sb-toggle" onclick="_geoAbrirSidebar()" title="Ver barrios">◀ BARRIOS</button>
     <button id="btn-gps-float" style="display:none" onclick="_geoToggleGPS()" title="GPS">📍</button>
     <div id="geo-notif"><span class="gn-icon"></span><span class="gn-msg"></span></div>
     <!-- Panel estadísticas de selección -->
@@ -1333,6 +1346,7 @@ _cargarCatalogo();
             _geoFiltroBarrio = null;
             var si = document.getElementById('geo-sb-search'); if(si) si.value='';
             document.getElementById('geo-stats-barrio').textContent = '';
+            var tog = document.getElementById('geo-sb-toggle'); if(tog) tog.classList.remove('visible');
         }
         _geoRenderLayer();
         _geoRenderLeyenda();
@@ -1626,6 +1640,13 @@ _cargarCatalogo();
     function _geoSelBarrio(nombre) {
         _geoFiltroBarrio = nombre;
         _geoRenderSidebar();
+        if (nombre) {
+            /* Al seleccionar barrio: colapsar sidebar para ver el mapa */
+            _geoCerrarSidebar();
+        } else {
+            /* Al elegir TODOS: reabre el sidebar */
+            _geoAbrirSidebar();
+        }
         _geoRenderLayer();
         var stEl = document.getElementById('geo-stats-barrio');
         if (stEl) {
@@ -1699,6 +1720,28 @@ _cargarCatalogo();
                 f.textContent = t.classList.contains('activo') ? '📡' : '📍';
             }
         };
+    }
+
+    
+    function _geoCerrarSidebar() {
+        var sb  = document.getElementById('geo-sidebar');
+        var btn = document.getElementById('geo-sb-toggle');
+        var bd  = document.getElementById('geo-sb-backdrop');
+        if (sb)  sb.classList.add('oculto');
+        if (bd)  bd.classList.remove('show');
+        if (btn) btn.classList.add('visible');
+        setTimeout(function(){ _geoMap && _geoMap.invalidateSize(); }, 260);
+    }
+
+    function _geoAbrirSidebar() {
+        var sb  = document.getElementById('geo-sidebar');
+        var btn = document.getElementById('geo-sb-toggle');
+        var bd  = document.getElementById('geo-sb-backdrop');
+        if (sb)  { sb.classList.remove('oculto'); _geoRenderSidebar(); }
+        if (btn) btn.classList.remove('visible');
+        /* en móvil mostrar backdrop */
+        if (_esMobil && bd) bd.classList.add('show');
+        setTimeout(function(){ _geoMap && _geoMap.invalidateSize(); }, 260);
     }
 
         function _cerrarGeovisor() {
