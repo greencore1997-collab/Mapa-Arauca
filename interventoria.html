@@ -350,6 +350,52 @@
     #geo-sb-toggle:hover { background:#0d2a45; color:#00e5ff; border-color:#00bcd4; }
     #geo-sb-toggle.visible { display:block; }
 
+
+    /* ── CAPA SATÉLITE / RUTA ── */
+    #btn-sat { padding:5px 12px; font-size:10px; font-family:'Orbitron',monospace;
+        letter-spacing:1px; border:1px solid #1a4060; border-radius:5px;
+        background:#0d1f35; color:#80a8c0; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    #btn-sat.sat { background:#1a3020; border-color:#69f0ae; color:#69f0ae; }
+    #btn-sat:hover { border-color:#69f0ae; color:#69f0ae; }
+
+    #btn-ruta { padding:5px 12px; font-size:10px; font-family:'Orbitron',monospace;
+        letter-spacing:1px; border:1px solid #1a4060; border-radius:5px;
+        background:#0d1f35; color:#80a8c0; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    #btn-ruta.activo { background:#2a1a05; border-color:#ffa726; color:#ffa726; font-weight:700;
+        animation: ruta-pulse .9s infinite alternate; }
+    #btn-ruta:hover { border-color:#ffa726; color:#ffa726; }
+    @keyframes ruta-pulse { from { box-shadow:0 0 4px #ffa726; } to { box-shadow:0 0 10px #ffa726; } }
+
+    /* Panel de ruta */
+    #geo-ruta-panel { position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+        z-index:9200; background:rgba(7,21,37,0.96); border:1px solid #ffa726;
+        border-radius:10px; padding:10px 18px; min-width:240px; max-width:90vw;
+        font-family:'Orbitron',monospace; text-align:center; display:none;
+        box-shadow:0 4px 20px rgba(0,0,0,0.6); }
+    #geo-ruta-panel .rp-title { font-size:8px; letter-spacing:2px; color:#ffa726;
+        margin-bottom:7px; font-weight:700; }
+    #geo-ruta-panel .rp-vals { display:flex; gap:18px; justify-content:center; margin-bottom:8px; }
+    #geo-ruta-panel .rp-val  { display:flex; flex-direction:column; align-items:center; }
+    #geo-ruta-panel .rp-num  { font-size:18px; font-weight:900; color:#00e5ff; }
+    #geo-ruta-panel .rp-lbl  { font-size:7px; color:#4a7a9b; letter-spacing:1px; margin-top:1px; }
+    #geo-ruta-panel .rp-hint { font-size:8px; color:#ffa726; margin-top:2px; }
+    #btn-ruta-clear { margin-top:7px; padding:4px 14px; background:transparent;
+        border:1px solid #4a3010; border-radius:5px; color:#ef5350;
+        font-size:8px; font-family:'Orbitron',monospace; cursor:pointer; letter-spacing:1px; }
+    #btn-ruta-clear:hover { background:#1a0505; border-color:#ef5350; }
+
+    /* Instrucción flotante */
+    #geo-ruta-hint { position:absolute; top:12px; left:50%; transform:translateX(-50%);
+        z-index:9210; background:rgba(30,15,0,0.95); border:1px solid #ffa726;
+        border-radius:8px; padding:7px 16px; font-family:'Orbitron',monospace;
+        font-size:9px; letter-spacing:1px; color:#ffa726; pointer-events:none;
+        display:none; white-space:nowrap; }
+
+    @media (max-width:768px) {
+        #geo-ruta-panel { bottom:60px; min-width:80vw; }
+        #geo-ruta-panel .rp-num { font-size:20px; }
+    }
+
     /* popup geovisor */
     .geo-popup .leaflet-popup-content-wrapper {
         background:#0a1628 !important; border:1px solid #1a3a5c !important;
@@ -574,6 +620,9 @@
         <button class="geo-modo-btn activo" data-modo="estado" onclick="_geoSetModo('estado')">Por Estado</button>
         <button class="geo-modo-btn" data-modo="barrio" onclick="_geoSetModo('barrio')">Por Barrio</button>
         <div style="width:1px;height:20px;background:#1a3a5c;margin:0 2px"></div>
+        <button id="btn-sat"  onclick="_geoToggleSat()">🛰️ Satélite</button>
+        <button id="btn-ruta" onclick="_geoToggleRuta()">🧭 Ruta</button>
+        <div style="width:1px;height:20px;background:#1a3a5c;margin:0 2px"></div>
         <button class="geo-sel-btn" data-sel="rect" onclick="_geoIniciarSel('rect')">▭ Cuadrado</button>
         <button class="geo-sel-btn" data-sel="poly" onclick="_geoIniciarSel('poly')">⬡ Polígono</button>
         <button id="btn-sel-clear" onclick="_geoLimpiarSel()">✕ Limpiar sel.</button>
@@ -600,6 +649,16 @@
     </div>
     <button id="geo-sb-toggle" onclick="_geoAbrirSidebar()" title="Ver barrios">◀ BARRIOS</button>
     <button id="btn-gps-float" style="display:none" onclick="_geoToggleGPS()" title="GPS">📍</button>
+    <div id="geo-ruta-hint">🧭 Toca un punto del mapa como destino</div>
+    <div id="geo-ruta-panel">
+        <div class="rp-title">RUTA ÓPTIMA</div>
+        <div class="rp-vals">
+            <div class="rp-val"><span class="rp-num" id="rp-dist">—</span><span class="rp-lbl">DISTANCIA</span></div>
+            <div class="rp-val"><span class="rp-num" id="rp-time">—</span><span class="rp-lbl">TIEMPO EST.</span></div>
+        </div>
+        <div class="rp-hint" id="rp-modo"></div>
+        <button id="btn-ruta-clear" onclick="_geoClearRuta()">✕ Limpiar ruta</button>
+    </div>
     <div id="geo-notif"><span class="gn-icon"></span><span class="gn-msg"></span></div>
     <!-- Panel estadísticas de selección -->
     <div id="geo-sel-panel" class="oculto">
@@ -1241,6 +1300,8 @@ _cargarCatalogo();
     var _geoModoSel = null, _geoSelLayer = null, _geoPolyVerts = [], _geoPolyPrev = null,
         _geoRectStart = null, _geoRectPrev = null;
     var _gpsWatchId = null, _gpsMarker = null, _gpsCircle = null;
+    var _geoTileOSM = null, _geoTileSAT = null, _geoTileActual = 'osm';
+    var _geoRutaLayer = null, _geoRutaModo = false, _geoDestMark = null;
     var _colBarrio = {"LAS AMERICAS": "#aaffc3", "LA UNION": "#800000", "SANTA TERESITA": "#ff851b", "MIRAMAR FRONTERA": "#6a5acd", "MERIDIANO 70": "#e05c1a", "MIRAMAR": "#ffd8b1", "CABAÑAS DEL RIO": "#01ff70", "SIETE DE AGOSTO": "#c9cc3f", "BOSQUE CLUB": "#ff9800", "CRISTO REY": "#ff6b6b", "CORDOBA": "#dcbeff", "CHIRCAL": "#2196f3", "LAS COROCORAS": "#00bcd4", "LA ESPERANZA": "#8bc34a", "FUNDADORES": "#e91e63", "PRIMERO DE MAYO": "#ff5722", "OLIMPICO": "#9c27b0", "EL HORCON": "#ffeb3b", "LIBERTADORES": "#009688", "VILLA SAN JUAN": "#3f51b5", "ALTOS DE LA SABANA": "#f44336", "COPEBANCARIOS": "#4caf50", "LOS GUARATAROS": "#607d8b", "VILLA CELESTE": "#795548", "SANTAFESITO": "#cddc39", "VILLA CAYENA": "#ff4081", "CIUDAD JARDIN": "#00e676", "LA CHORRERA": "#40c4ff", "VEINTE DE JULIO": "#ffd740", "SIN BARRIO": "#546e7a"};
     var _colEstadoGeo = {'SI':'#69f0ae','NO':'#ef5350','SIN RESPUESTA':'#ffa726'};
     var _leyEstado = [
@@ -1256,8 +1317,12 @@ _cargarCatalogo();
             center:[7.0824,-70.7607], zoom:14,
             zoomControl:true, attributionControl:false
         });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            {maxZoom:19, opacity:0.6}).addTo(_geoMap);
+        _geoTileOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {maxZoom:19, opacity:0.6});
+        _geoTileSAT = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            {maxZoom:19, opacity:1, attribution:'Esri'});
+        _geoTileOSM.addTo(_geoMap);
+        _geoTileActual = 'osm';
         _geoRenderLayer();
         _geoRenderLeyenda();
     }
@@ -1672,7 +1737,121 @@ _cargarCatalogo();
     }
 
     
-    /* ── DETECCIÓN MÓVIL Y AJUSTES ── */
+
+    /* ══ SATÉLITE ══ */
+    function _geoToggleSat() {
+        var btn = document.getElementById('btn-sat');
+        if (_geoTileActual === 'osm') {
+            _geoMap.removeLayer(_geoTileOSM);
+            _geoTileSAT.addTo(_geoMap);
+            _geoTileSAT.bringToBack();
+            _geoTileActual = 'sat';
+            btn.textContent = '🗺️ Mapa';
+            btn.classList.add('sat');
+        } else {
+            _geoMap.removeLayer(_geoTileSAT);
+            _geoTileOSM.addTo(_geoMap);
+            _geoTileOSM.bringToBack();
+            _geoTileActual = 'osm';
+            btn.textContent = '🛰️ Satélite';
+            btn.classList.remove('sat');
+        }
+    }
+
+    /* ══ RUTA ÓPTIMA (OSRM) ══ */
+    function _geoToggleRuta() {
+        var btn = document.getElementById('btn-ruta');
+        if (_geoRutaModo) {
+            _geoClearRuta();
+            return;
+        }
+        /* Necesita GPS activo */
+        if (!_gpsMarker) {
+            _geoNotif('Activa el GPS primero para usar la función de ruta.', '#ffa726', '🧭');
+            return;
+        }
+        _geoRutaModo = true;
+        btn.classList.add('activo');
+        btn.textContent = '✕ Cancelar ruta';
+        document.getElementById('geo-ruta-hint').style.display = 'block';
+        _geoMap.getContainer().style.cursor = 'crosshair';
+        _geoMap.once('click', _geoOnRutaClick);
+    }
+
+    function _geoOnRutaClick(e) {
+        document.getElementById('geo-ruta-hint').style.display = 'none';
+        _geoMap.getContainer().style.cursor = '';
+        var destLat = e.latlng.lat, destLon = e.latlng.lng;
+        var oriLat  = _gpsMarker.getLatLng().lat;
+        var oriLon  = _gpsMarker.getLatLng().lng;
+
+        /* Marcador de destino */
+        if (_geoDestMark) _geoMap.removeLayer(_geoDestMark);
+        _geoDestMark = L.marker([destLat, destLon], {
+            icon: L.divIcon({
+                className:'',
+                html:'<div style="background:#ffa726;width:16px;height:16px;border-radius:50%;'
+                    +'border:3px solid #fff;box-shadow:0 0 8px #ffa726"></div>',
+                iconSize:[16,16], iconAnchor:[8,8]
+            })
+        }).addTo(_geoMap);
+
+        _geoNotif('Calculando ruta…', '#ffa726', '🧭');
+
+        /* Llamada OSRM */
+        var url = 'https://router.project-osrm.org/route/v1/driving/'
+            + oriLon + ',' + oriLat + ';' + destLon + ',' + destLat
+            + '?overview=full&geometries=geojson&steps=false';
+
+        fetch(url)
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+            if (!data.routes || !data.routes.length) {
+                _geoNotif('No se encontró ruta para ese destino.', '#ef5350', '⚠️');
+                _geoClearRuta(); return;
+            }
+            var route = data.routes[0];
+            var coords = route.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+            if (_geoRutaLayer) _geoMap.removeLayer(_geoRutaLayer);
+            _geoRutaLayer = L.polyline(coords, {
+                color:'#ffa726', weight:5, opacity:0.85,
+                dashArray: null, lineCap:'round', lineJoin:'round'
+            }).addTo(_geoMap);
+
+            /* Ajustar vista */
+            _geoMap.fitBounds(_geoRutaLayer.getBounds(), {padding:[30,30]});
+
+            /* Estadísticas */
+            var distKm = (route.distance / 1000).toFixed(1);
+            var mins   = Math.round(route.duration / 60);
+            var timeStr = mins >= 60
+                ? Math.floor(mins/60) + 'h ' + (mins%60) + 'min'
+                : mins + ' min';
+
+            document.getElementById('rp-dist').textContent = distKm + ' km';
+            document.getElementById('rp-time').textContent = timeStr;
+            document.getElementById('rp-modo').textContent = '🚗 En vehículo · ruta más rápida';
+            document.getElementById('geo-ruta-panel').style.display = 'block';
+        })
+        .catch(function(err) {
+            _geoNotif('Error al calcular ruta. Verifica tu conexión.', '#ef5350', '⚠️');
+            _geoClearRuta();
+        });
+    }
+
+    function _geoClearRuta() {
+        _geoRutaModo = false;
+        _geoMap.off('click', _geoOnRutaClick);
+        _geoMap.getContainer().style.cursor = '';
+        if (_geoRutaLayer) { _geoMap.removeLayer(_geoRutaLayer); _geoRutaLayer = null; }
+        if (_geoDestMark)  { _geoMap.removeLayer(_geoDestMark);  _geoDestMark  = null; }
+        document.getElementById('geo-ruta-panel').style.display = 'none';
+        document.getElementById('geo-ruta-hint').style.display  = 'none';
+        var btn = document.getElementById('btn-ruta');
+        if (btn) { btn.classList.remove('activo'); btn.textContent = '🧭 Ruta'; }
+    }
+
+        /* ── DETECCIÓN MÓVIL Y AJUSTES ── */
     var _esMobil = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
     function _geoCloseSidebarMobile() {
@@ -1745,6 +1924,7 @@ _cargarCatalogo();
     }
 
         function _cerrarGeovisor() {
+        _geoClearRuta();
         if (_gpsWatchId !== null) { navigator.geolocation.clearWatch(_gpsWatchId); _gpsWatchId=null; }
         if (_gpsMarker) { _geoMap.removeLayer(_gpsMarker); _gpsMarker=null; }
         if (_gpsCircle) { _geoMap.removeLayer(_gpsCircle); _gpsCircle=null; }
