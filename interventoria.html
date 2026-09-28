@@ -296,6 +296,36 @@
         text-align:right; flex-shrink:0; }
     .geo-map-wrap { flex:1; min-height:0; position:relative; }
 
+
+    /* ── GPS TIEMPO REAL ── */
+    #btn-gps { padding:5px 13px; font-size:10px; font-family:'Orbitron',monospace;
+        letter-spacing:1px; border:1px solid #1a4060; border-radius:5px;
+        background:#0d1f35; color:#80a8c0; cursor:pointer; transition:all .2s; }
+    #btn-gps.activo { background:#0a2a3a; border-color:#00bcd4; color:#00e5ff; font-weight:700;
+        animation: gps-pulse-btn .8s infinite alternate; }
+    #btn-gps:hover { background:#0d2a3a; border-color:#00bcd4; color:#00e5ff; }
+    @keyframes gps-pulse-btn { from { box-shadow:0 0 4px #00bcd4; } to { box-shadow:0 0 10px #00bcd4; } }
+
+    /* toast GPS recordatorio */
+    #geo-gps-toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0.9);
+        background:rgba(6,14,30,0.97); border:2px solid #00bcd4;
+        border-radius:12px; padding:16px 28px; z-index:99999;
+        font-family:'Orbitron',monospace; font-size:11px; letter-spacing:1.5px;
+        color:#00e5ff; text-align:center; pointer-events:none;
+        opacity:0; transition:opacity .4s, transform .4s; max-width:320px; }
+    #geo-gps-toast.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    #geo-gps-toast .gps-icon { font-size:28px; display:block; margin-bottom:8px; }
+
+    /* punto GPS en el mapa */
+    .geo-gps-dot { width:16px; height:16px; background:#00bcd4; border:3px solid #fff;
+        border-radius:50%; box-shadow:0 0 0 4px rgba(0,188,212,.35);
+        animation:gps-dot-pulse 1.2s infinite; }
+    @keyframes gps-dot-pulse {
+        0%   { box-shadow:0 0 0 0 rgba(0,188,212,.5); }
+        70%  { box-shadow:0 0 0 10px rgba(0,188,212,0); }
+        100% { box-shadow:0 0 0 0 rgba(0,188,212,0); }
+    }
+
     /* popup geovisor */
     .geo-popup .leaflet-popup-content-wrapper {
         background:#0a1628 !important; border:1px solid #1a3a5c !important;
@@ -311,6 +341,7 @@
 <body>
 <canvas id="bg-canvas"></canvas>
 <div id="toast"></div>
+<div id="geo-gps-toast"><span class="gps-icon">📍</span>RECUERDA ACTIVAR EL GPS<br>DE TU DISPOSITIVO MÓVIL</div>
 <div id="banner-sync">
   <span class="bs-icon">📊</span>
   <span class="bs-title">ACTUALIZACIÓN DE REPORTE</span>
@@ -375,6 +406,8 @@
         <button class="geo-sel-btn" data-sel="rect" onclick="_geoIniciarSel('rect')">▭ Cuadrado</button>
         <button class="geo-sel-btn" data-sel="poly" onclick="_geoIniciarSel('poly')">⬡ Polígono</button>
         <button id="btn-sel-clear" onclick="_geoLimpiarSel()">✕ Limpiar sel.</button>
+        <div style="width:1px;height:20px;background:#1a3a5c;margin:0 2px"></div>
+        <button id="btn-gps" onclick="_geoToggleGPS()" title="Ubicación en tiempo real">📍 GPS</button>
         <button id="geo-cerrar" onclick="_cerrarGeovisor()">✕ SALIR</button>
     </div>
     <div id="geo-stats">
@@ -644,6 +677,7 @@ function validarLogin() {
         if (_perfil === 'GEOVISOR') {
             document.getElementById('screen-geovisor').classList.add('visible');
             setTimeout(_initGeovisor, 50);
+            _mostrarToastGPS();
         } else {
         document.getElementById('panel-avatar').textContent=_PERFILES[_perfil].avatar;
         document.getElementById('panel-nombre').textContent=_perfil;
@@ -1031,6 +1065,7 @@ _cargarCatalogo();
     var _geoMap = null, _geoLayer = null, _geoModo = 'estado', _geoInited = false, _geoFiltroBarrio = null;
     var _geoModoSel = null, _geoSelLayer = null, _geoPolyVerts = [], _geoPolyPrev = null,
         _geoRectStart = null, _geoRectPrev = null;
+    var _gpsWatchId = null, _gpsMarker = null, _gpsCircle = null;
     var _colBarrio = {"LAS AMERICAS": "#aaffc3", "LA UNION": "#800000", "SANTA TERESITA": "#ff851b", "MIRAMAR FRONTERA": "#6a5acd", "MERIDIANO 70": "#e05c1a", "MIRAMAR": "#ffd8b1", "CABAÑAS DEL RIO": "#01ff70", "SIETE DE AGOSTO": "#c9cc3f", "BOSQUE CLUB": "#ff9800", "CRISTO REY": "#ff6b6b", "CORDOBA": "#dcbeff", "CHIRCAL": "#2196f3", "LAS COROCORAS": "#00bcd4", "LA ESPERANZA": "#8bc34a", "FUNDADORES": "#e91e63", "PRIMERO DE MAYO": "#ff5722", "OLIMPICO": "#9c27b0", "EL HORCON": "#ffeb3b", "LIBERTADORES": "#009688", "VILLA SAN JUAN": "#3f51b5", "ALTOS DE LA SABANA": "#f44336", "COPEBANCARIOS": "#4caf50", "LOS GUARATAROS": "#607d8b", "VILLA CELESTE": "#795548", "SANTAFESITO": "#cddc39", "VILLA CAYENA": "#ff4081", "CIUDAD JARDIN": "#00e676", "LA CHORRERA": "#40c4ff", "VEINTE DE JULIO": "#ffd740", "SIN BARRIO": "#546e7a"};
     var _colEstadoGeo = {'SI':'#69f0ae','NO':'#ef5350','SIN RESPUESTA':'#ffa726'};
     var _leyEstado = [
@@ -1320,6 +1355,68 @@ _cargarCatalogo();
         body.innerHTML = estadoHtml + barrioHtml + digHtml;
     }
 
+    
+    /* ── GPS TIEMPO REAL ── */
+    function _geoToggleGPS() {
+        var btn = document.getElementById('btn-gps');
+        if (_gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(_gpsWatchId);
+            _gpsWatchId = null;
+            if (_gpsMarker) { _geoMap.removeLayer(_gpsMarker); _gpsMarker = null; }
+            if (_gpsCircle) { _geoMap.removeLayer(_gpsCircle); _gpsCircle = null; }
+            btn.classList.remove('activo');
+            btn.textContent = '📍 GPS';
+        } else {
+            if (!navigator.geolocation) {
+                alert('Tu navegador no soporta geolocalización.');
+                return;
+            }
+            btn.classList.add('activo');
+            btn.textContent = '📡 GPS ON';
+            _gpsWatchId = navigator.geolocation.watchPosition(
+                function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lon = pos.coords.longitude;
+                    var acc = pos.coords.accuracy;
+                    if (!_gpsMarker) {
+                        var icon = L.divIcon({
+                            className: '',
+                            html: '<div class="geo-gps-dot"></div>',
+                            iconSize: [16,16], iconAnchor: [8,8]
+                        });
+                        _gpsMarker = L.marker([lat, lon], {icon:icon, zIndexOffset:9000}).addTo(_geoMap);
+                        _gpsCircle = L.circle([lat, lon], {radius:acc, color:'#00bcd4',
+                            fillColor:'#00bcd4', fillOpacity:0.08, weight:1}).addTo(_geoMap);
+                        _geoMap.setView([lat, lon], 16);
+                    } else {
+                        _gpsMarker.setLatLng([lat, lon]);
+                        _gpsCircle.setLatLng([lat, lon]).setRadius(acc);
+                    }
+                },
+                function(err) {
+                    btn.classList.remove('activo');
+                    btn.textContent = '📍 GPS';
+                    _gpsWatchId = null;
+                    var msgs = {1:'Permiso denegado.',2:'Posición no disponible.',3:'Tiempo agotado.'};
+                    alert('Error GPS: ' + (msgs[err.code] || err.message));
+                },
+                { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+            );
+        }
+    }
+
+    /* ── TOAST RECORDATORIO GPS ── */
+    function _mostrarToastGPS() {
+        var el = document.getElementById('geo-gps-toast');
+        if (!el) return;
+        setTimeout(function() {
+            el.classList.add('show');
+            setTimeout(function() {
+                el.classList.remove('show');
+            }, 3000);
+        }, 2000);
+    }
+
         function _geoRenderSidebar(filtro) {
         var list = document.getElementById('geo-sb-list');
         var nores = document.getElementById('geo-sb-nores');
@@ -1376,6 +1473,10 @@ _cargarCatalogo();
     }
 
         function _cerrarGeovisor() {
+        if (_gpsWatchId !== null) { navigator.geolocation.clearWatch(_gpsWatchId); _gpsWatchId=null; }
+        if (_gpsMarker) { _geoMap.removeLayer(_gpsMarker); _gpsMarker=null; }
+        if (_gpsCircle) { _geoMap.removeLayer(_gpsCircle); _gpsCircle=null; }
+        var btn=document.getElementById('btn-gps'); if(btn){btn.classList.remove('activo');btn.textContent='📍 GPS';}
         document.getElementById('screen-geovisor').classList.remove('visible');
         document.getElementById('screen-selector').classList.remove('oculto');
         _perfil = null;
