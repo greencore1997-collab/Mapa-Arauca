@@ -326,6 +326,18 @@
         100% { box-shadow:0 0 0 0 rgba(0,188,212,0); }
     }
 
+
+    /* ── NOTIFICACIÓN INTERNA GEOVISOR ── */
+    #geo-notif { position:absolute; top:14px; left:50%; transform:translateX(-50%);
+        z-index:9500; background:rgba(6,14,30,0.97); border-radius:10px;
+        padding:10px 16px; max-width:340px; width:90%; text-align:center;
+        font-family:sans-serif; font-size:11px; line-height:1.5;
+        box-shadow:0 4px 20px rgba(0,0,0,0.6); pointer-events:none;
+        opacity:0; transition:opacity .35s; border:1px solid #1a3a5c; }
+    #geo-notif.show { opacity:1; }
+    #geo-notif .gn-icon { font-size:20px; display:block; margin-bottom:4px; }
+    #geo-notif .gn-msg { color:#cfd8dc; }
+
     /* popup geovisor */
     .geo-popup .leaflet-popup-content-wrapper {
         background:#0a1628 !important; border:1px solid #1a3a5c !important;
@@ -426,6 +438,7 @@
         </div>
         <div id="geo-map"></div>
     </div>
+    <div id="geo-notif"><span class="gn-icon"></span><span class="gn-msg"></span></div>
     <!-- Panel estadísticas de selección -->
     <div id="geo-sel-panel" class="oculto">
         <div id="geo-sel-header">
@@ -1356,7 +1369,19 @@ _cargarCatalogo();
     }
 
     
-    /* ── GPS TIEMPO REAL ── */
+    function _geoNotif(msg, color, icon) {
+        var el = document.getElementById('geo-notif');
+        if (!el) return;
+        el.querySelector('.gn-icon').textContent = icon || 'ℹ️';
+        el.querySelector('.gn-msg').textContent = msg;
+        el.style.borderColor = color || '#1a3a5c';
+        el.style.color = color || '#cfd8dc';
+        el.classList.add('show');
+        clearTimeout(el._t);
+        el._t = setTimeout(function(){ el.classList.remove('show'); }, 6000);
+    }
+
+        /* ── GPS TIEMPO REAL ── */
     function _geoToggleGPS() {
         var btn = document.getElementById('btn-gps');
         if (_gpsWatchId !== null) {
@@ -1368,7 +1393,7 @@ _cargarCatalogo();
             btn.textContent = '📍 GPS';
         } else {
             if (!navigator.geolocation) {
-                alert('Tu navegador no soporta geolocalización.');
+                _geoNotif('Tu navegador no soporta geolocalización. Usa Chrome o Firefox en tu móvil.', '#ffa726', '⚠️');
                 return;
             }
             btn.classList.add('activo');
@@ -1397,8 +1422,12 @@ _cargarCatalogo();
                     btn.classList.remove('activo');
                     btn.textContent = '📍 GPS';
                     _gpsWatchId = null;
-                    var msgs = {1:'Permiso denegado.',2:'Posición no disponible.',3:'Tiempo agotado.'};
-                    alert('Error GPS: ' + (msgs[err.code] || err.message));
+                    var msgs = {
+                        1: 'Permiso de ubicación bloqueado. Ve a la configuración de tu navegador → Privacidad → Permisos de ubicación y permite el acceso para este sitio.',
+                        2: 'No se pudo obtener la posición. Verifica que el GPS esté activo en tu dispositivo.',
+                        3: 'Tiempo de espera agotado. Asegúrate de tener señal GPS o activa el GPS de tu dispositivo.'
+                    };
+                    _geoNotif(msgs[err.code] || err.message, '#ef5350', '⚠️');
                 },
                 { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
             );
