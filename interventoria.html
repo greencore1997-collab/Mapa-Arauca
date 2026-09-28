@@ -346,6 +346,153 @@
     .geo-popup .leaflet-popup-content { margin:12px 14px !important; }
     .geo-popup .leaflet-popup-tip-container { display:none; }
     .geo-popup .leaflet-popup-close-button { color:#80a8c0 !important; font-size:16px !important; top:6px !important; right:8px !important; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE MÓVIL — interventoria.html
+   ══════════════════════════════════════════ */
+
+/* ── Pantallas hasta 768px ── */
+@media (max-width: 768px) {
+
+    /* ── TOPBAR: scroll horizontal, botones más grandes al tacto ── */
+    #geo-topbar {
+        padding: 6px 8px;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+    }
+    #geo-topbar::-webkit-scrollbar { display: none; }
+
+    #geo-topbar .geo-title { font-size: 9px; letter-spacing: 1px; white-space: nowrap; }
+    #geo-topbar .geo-sub   { display: none; }
+
+    .geo-modo-btn, .geo-sel-btn, #btn-gps, #geo-cerrar, #btn-sel-clear {
+        padding: 7px 11px;
+        font-size: 9px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 34px;
+    }
+
+    /* ── STATS BAR ── */
+    #geo-stats {
+        font-size: 8px;
+        padding: 4px 8px;
+        gap: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+    }
+    #geo-stats::-webkit-scrollbar { display: none; }
+
+    /* ── SIDEBAR: overlay full-screen desde la izquierda ── */
+    #geo-sidebar {
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        z-index: 9300;
+        width: 82% !important;
+        max-width: 300px;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.7);
+        transition: transform .3s cubic-bezier(.4,0,.2,1);
+        transform: translateX(-105%);
+    }
+    #geo-sidebar:not(.oculto) {
+        transform: translateX(0);
+    }
+    #geo-sidebar.oculto {
+        transform: translateX(-105%);
+        width: 82% !important;
+        overflow: hidden;
+    }
+
+    /* Backdrop para cerrar sidebar */
+    #geo-sb-backdrop {
+        display: none;
+        position: absolute;
+        inset: 0;
+        z-index: 9290;
+        background: rgba(0,0,0,0.45);
+    }
+    #geo-sb-backdrop.show { display: block; }
+
+    /* Botones sidebar más grandes */
+    .geo-sb-btn { padding: 8px 9px; }
+    .geo-sb-name { font-size: 10px; }
+    .geo-sb-cnt  { font-size: 9px; }
+    #geo-sb-search { font-size: 11px; padding: 7px 10px; }
+    #geo-sb-all { font-size: 9px; padding: 7px 10px; min-height: 36px; }
+
+    /* ── PANEL DE SELECCIÓN: columna única ── */
+    #geo-sel-panel { max-height: 60%; }
+    #geo-sel-body  { grid-template-columns: 1fr !important; gap: 8px; padding: 8px 10px; }
+    .sel-stat-title { font-size: 7px; }
+    .sel-bar-label  { width: 70px; font-size: 8px; }
+    .sel-bar-val    { font-size: 7.5px; }
+
+    /* ── POPUP DEL MAPA ── */
+    .leaflet-popup-content-wrapper { max-width: 85vw !important; }
+    .geo-popup .leaflet-popup-content { margin: 10px 11px !important; }
+
+    /* ── NOTIFICACIÓN INTERNA ── */
+    #geo-notif { font-size: 10px; padding: 10px 14px; max-width: 88vw; top: 10px; }
+
+    /* ── TOAST GPS ── */
+    #geo-gps-toast { font-size: 10px; padding: 14px 20px; max-width: 85vw; }
+    #geo-gps-toast .gps-icon { font-size: 22px; margin-bottom: 5px; }
+
+    /* ── BOTÓN GPS FLOTANTE ── */
+    #btn-gps-float {
+        display: flex !important;
+        position: absolute;
+        bottom: 90px; right: 12px;
+        z-index: 9200;
+        width: 48px; height: 48px;
+        background: #0d1f35;
+        border: 2px solid #1a4060;
+        border-radius: 50%;
+        color: #80deea;
+        font-size: 20px;
+        align-items: center; justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.5);
+        transition: all .2s;
+    }
+    #btn-gps-float.activo {
+        background: #0a2a3a;
+        border-color: #00bcd4;
+        box-shadow: 0 0 12px rgba(0,188,212,.5);
+        animation: gps-pulse-btn .8s infinite alternate;
+    }
+
+    /* ── CONTROLES DE ZOOM más grandes ── */
+    .leaflet-control-zoom a {
+        width: 38px !important;
+        height: 38px !important;
+        line-height: 38px !important;
+        font-size: 20px !important;
+    }
+
+    /* ── PANTALLA SELECTOR (tarjetas perfil) ── */
+    .sel-cards { flex-direction: column; max-width: 320px; gap: 10px; }
+    .sel-card  { padding: 18px 16px; }
+    .sel-card-avatar { font-size: 30px; }
+    .sel-card-name   { font-size: 14px; }
+
+    /* ── LOGIN ── */
+    .login-box { padding: 28px 20px; }
+    #login-password { font-size: 16px !important; padding: 12px 14px; }
+    #btn-login { min-height: 44px; font-size: 11px; }
+}
+
+/* ── Pantallas muy pequeñas (360px) ── */
+@media (max-width: 400px) {
+    .geo-modo-btn, .geo-sel-btn, #btn-gps, #geo-cerrar { font-size: 8px; padding: 6px 8px; }
+    #geo-topbar .geo-title { font-size: 8px; }
+}
+
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -427,6 +574,7 @@
     </div>
     <div class="geo-map-wrap">
     <div id="geo-body">
+        <div id="geo-sb-backdrop" onclick="_geoCloseSidebarMobile()"></div>
         <div id="geo-sidebar" class="oculto">
             <div id="geo-sb-head">
                 <div id="geo-sb-title">BARRIOS</div>
@@ -438,6 +586,7 @@
         </div>
         <div id="geo-map"></div>
     </div>
+    <button id="btn-gps-float" style="display:none" onclick="_geoToggleGPS()" title="GPS">📍</button>
     <div id="geo-notif"><span class="gn-icon"></span><span class="gn-msg"></span></div>
     <!-- Panel estadísticas de selección -->
     <div id="geo-sel-panel" class="oculto">
@@ -689,7 +838,7 @@ function validarLogin() {
         document.getElementById('screen-login').classList.add('oculto');
         if (_perfil === 'GEOVISOR') {
             document.getElementById('screen-geovisor').classList.add('visible');
-            setTimeout(_initGeovisor, 50);
+            setTimeout(function(){ _initGeovisor(); setTimeout(_geoInitMobileOverrides, 100); }, 50);
             _mostrarToastGPS();
         } else {
         document.getElementById('panel-avatar').textContent=_PERFILES[_perfil].avatar;
@@ -1090,7 +1239,7 @@ _cargarCatalogo();
     function _initGeovisor() {
         if (_geoInited) { _geoMap && _geoMap.invalidateSize(); return; }
         _geoInited = true;
-        _geoMap = L.map('geo-map', {
+        _geoMap = L.map('geo-map', { tap: false,
             center:[7.0824,-70.7607], zoom:14,
             zoomControl:true, attributionControl:false
         });
@@ -1499,6 +1648,57 @@ _cargarCatalogo();
                                    [Math.max.apply(null,lats)+0.002,Math.max.apply(null,lons)+0.002]]);
             }
         }
+    }
+
+    
+    /* ── DETECCIÓN MÓVIL Y AJUSTES ── */
+    var _esMobil = ('ontouchstart' in window) || (window.innerWidth <= 768);
+
+    function _geoCloseSidebarMobile() {
+        document.getElementById('geo-sidebar').classList.add('oculto');
+        var bd = document.getElementById('geo-sb-backdrop');
+        if (bd) bd.classList.remove('show');
+    }
+
+    /* Override _geoSetModo para móvil: sidebar como overlay ── */
+    var _geoSetModoOrig = null;
+    function _geoInitMobileOverrides() {
+        if (!_esMobil) return;
+
+        /* Botón GPS flotante visible en móvil, ocultar el de topbar */
+        var btnTop   = document.getElementById('btn-gps');
+        var btnFloat = document.getElementById('btn-gps-float');
+        if (btnTop && btnFloat) {
+            btnTop.style.display = 'none';
+            btnFloat.style.display = '';
+        }
+
+        /* Sidebar overlay: tap en backdrop cierra */
+        var sb = document.getElementById('geo-sidebar');
+        if (sb) {
+            var observer = new MutationObserver(function() {
+                var bd = document.getElementById('geo-sb-backdrop');
+                if (!bd) return;
+                if (!sb.classList.contains('oculto')) {
+                    bd.classList.add('show');
+                } else {
+                    bd.classList.remove('show');
+                }
+            });
+            observer.observe(sb, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        /* Sync estado del botón flotante GPS con el de topbar */
+        var origToggle = _geoToggleGPS;
+        _geoToggleGPS = function() {
+            origToggle();
+            var f = document.getElementById('btn-gps-float');
+            var t = document.getElementById('btn-gps');
+            if (f && t) {
+                f.classList.toggle('activo', t.classList.contains('activo'));
+                f.textContent = t.classList.contains('activo') ? '📡' : '📍';
+            }
+        };
     }
 
         function _cerrarGeovisor() {
