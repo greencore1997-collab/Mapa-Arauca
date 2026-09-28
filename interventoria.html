@@ -1026,19 +1026,6 @@ _cargarCatalogo();
             _geoLayer.addLayer(m);
         });
         _geoLayer.addTo(_geoMap);
-    });
-            var desTag = p.e==='SI' ? '<span style="color:#69f0ae">✅ Sí desea el servicio</span>'
-                : p.e==='NO' ? '<span style="color:#ef5350">❌ No desea el servicio</span>'
-                : '<span style="color:#ffa726">⏳ Sin respuesta</span>';
-            m.bindPopup('<div style="font-size:12px;line-height:1.6;min-width:180px">'
-                + '<b style="color:#ffa726">🔧 ACOMETIDA</b><br>'
-                + (p.b && p.b!=='SIN BARRIO' ? '🏘️ <b>'+p.b+'</b><br>' : '')
-                + desTag
-                + (p.obs ? '<br><span style=\"color:#aaa;font-size:10px\">'+p.obs+'</span>' : '')
-                + '</div>', {maxWidth:260});
-            _geoLayer.addLayer(m);
-        });
-        _geoLayer.addTo(_geoMap);
     }
 
     function _geoRenderLeyenda() {
