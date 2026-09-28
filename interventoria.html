@@ -1366,6 +1366,17 @@ _cargarCatalogo();
                 + '</div>';
 
             m.bindPopup(popup, {maxWidth:290, className:'geo-popup'});
+            m.off('click');
+            (function(pt, mk) {
+                mk.on('click', function(e) {
+                    if (_geoRutaModo) {
+                        L.DomEvent.stopPropagation(e);
+                        _geoOnRutaClick({ latlng: L.latLng(pt.a, pt.o) });
+                    } else {
+                        mk.openPopup();
+                    }
+                });
+            })(p, m);
             _geoLayer.addLayer(m);
         });
         _geoLayer.addTo(_geoMap);
@@ -1775,10 +1786,11 @@ _cargarCatalogo();
         btn.textContent = '✕ Cancelar ruta';
         document.getElementById('geo-ruta-hint').style.display = 'block';
         _geoMap.getContainer().style.cursor = 'crosshair';
-        _geoMap.once('click', _geoOnRutaClick);
+        _geoMap.on('click', _geoOnRutaClick);
     }
 
     function _geoOnRutaClick(e) {
+        _geoMap.off('click', _geoOnRutaClick);  /* desregistrar listener del mapa */
         document.getElementById('geo-ruta-hint').style.display = 'none';
         _geoMap.getContainer().style.cursor = '';
         var destLat = e.latlng.lat, destLon = e.latlng.lng;
@@ -1842,6 +1854,7 @@ _cargarCatalogo();
     function _geoClearRuta() {
         _geoRutaModo = false;
         _geoMap.off('click', _geoOnRutaClick);
+        _geoRenderLayer();  /* reconstruir markers para restaurar popups */
         _geoMap.getContainer().style.cursor = '';
         if (_geoRutaLayer) { _geoMap.removeLayer(_geoRutaLayer); _geoRutaLayer = null; }
         if (_geoDestMark)  { _geoMap.removeLayer(_geoDestMark);  _geoDestMark  = null; }
