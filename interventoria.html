@@ -238,6 +238,14 @@
     #geo-sb-head { padding:8px 10px 6px; border-bottom:1px solid #0d2035; flex-shrink:0; }
     #geo-sb-title { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px;
         color:#80deea; font-weight:700; margin-bottom:5px; }
+    #geo-sb-search { width:100%; padding:5px 8px; margin:5px 0 4px;
+        background:#0a1e35; border:1px solid #1a4060; border-radius:5px;
+        color:#80deea; font-size:9.5px; font-family:sans-serif; box-sizing:border-box;
+        outline:none; }
+    #geo-sb-search::placeholder { color:#2a5a7a; }
+    #geo-sb-search:focus { border-color:#00bcd4; background:#071525; }
+    #geo-sb-nores { font-size:9px; color:#2a5a7a; text-align:center;
+        padding:10px 4px; font-family:sans-serif; display:none; }
     #geo-sb-all { width:100%; padding:5px 8px; background:#0d2a45; border:1px solid #1a4060;
         border-radius:5px; color:#80deea; font-size:9px; font-family:'Orbitron',monospace;
         letter-spacing:1px; cursor:pointer; margin-bottom:2px; text-align:left; }
@@ -342,8 +350,10 @@
             <div id="geo-sb-head">
                 <div id="geo-sb-title">BARRIOS</div>
                 <button id="geo-sb-all" onclick="_geoSelBarrio(null)">▦ TODOS LOS BARRIOS</button>
+                <input id="geo-sb-search" type="text" placeholder="🔍 Buscar barrio..." oninput="_geoFiltrarSidebar(this.value)" autocomplete="off"/>
             </div>
             <div id="geo-sb-list"></div>
+            <div id="geo-sb-nores">Sin resultados</div>
         </div>
         <div id="geo-map"></div>
     </div>
@@ -1073,10 +1083,12 @@ _cargarCatalogo();
         if (modo === 'barrio') {
             sb.classList.remove('oculto');
             _geoFiltroBarrio = null;
+            var si = document.getElementById('geo-sb-search'); if(si) si.value='';
             _geoRenderSidebar();
         } else {
             sb.classList.add('oculto');
             _geoFiltroBarrio = null;
+            var si = document.getElementById('geo-sb-search'); if(si) si.value='';
             document.getElementById('geo-stats-barrio').textContent = '';
         }
         _geoRenderLayer();
@@ -1087,11 +1099,15 @@ _cargarCatalogo();
 
     var _barrioData = {"LAS AMERICAS": {"cnt": 179, "col": "#aaffc3"}, "LA UNION": {"cnt": 173, "col": "#800000"}, "SANTA TERESITA": {"cnt": 152, "col": "#ff851b"}, "MIRAMAR FRONTERA": {"cnt": 82, "col": "#6a5acd"}, "MERIDIANO 70": {"cnt": 57, "col": "#e05c1a"}, "MIRAMAR": {"cnt": 54, "col": "#ffd8b1"}, "CABAÑAS DEL RIO": {"cnt": 45, "col": "#01ff70"}, "SIETE DE AGOSTO": {"cnt": 37, "col": "#c9cc3f"}, "BOSQUE CLUB": {"cnt": 27, "col": "#ff9800"}, "CRISTO REY": {"cnt": 18, "col": "#ff6b6b"}, "CORDOBA": {"cnt": 17, "col": "#dcbeff"}, "CHIRCAL": {"cnt": 14, "col": "#2196f3"}, "LAS COROCORAS": {"cnt": 12, "col": "#00bcd4"}, "LA ESPERANZA": {"cnt": 12, "col": "#8bc34a"}, "FUNDADORES": {"cnt": 10, "col": "#e91e63"}, "PRIMERO DE MAYO": {"cnt": 9, "col": "#ff5722"}, "OLIMPICO": {"cnt": 5, "col": "#9c27b0"}, "EL HORCON": {"cnt": 3, "col": "#ffeb3b"}, "LIBERTADORES": {"cnt": 3, "col": "#009688"}, "VILLA SAN JUAN": {"cnt": 2, "col": "#3f51b5"}, "ALTOS DE LA SABANA": {"cnt": 2, "col": "#f44336"}, "COPEBANCARIOS": {"cnt": 2, "col": "#4caf50"}, "LOS GUARATAROS": {"cnt": 2, "col": "#607d8b"}, "VILLA CELESTE": {"cnt": 2, "col": "#795548"}, "SANTAFESITO": {"cnt": 1, "col": "#cddc39"}, "VILLA CAYENA": {"cnt": 1, "col": "#ff4081"}, "CIUDAD JARDIN": {"cnt": 1, "col": "#00e676"}, "LA CHORRERA": {"cnt": 1, "col": "#40c4ff"}, "VEINTE DE JULIO": {"cnt": 1, "col": "#ffd740"}, "SIN BARRIO": {"cnt": 4, "col": "#546e7a"}};
 
-    function _geoRenderSidebar() {
+    function _geoRenderSidebar(filtro) {
         var list = document.getElementById('geo-sb-list');
+        var nores = document.getElementById('geo-sb-nores');
         if (!list) return;
+        var q = (filtro || '').toUpperCase().trim();
         var html = '';
+        var count = 0;
         Object.keys(_barrioData).forEach(function(b) {
+            if (q && b.toUpperCase().indexOf(q) === -1) return;
             var d = _barrioData[b];
             var activo = (_geoFiltroBarrio === b) ? ' activo' : '';
             html += '<button class="geo-sb-btn' + activo + '" onclick="_geoSelBarrio(\'' + b.replace(/'/g,"\'") + '\')">'
@@ -1099,10 +1115,16 @@ _cargarCatalogo();
                 + '<span class="geo-sb-name">' + b + '</span>'
                 + '<span class="geo-sb-cnt">' + d.cnt + '</span>'
                 + '</button>';
+            count++;
         });
         list.innerHTML = html;
+        if (nores) nores.style.display = (count === 0) ? 'block' : 'none';
         var allBtn = document.getElementById('geo-sb-all');
         if (allBtn) allBtn.classList.toggle('activo', !_geoFiltroBarrio);
+    }
+
+    function _geoFiltrarSidebar(val) {
+        _geoRenderSidebar(val);
     }
 
     function _geoSelBarrio(nombre) {
