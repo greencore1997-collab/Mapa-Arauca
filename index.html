@@ -986,6 +986,16 @@
         #geo-edit-tipo-sel { margin-bottom:10px; }
         #geo-edit-tipo-sel label { display:inline-block; margin-right:12px; cursor:pointer; }
         #geo-edit-tipo-sel input[type=radio] { margin-right:3px; }
+
+        /* ══ EDICIÓN REDES GAS ══ */
+        .geo-vert-dot {
+            width:12px; height:12px; background:#fff; border:2px solid #ffa726;
+            border-radius:2px; cursor:grab; box-shadow:0 0 0 1.5px rgba(255,167,38,.4);
+        }
+        .geo-vert-dot:hover { background:#ffa726; }
+        #geo-edit-panel.redes h4 { color:#ffb300; }
+        #gef-vert-info { font-size:10px; color:#ffa726; margin-bottom:8px; display:none; }
+        #btn-geo-del-vert { display:none; }
 </style>
 </head>
 <body>
@@ -4899,6 +4909,281 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         try { _geoLoadEdits(); } catch(e) {}
     })();
 
+    
+    /* ══════════════════════════════════════════════════════════
+       EDICIÓN RED DE GAS
+    ══════════════════════════════════════════════════════════ */
+    var _redEditLayer  = null;   // L.layerGroup con vértices arrastrables
+    var _redEditFeatIdx = -1;    // índice de feature seleccionada en _redGasData.features
+    var _redEditVertIdx = -1;    // índice de vértice seleccionado en su coordenada array
+
+    /* ── Renderizar vértices de red editables ── */
+    function _geoRenderRedEdit() {
+        if (_redEditLayer) { map.removeLayer(_redEditLayer); _redEditLayer = null; }
+        if (!_redGasData || !_redGasActiva) return;
+
+        _redEditLayer = L.layerGroup().addTo(map);
+
+        _redGasData.features.forEach(function(feat, fi) {
+            var coords = feat.geometry.coordinates; // [[lon,lat], ...]
+
+            // Resaltar el segmento con click para abrir atributos
+            var poly = L.polyline(coords.map(function(c){ return [c[1],c[0]]; }), {
+                color: 'rgba(255,167,38,0.0)', weight: 12, opacity: 0
+            }).addTo(_redEditLayer);
+            poly.on('click', function(e) {
+                L.DomEvent.stopPropagation(e);
+                _geoOpenRedEditor(fi, -1);
+            });
+
+            // Vértices arrastrables
+            coords.forEach(function(c, vi) {
+                var dot = L.divIcon({
+                    className:'', iconSize:[12,12], iconAnchor:[6,6],
+                    html:'<div class="geo-vert-dot"></div>'
+                });
+                var mk = L.marker([c[1], c[0]], { icon:dot, draggable:true, zIndexOffset:600 });
+                mk._redFi = fi;
+                mk._redVi = vi;
+
+                mk.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    _geoOpenRedEditor(fi, vi);
+                });
+
+                mk.on('dragend', function(e) {
+                    var ll = e.target.getLatLng();
+                    _redGasData.features[fi].geometry.coordinates[vi] = [ll.lng, ll.lat];
+                    _geoAutoSaveRed();
+                    _rebuildRedLayer();
+                    _geoRenderRedEdit();
+                });
+
+                _redEditLayer.addLayer(mk);
+            });
+        });
+    }
+
+    /* ── Abrir editor de segmento o vértice ── */
+    function _geoOpenRedEditor(fi, vi) {
+        _redEditFeatIdx = fi;
+        _redEditVertIdx = vi;
+
+        var feat = _redGasData.features[fi];
+        var p    = feat.properties;
+
+        // Mostrar/ocultar campos según modo
+        document.getElementById('geo-edit-tipo-sel').style.display = 'none';
+        document.getElementById('gef-redes-extra').style.display   = '';
+        // Ocultar campos de puntos
+        document.querySelector('label[for="gef-estado"]')           && (document.querySelector('label[for="gef-estado"]').style.display = 'none');
+        document.getElementById('gef-estado').style.display         = 'none';
+        document.getElementById('gef-digitador').parentNode && (document.querySelector('label[for="gef-digitador"]') || {style:{}}).style.display = 'none';
+        document.getElementById('gef-digitador').style.display      = 'none';
+        document.getElementById('gef-obs').style.display            = 'none';
+        document.querySelectorAll('#geo-edit-panel label').forEach(function(l){
+            if (l.textContent.indexOf('DIGITADOR')>-1 || l.textContent.indexOf('OBSERV')>-1 ||
+                l.textContent.indexOf('ESTADO / CLAS')>-1)
+                l.style.display='none';
+        });
+
+        // Rellenar campos
+        document.getElementById('gef-tipo-tubo').value    = p.tipo    || '';
+        document.getElementById('gef-estado-tubo').value  = p.estado  || '';
+        document.getElementById('gef-barrio').value        = p.barrio  || '';
+        document.getElementById('gef-polivalvula').value   = p.polivalvula || '';
+
+        // Info de vértice
+        var vertInfo = document.getElementById('gef-vert-info');
+        var delVert  = document.getElementById('btn-geo-del-vert');
+        if (vi >= 0) {
+            var coords = feat.geometry.coordinates;
+            vertInfo.style.display = '';
+            vertInfo.innerHTML = '📍 Vértice ' + (vi+1) + ' de ' + coords.length +
+                ' &nbsp;|&nbsp; ' + coords[vi][1].toFixed(6) + ', ' + coords[vi][0].toFixed(6);
+            // Solo permitir eliminar si quedan > 2 vértices
+            if (coords.length > 2) {
+                delVert.style.display = '';
+            } else {
+                delVert.style.display = 'none';
+            }
+        } else {
+            vertInfo.style.display = 'none';
+            delVert.style.display  = 'none';
+        }
+
+        document.getElementById('btn-geo-delete').style.display = fi >= 0 && vi < 0 ? '' : 'none';
+        document.getElementById('geo-edit-panel').classList.add('visible');
+        document.getElementById('geo-edit-panel').classList.add('redes');
+        var h4 = document.querySelector('#geo-edit-panel h4');
+        if (h4) {
+            h4.textContent = vi >= 0
+                ? '✏️ VÉRTICE — ' + (feat.properties.tipo || 'Tubería')
+                : '✏️ SEGMENTO — ' + (feat.properties.tipo || 'Tubería');
+        }
+    }
+
+    /* ── Guardar atributos de segmento de red ── */
+    function _geoSaveRedEditor() {
+        if (_redEditFeatIdx < 0) return;
+        var p = _redGasData.features[_redEditFeatIdx].properties;
+        p.tipo        = document.getElementById('gef-tipo-tubo').value;
+        p.estado      = document.getElementById('gef-estado-tubo').value;
+        p.barrio      = document.getElementById('gef-barrio').value.trim();
+        p.polivalvula = document.getElementById('gef-polivalvula').value.trim();
+        _geoAutoSaveRed();
+        _rebuildRedLayer();
+        _geoCloseRedEditor();
+    }
+
+    /* ── Eliminar vértice ── */
+    function _geoDelVert() {
+        if (_redEditFeatIdx < 0 || _redEditVertIdx < 0) return;
+        var coords = _redGasData.features[_redEditFeatIdx].geometry.coordinates;
+        if (coords.length <= 2) { alert('Un segmento necesita mínimo 2 vértices.'); return; }
+        coords.splice(_redEditVertIdx, 1);
+        _geoAutoSaveRed();
+        _rebuildRedLayer();
+        _geoRenderRedEdit();
+        _geoCloseRedEditor();
+    }
+
+    /* ── Eliminar segmento completo ── */
+    function _geoDelSegmento() {
+        if (_redEditFeatIdx < 0) return;
+        if (!confirm('¿Eliminar este segmento de tubería?')) return;
+        _redGasData.features.splice(_redEditFeatIdx, 1);
+        _geoAutoSaveRed();
+        _rebuildRedLayer();
+        _geoRenderRedEdit();
+        _geoCloseRedEditor();
+    }
+
+    /* ── Reconstruir capa visual de red con datos actualizados ── */
+    function _rebuildRedLayer() {
+        if (!_redGasActiva) return;
+        if (_redGasLayer) { map.removeLayer(_redGasLayer); _redGasLayer = null; }
+        _redGasLayer = L.geoJSON(_redGasData, {
+            style: _estiloTuberia,
+            onEachFeature: _popupTuberia
+        }).addTo(map);
+    }
+
+    /* ── Cerrar editor de redes y restaurar panel ── */
+    function _geoCloseRedEditor() {
+        _redEditFeatIdx = -1;
+        _redEditVertIdx = -1;
+        document.getElementById('geo-edit-panel').classList.remove('visible');
+        document.getElementById('geo-edit-panel').classList.remove('redes');
+        // Restaurar campos de puntos
+        document.getElementById('gef-redes-extra').style.display = 'none';
+        document.getElementById('gef-estado').style.display      = '';
+        document.getElementById('gef-digitador').style.display   = '';
+        document.getElementById('gef-obs').style.display         = '';
+        document.querySelectorAll('#geo-edit-panel label').forEach(function(l){
+            l.style.display = '';
+        });
+        var h4 = document.querySelector('#geo-edit-panel h4');
+        if (h4) h4.textContent = '✏️ EDITOR DE ELEMENTO ';
+    }
+
+    /* ── Autosave GeoJSON de red ── */
+    function _geoAutoSaveRed() {
+        if (!_redGasData) return;
+        try {
+            var bundle = {};
+            var raw = localStorage.getItem(_EDITS_KEY);
+            if (raw) bundle = JSON.parse(raw);
+            bundle.redes_gas = _redGasData;
+            localStorage.setItem(_EDITS_KEY, JSON.stringify(bundle));
+            var el = document.getElementById('geo-edit-autosave');
+            if (el) { el.classList.add('visible'); setTimeout(function(){ el.classList.remove('visible'); }, 1800); }
+        } catch(e) { console.warn('[EDIT] AutoSave redes error:', e); }
+    }
+
+    /* ── Cargar edits de redes desde localStorage ── */
+    function _geoLoadRedEdits() {
+        var raw = localStorage.getItem(_EDITS_KEY);
+        if (!raw) return;
+        try {
+            var bundle = JSON.parse(raw);
+            if (bundle.redes_gas) {
+                _redGasData = bundle.redes_gas;
+                console.log('[EDIT] Red de gas cargada desde localStorage');
+            }
+        } catch(e) {}
+    }
+
+    /* ── Exportar red como GeoJSON ── */
+    function _geoExportRed() {
+        if (!_redGasData) return;
+        var blob = new Blob([JSON.stringify(_redGasData, null, 2)], {type:'application/geo+json'});
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'redes_gas_edit_' + new Date().toISOString().slice(0,10) + '.geojson';
+        a.click();
+    }
+
+    /* ── Sobrescribir _geoToggleEdit para incluir redes ── */
+    var _geoToggleEdit_orig = _geoToggleEdit;
+    _geoToggleEdit = function() {
+        _geoEditMode = !_geoEditMode;
+        var btn = document.getElementById('btn-edit');
+        if (_geoEditMode) {
+            btn.classList.add('activo');
+            btn.textContent = '⏹ DETENER';
+            _geoLoadEdits();
+            _geoLoadRedEdits();
+            _geoRenderEditLayers();
+            _geoRenderRedEdit();
+            map.on('click', _geoOnMapClick);
+        } else {
+            btn.classList.remove('activo');
+            btn.textContent = '✏️ EDITAR';
+            map.off('click', _geoOnMapClick);
+            _geoDestroyEditLayers();
+            if (_redEditLayer) { map.removeLayer(_redEditLayer); _redEditLayer = null; }
+            _geoCloseEditor();
+            _geoCloseRedEditor();
+        }
+    };
+
+    /* ── Sobrescribir toggleRedGas para actualizar vértices si está en modo edición ── */
+    var _toggleRedGas_orig = toggleRedGas;
+    toggleRedGas = function() {
+        _toggleRedGas_orig();
+        if (_geoEditMode) {
+            setTimeout(function(){ _geoRenderRedEdit(); }, 500);
+        }
+    };
+
+    /* ── Sobrescribir _geoSaveEditor para detectar contexto redes ── */
+    var _geoSaveEditor_orig = _geoSaveEditor;
+    _geoSaveEditor = function() {
+        if (_redEditFeatIdx >= 0) {
+            _geoSaveRedEditor();
+        } else {
+            _geoSaveEditor_orig();
+        }
+    };
+
+    /* ── Sobrescribir _geoConfirmDelete para detectar contexto redes ── */
+    var _geoConfirmDelete_orig = _geoConfirmDelete;
+    _geoConfirmDelete = function() {
+        if (_redEditFeatIdx >= 0 && _redEditVertIdx < 0) {
+            _geoDelSegmento();
+        } else {
+            _geoConfirmDelete_orig();
+        }
+    };
+
+    /* ── Sobrescribir _geoExportEdits para incluir red ── */
+    var _geoExportEdits_orig = _geoExportEdits;
+    _geoExportEdits = function() {
+        _geoExportEdits_orig();
+        if (_redGasData) _geoExportRed();
+    };
+
     </script>
 
     <!-- ══ PANEL EDITOR GEOVISOR ══ -->
@@ -4911,6 +5196,31 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             <label><input type="radio" name="geo-tipo" value="usuarios"> Usuario</label>
             <label><input type="radio" name="geo-tipo" value="polivalvulas"> Polivalvula</label>
         </div>
+        
+        <div id="gef-redes-extra" style="display:none">
+            <label>TIPO DE TUBERÍA</label>
+            <select id="gef-tipo-tubo">
+                <option value="">— sin tipo —</option>
+                <option value="TPE3/4">TPE3/4 (3/4")</option>
+                <option value="TPE1">TPE1 (1")</option>
+                <option value="TPE2">TPE2 (2")</option>
+                <option value="TPE3">TPE3 (3")</option>
+                <option value="TPE4">TPE4 (4")</option>
+            </select>
+            <label>ESTADO DE TUBERÍA</label>
+            <select id="gef-estado-tubo">
+                <option value="">— sin estado —</option>
+                <option value="INSTALADO">INSTALADO</option>
+                <option value="PROYECTADO">PROYECTADO</option>
+                <option value="PROGRAMADO">PROGRAMADO</option>
+                <option value="PROYECTO">PROYECTO</option>
+            </select>
+            <label>POLIVALVULA</label>
+            <input id="gef-polivalvula" placeholder="Ej: AA010">
+            <div id="gef-vert-info"></div>
+            <button id="btn-geo-del-vert" class="geo-edit-btn eliminar" onclick="_geoDelVert()" style="margin-bottom:8px">🗑 ELIMINAR ESTE VÉRTICE</button>
+        </div>
+
         <label>ESTADO / CLASIFICACIÓN</label>
         <select id="gef-estado">
             <option value="">— sin clasificar —</option>
