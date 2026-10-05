@@ -551,6 +551,51 @@
     #geo-topbar .geo-title { font-size: 8px; }
 }
 
+
+    /* ── MODO EDICIÓN ── */
+    #btn-edit { padding:5px 12px; font-size:10px; font-family:'Orbitron',monospace;
+        letter-spacing:1px; border:1px solid #1a4060; border-radius:5px;
+        background:#0d1f35; color:#80a8c0; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    #btn-edit.activo { background:#2a1005; border-color:#ffa726; color:#ffa726; font-weight:700;
+        animation:edit-pulse .9s infinite alternate; }
+    @keyframes edit-pulse { from { box-shadow:0 0 4px #ffa726; } to { box-shadow:0 0 14px #ffa726; } }
+    #geo-autosave { font-family:'Orbitron',monospace; font-size:7.5px; letter-spacing:1px;
+        color:#00e676; opacity:0.4; transition:opacity .6s; white-space:nowrap; padding:0 4px; }
+    #geo-map.edit-cursor .leaflet-container { cursor:crosshair !important; }
+    #geo-edit-panel { position:absolute; bottom:0; left:0; right:0; z-index:9250;
+        background:rgba(5,14,28,0.99); border-top:2px solid #ffa726;
+        backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+        padding:14px 16px 20px; transform:translateY(100%);
+        transition:transform .28s cubic-bezier(.4,0,.2,1); }
+    #geo-edit-panel.visible { transform:translateY(0); }
+    .ep-title { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px;
+        color:#ffa726; font-weight:700; margin-bottom:11px;
+        display:flex; align-items:center; gap:8px; }
+    .ep-fields { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:11px; }
+    @media (max-width:520px){ .ep-fields { grid-template-columns:1fr; } }
+    .ep-field { display:flex; flex-direction:column; gap:4px; }
+    .ep-obs  { grid-column:1/-1; }
+    .ep-label { font-family:'Orbitron',monospace; font-size:7px; letter-spacing:1px; color:#4a7a9b; }
+    .ep-input, .ep-select { background:#0a1628; border:1px solid #1a4060; border-radius:6px;
+        padding:7px 9px; color:#cfd8dc; font-size:11px; outline:none; font-family:sans-serif;
+        width:100%; -webkit-appearance:none; }
+    .ep-input:focus, .ep-select:focus { border-color:#ffa726; box-shadow:0 0 6px rgba(255,167,38,.2); }
+    textarea.ep-input { resize:vertical; min-height:44px; }
+    .ep-coord { font-family:'Orbitron',monospace; font-size:7px; letter-spacing:.5px;
+        color:#2a5a7a; padding:7px 9px; background:#07111e;
+        border:1px solid #0d2035; border-radius:6px; }
+    .ep-btns { display:flex; gap:7px; }
+    .ep-btn { font-family:'Orbitron',monospace; font-size:8px; letter-spacing:1px; font-weight:700;
+        padding:9px 14px; border-radius:7px; cursor:pointer; border:none;
+        flex:1; transition:all .18s; -webkit-tap-highlight-color:transparent; }
+    .ep-btn-save  { background:linear-gradient(135deg,#2e7d32,#388e3c); color:#c8e6c9; }
+    .ep-btn-del   { background:rgba(229,57,53,.12); color:#ef9a9a;
+        border:1px solid rgba(229,57,53,.35) !important; flex:.7; }
+    .ep-btn-close { background:rgba(255,255,255,.05); color:#80a8c0;
+        border:1px solid #1a4060 !important; flex:.7; }
+    .geo-edit-dot { width:16px; height:16px; border-radius:50%; border:2.5px solid #fff;
+        box-shadow:0 0 0 2px rgba(255,167,38,.5), 0 2px 8px rgba(0,0,0,.6); cursor:grab; }
+    .geo-edit-dot:active { cursor:grabbing; }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -628,6 +673,9 @@
         <button id="btn-sel-clear" onclick="_geoLimpiarSel()">✕ Limpiar sel.</button>
         <div style="width:1px;height:20px;background:#1a3a5c;margin:0 2px"></div>
         <button id="btn-gps" onclick="_geoToggleGPS()" title="Ubicación en tiempo real">📍 GPS</button>
+                <div style="width:1px;height:20px;background:#1a3a5c;margin:0 2px"></div>
+        <button id="btn-edit" onclick="_geoToggleEdit()">&#9999;&#65039; Editar</button>
+        <span id="geo-autosave"></span>
         <button id="geo-cerrar" onclick="_cerrarGeovisor()">✕ SALIR</button>
     </div>
     <div id="geo-stats">
@@ -669,7 +717,49 @@
         </div>
         <div id="geo-sel-body"></div>
     </div>
-    </div><!-- /geo-map-wrap -->
+        <!-- PANEL EDITOR ATRIBUTOS -->
+    <div id="geo-edit-panel">
+        <div class="ep-title">
+            <span>&#9999;&#65039;</span>
+            <span id="ep-title-txt">NUEVO PUNTO</span>
+            <span style="margin-left:auto;font-size:7.5px;color:#4a7a9b" id="ep-idx-txt"></span>
+        </div>
+        <div class="ep-fields">
+            <div class="ep-field">
+                <label class="ep-label">ESTADO</label>
+                <select class="ep-select" id="ep-estado">
+                    <option value="SIN RESPUESTA">Sin respuesta</option>
+                    <option value="SI">Si desea el servicio</option>
+                    <option value="NO">No desea el servicio</option>
+                    <option value="YA TIENE CONTRATO">Ya tiene contrato</option>
+                    <option value="N/A">N/A</option>
+                </select>
+            </div>
+            <div class="ep-field">
+                <label class="ep-label">BARRIO</label>
+                <input class="ep-input" id="ep-barrio" type="text" list="ep-barrio-list" placeholder="Nombre del barrio..."/>
+                <datalist id="ep-barrio-list"></datalist>
+            </div>
+            <div class="ep-field">
+                <label class="ep-label">DIGITADOR</label>
+                <input class="ep-input" id="ep-digitador" type="text" placeholder="Nombre..."/>
+            </div>
+            <div class="ep-field">
+                <label class="ep-label">COORDENADAS</label>
+                <div class="ep-coord" id="ep-coord">--</div>
+            </div>
+            <div class="ep-field ep-obs">
+                <label class="ep-label">OBSERVACIONES</label>
+                <textarea class="ep-input" id="ep-obs" placeholder="Observaciones del punto..."></textarea>
+            </div>
+        </div>
+        <div class="ep-btns">
+            <button class="ep-btn ep-btn-close" onclick="_geoCloseEditor()">x Cerrar</button>
+            <button class="ep-btn ep-btn-del" id="ep-btn-del" onclick="_geoConfirmDelete()">Borrar</button>
+            <button class="ep-btn ep-btn-save" onclick="_geoSaveEditor()">Guardar</button>
+        </div>
+    </div>
+</div><!-- /geo-map-wrap -->
         <div id="geo-leg-body"></div>
     </div>
 </div>
@@ -1328,6 +1418,7 @@ _cargarCatalogo();
             {maxZoom:19, opacity:1, attribution:'Esri'});
         _geoTileOSM.addTo(_geoMap);
         _geoTileActual = 'osm';
+        _geoLoadEdits();
         _geoRenderLayer();
         _geoRenderLeyenda();
     }
@@ -1957,6 +2048,202 @@ _cargarCatalogo();
         document.getElementById('screen-selector').classList.remove('oculto');
         _perfil = null;
     }
+
+    // ════ MODO EDICIÓN ════
+    var _geoEditMode  = false;
+    var _geoEditLayer = null;
+    var _geoEditIdx   = -1;
+    var _geoEditMark  = null;
+    var _geoEditsKey  = 'araucana_geoedits_v1';
+
+    function _geoLoadEdits() {
+        try {
+            var saved = localStorage.getItem(_geoEditsKey);
+            if (saved) {
+                var parsed = JSON.parse(saved);
+                if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+                    _datAcomet = parsed;
+                    var si=0,no=0,sr=0;
+                    _datAcomet.forEach(function(p){ if(p.e==='SI') si++; else if(p.e==='NO') no++; else sr++; });
+                    var st=document.getElementById('geo-stats');
+                    if(st) st.innerHTML='<span>Total: <b>'+_datAcomet.length+'</b> pts</span>'
+                        +'<span style="color:#69f0ae">&#10003; SI: <b>'+si+'</b></span>'
+                        +'<span style="color:#ef5350">&#10007; NO: <b>'+no+'</b></span>'
+                        +'<span style="color:#ffa726"> Sin resp.: <b>'+sr+'</b></span>'
+                        +'<span id="geo-stats-barrio" style="color:#00e5ff;margin-left:8px"></span>';
+                    _geoAutoSaveIndicator('Cargado '+parsed.length+' pts');
+                }
+            }
+        } catch(e) {}
+        _geoPopulateBarrioList();
+    }
+
+    function _geoPopulateBarrioList() {
+        var dl = document.getElementById('ep-barrio-list');
+        if (!dl) return;
+        dl.innerHTML = Object.keys(_colBarrio).sort().map(function(b){ return '<option value="'+b+'">'; }).join('');
+    }
+
+    function _geoAutoSave() {
+        try {
+            localStorage.setItem(_geoEditsKey, JSON.stringify(_datAcomet));
+            var n=new Date(), ts=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')+':'+n.getSeconds().toString().padStart(2,'0');
+            _geoAutoSaveIndicator('Guardado '+ts);
+        } catch(e) { _geoAutoSaveIndicator('Error guardando'); }
+    }
+
+    function _geoAutoSaveIndicator(msg) {
+        var el=document.getElementById('geo-autosave');
+        if(!el) return;
+        el.textContent=msg; el.style.opacity='1';
+        clearTimeout(el._t); el._t=setTimeout(function(){ el.style.opacity='0.4'; },3000);
+    }
+
+    function _geoToggleEdit() {
+        _geoEditMode = !_geoEditMode;
+        var btn=document.getElementById('btn-edit');
+        var mapDiv=document.getElementById('geo-map');
+        if (_geoEditMode) {
+            btn.classList.add('activo');
+            btn.textContent = 'Detener edicion';
+            mapDiv.classList.add('edit-cursor');
+            if (_geoModoSel) _geoLimpiarSel();
+            _geoRenderEditLayer();
+            _geoMap.on('click', _geoOnMapClickEdit);
+            _geoNotif('MODO EDICION: clic en punto=editar | clic en mapa=nuevo punto', '#ffa726', 'i');
+        } else {
+            btn.classList.remove('activo');
+            btn.textContent = 'Editar';
+            mapDiv.classList.remove('edit-cursor');
+            _geoMap.off('click', _geoOnMapClickEdit);
+            _geoCloseEditor();
+            if (_geoEditLayer) { _geoMap.removeLayer(_geoEditLayer); _geoEditLayer=null; }
+            if (_geoEditMark)  { _geoMap.removeLayer(_geoEditMark);  _geoEditMark=null; }
+            _geoRenderLayer();
+            _geoRenderLeyenda();
+        }
+    }
+
+    function _geoRenderEditLayer() {
+        if (_geoLayer)     { _geoMap.removeLayer(_geoLayer);     _geoLayer=null; }
+        if (_geoEditLayer) { _geoMap.removeLayer(_geoEditLayer); _geoEditLayer=null; }
+        _geoEditLayer = L.layerGroup();
+        var list=(_geoModo==='barrio'&&_geoFiltroBarrio)
+            ? _datAcomet.map(function(p,i){return{p:p,i:i};}).filter(function(x){return x.p.b===_geoFiltroBarrio;})
+            : _datAcomet.map(function(p,i){return{p:p,i:i};});
+        list.forEach(function(item){
+            var p=item.p, idx=item.i;
+            if(!p||!p.a||!p.o) return;
+            var fc=_geoModo==='estado'?(_colEstadoGeo[p.e]||'#78909c'):(_colBarrio[p.b]||'#78909c');
+            var icon=L.divIcon({className:'',html:'<div class="geo-edit-dot" style="background:'+fc+'"></div>',iconSize:[16,16],iconAnchor:[8,8]});
+            var mk=L.marker([p.a,p.o],{icon:icon,draggable:true,zIndexOffset:500});
+            (function(pt,i,m){
+                m.on('dragend',function(ev){
+                    var ll=ev.target.getLatLng();
+                    _datAcomet[i].a=parseFloat(ll.lat.toFixed(7));
+                    _datAcomet[i].o=parseFloat(ll.lng.toFixed(7));
+                    _geoAutoSave();
+                    _geoNotif('Posicion actualizada','#00e676','o');
+                    if(_geoEditIdx===i){var c=document.getElementById('ep-coord');if(c)c.textContent=_datAcomet[i].a.toFixed(6)+', '+_datAcomet[i].o.toFixed(6);}
+                });
+                m.on('click',function(ev){
+                    L.DomEvent.stopPropagation(ev);
+                    if(_geoEditMark){_geoMap.removeLayer(_geoEditMark);_geoEditMark=null;}
+                    _geoOpenEditor(i);
+                });
+            })(p,idx,mk);
+            _geoEditLayer.addLayer(mk);
+        });
+        _geoEditLayer.addTo(_geoMap);
+    }
+
+    function _geoOnMapClickEdit(e) {
+        if (_geoModoSel) return;
+        if (_geoEditMark) { _geoMap.removeLayer(_geoEditMark); _geoEditMark=null; }
+        _geoEditIdx=-1;
+        var ll=e.latlng;
+        var icon=L.divIcon({className:'',html:'<div class="geo-edit-dot" style="background:#69f0ae;border-color:#ffa726"></div>',iconSize:[16,16],iconAnchor:[8,8]});
+        _geoEditMark=L.marker(ll,{icon:icon,draggable:true}).addTo(_geoMap);
+        _geoEditMark.on('dragend',function(ev){var c=ev.target.getLatLng();var el=document.getElementById('ep-coord');if(el)el.textContent=c.lat.toFixed(7)+', '+c.lng.toFixed(7);});
+        document.getElementById('ep-title-txt').textContent='NUEVO PUNTO';
+        document.getElementById('ep-idx-txt').textContent='';
+        document.getElementById('ep-estado').value='SIN RESPUESTA';
+        document.getElementById('ep-barrio').value='';
+        document.getElementById('ep-digitador').value='';
+        document.getElementById('ep-obs').value='';
+        document.getElementById('ep-coord').textContent=ll.lat.toFixed(7)+', '+ll.lng.toFixed(7);
+        document.getElementById('ep-btn-del').style.display='none';
+        _geoShowEditPanel();
+    }
+
+    function _geoOpenEditor(idx) {
+        _geoEditIdx=idx;
+        var p=_datAcomet[idx];
+        document.getElementById('ep-title-txt').textContent='EDITAR PUNTO';
+        document.getElementById('ep-idx-txt').textContent='idx '+idx;
+        document.getElementById('ep-estado').value=p.e||'SIN RESPUESTA';
+        document.getElementById('ep-barrio').value=p.b||'';
+        document.getElementById('ep-digitador').value=p.d||'';
+        document.getElementById('ep-obs').value=p.obs||'';
+        document.getElementById('ep-coord').textContent=(p.a||0).toFixed(6)+', '+(p.o||0).toFixed(6);
+        document.getElementById('ep-btn-del').style.display='';
+        _geoShowEditPanel();
+    }
+
+    function _geoShowEditPanel() { var p=document.getElementById('geo-edit-panel'); if(p) p.classList.add('visible'); }
+
+    function _geoCloseEditor() {
+        var p=document.getElementById('geo-edit-panel'); if(p) p.classList.remove('visible');
+        if(_geoEditMark){_geoMap.removeLayer(_geoEditMark);_geoEditMark=null;}
+        _geoEditIdx=-1;
+    }
+
+    function _geoSaveEditor() {
+        var estado=document.getElementById('ep-estado').value;
+        var barrio=document.getElementById('ep-barrio').value.trim().toUpperCase();
+        var digitador=document.getElementById('ep-digitador').value.trim();
+        var obs=document.getElementById('ep-obs').value.trim();
+        if (_geoEditIdx===-1) {
+            var ll=_geoEditMark?_geoEditMark.getLatLng():null;
+            if(!ll){_geoNotif('Mueve el marcador verde a la ubicacion correcta','#ef5350','!');return;}
+            _datAcomet.push({a:parseFloat(ll.lat.toFixed(7)),o:parseFloat(ll.lng.toFixed(7)),e:estado,b:barrio,obs:obs,d:digitador,m:'ACOMETIDA',p:'',q:''});
+            _geoNotif('Nuevo punto agregado','#69f0ae','+');
+        } else {
+            var pt=_datAcomet[_geoEditIdx];
+            pt.e=estado; pt.b=barrio; pt.d=digitador; pt.obs=obs;
+            _geoNotif('Atributos actualizados','#69f0ae','ok');
+        }
+        _geoAutoSave();
+        _geoCloseEditor();
+        _geoRenderEditLayer();
+    }
+
+    function _geoConfirmDelete() {
+        if(_geoEditIdx<0) return;
+        if(!confirm('Eliminar este punto del mapa?')) return;
+        _datAcomet.splice(_geoEditIdx,1);
+        _geoAutoSave();
+        _geoCloseEditor();
+        _geoRenderEditLayer();
+        _geoNotif('Punto eliminado','#ef9a9a','x');
+    }
+
+    function _geoExportEdits() {
+        try {
+            var blob=new Blob([JSON.stringify(_datAcomet,null,2)],{type:'application/json'});
+            var url=URL.createObjectURL(blob);
+            var a=document.createElement('a');
+            a.href=url; a.download='acometidas_'+new Date().toISOString().slice(0,10)+'.json';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        } catch(e) {}
+    }
+
+    function _geoResetEdits() {
+        if(!confirm('Restaurar datos originales? Se perderan todos los cambios guardados.')) return;
+        try { localStorage.removeItem(_geoEditsKey); } catch(e) {}
+        location.reload();
+    }
+
 </script>
 </body>
 </html>
