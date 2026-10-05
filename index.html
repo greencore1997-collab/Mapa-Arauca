@@ -943,6 +943,49 @@
             border-radius:8px; padding:8px 18px; color:#fff176;
             font-size:12px; pointer-events:none; white-space:nowrap;
         }
+
+        /* ══ MODO EDICIÓN ══ */
+        @keyframes edit-pulse { from {box-shadow:0 0 6px #ffa726;} to {box-shadow:0 0 18px #ff6d00;} }
+        #btn-edit {
+            position:absolute; top:10px; right:52px; z-index:9300;
+            padding:5px 11px; font-size:10px; font-family:'Roboto',sans-serif; font-weight:700;
+            background:rgba(5,14,28,0.93); border:1.5px solid #546e7a; color:#90a4ae;
+            border-radius:6px; cursor:pointer; letter-spacing:.5px; transition:all .2s;
+        }
+        #btn-edit:hover { border-color:#ffa726; color:#ffa726; }
+        #btn-edit.activo { background:#2a1005; border-color:#ffa726; color:#ffa726; animation:edit-pulse .9s infinite alternate; }
+        #geo-edit-panel {
+            position:absolute; bottom:0; left:0; right:0; z-index:9250;
+            background:rgba(5,14,28,0.99); border-top:2px solid #ffa726;
+            padding:14px 16px 16px; max-height:54vh; overflow-y:auto;
+            transform:translateY(100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+        }
+        #geo-edit-panel.visible { transform:translateY(0); }
+        #geo-edit-panel h4 { margin:0 0 10px; color:#ffa726; font-size:12px; letter-spacing:.8px; }
+        #geo-edit-panel label { display:block; font-size:10px; color:#90a4ae; margin-bottom:2px; }
+        #geo-edit-panel input, #geo-edit-panel select, #geo-edit-panel textarea {
+            width:100%; box-sizing:border-box; padding:5px 8px; font-size:11px;
+            background:#0d1c2a; border:1px solid #2d4a62; color:#e0e0e0; border-radius:4px; margin-bottom:8px;
+        }
+        #geo-edit-panel textarea { resize:vertical; height:50px; }
+        .geo-edit-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+        .geo-edit-btn {
+            padding:5px 12px; font-size:10.5px; border-radius:4px; cursor:pointer; border:1.5px solid;
+            font-weight:600; transition:background .15s;
+        }
+        .geo-edit-btn.guardar  { background:#1b5e20; border-color:#69f0ae; color:#69f0ae; }
+        .geo-edit-btn.cancelar { background:#1a1a1a; border-color:#546e7a; color:#90a4ae; }
+        .geo-edit-btn.eliminar { background:#4e0000; border-color:#ef5350; color:#ef5350; }
+        .geo-edit-btn.exportar { background:#0a1929; border-color:#42a5f5; color:#42a5f5; }
+        .geo-edit-dot { width:16px; height:16px; border-radius:50%; border:2.5px solid #fff;
+            box-shadow:0 0 0 2px rgba(255,167,38,.6); cursor:grab; }
+        .geo-edit-dot-new { width:16px; height:16px; border-radius:50%; border:2.5px solid #69f0ae;
+            box-shadow:0 0 0 2px rgba(105,240,174,.5); cursor:grab; }
+        #geo-edit-autosave { font-size:9px; color:#69f0ae; margin-left:8px; opacity:0; transition:opacity .4s; }
+        #geo-edit-autosave.visible { opacity:1; }
+        #geo-edit-tipo-sel { margin-bottom:10px; }
+        #geo-edit-tipo-sel label { display:inline-block; margin-right:12px; cursor:pointer; }
+        #geo-edit-tipo-sel input[type=radio] { margin-right:3px; }
 </style>
 </head>
 <body>
@@ -1112,6 +1155,7 @@
         <div class="opc-item" onclick="actualizarExcel()"><span class="opc-icon">&#128202;</span>Cargar Excel</div>
         <div class="opc-item" onclick="actualizarKML()"><span class="opc-icon">&#128506;</span>Cargar KML</div>
     </div>
+    <button id="btn-edit" onclick="_geoToggleEdit()" title="Iniciar/detener edición de capas">✏️ EDITAR</button>
     <button id="btn-limpiar" onclick="limpiarGeovisor()" title="Limpiar todos los datos cargados">🗑️ LIMPIAR</button>
     <button id="btn-redes" onclick="toggleRedGas()" title="Activar/desactivar Red de Tuberías de Gas">🔶 REDES GAS</button>
     <div id="redes-legend">
@@ -4573,6 +4617,321 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         }
     }
 
-        </script>
+        
+    /* ══════════════════════════════════════════════════════════
+       MÓDULO DE EDICIÓN GEOVISOR — index.html
+    ══════════════════════════════════════════════════════════ */
+    var _geoEditMode  = false;
+    var _geoEditIdx   = -1;        // índice en array de capa activa
+    var _geoEditTipo  = null;      // 'acometidas' | 'cruces' | 'usuarios' | 'polivalvulas'
+    var _geoEditIsNew = false;
+    var _geoEditMark  = null;      // marcador provisional para punto nuevo
+    var _geoEditLayers= {};        // {tipo: L.layerGroup de marcadores editables}
+    var _EDITS_KEY    = 'arauca_geoedits_index_v1';
+
+    /* ── Colores por tipo para los dots ── */
+    var _editDotColor = {
+        acometidas:  '#ffa726',
+        cruces:      '#00e5ff',
+        usuarios:    '#69f0ae',
+        polivalvulas:'#ea80fc'
+    };
+
+    /* ── Cargar edits guardados en localStorage ── */
+    function _geoLoadEdits() {
+        var raw = localStorage.getItem(_EDITS_KEY);
+        if (!raw) return;
+        try {
+            var saved = JSON.parse(raw);
+            // saved: {acometidas:[...], cruces:[...], ...}
+            if (saved.acometidas && typeof datAcometidas !== 'undefined')
+                datAcometidas = saved.acometidas;
+            if (saved.cruces && typeof datCruces !== 'undefined')
+                datCruces = saved.cruces;
+            if (saved.usuarios && typeof datUsuarios !== 'undefined')
+                datUsuarios = saved.usuarios;
+            if (saved.polivalvulas && typeof datPolivalvulas !== 'undefined')
+                datPolivalvulas = saved.polivalvulas;
+            console.log('[EDIT] Edits cargados desde localStorage');
+        } catch(e) { console.warn('[EDIT] Error cargando edits:', e); }
+    }
+
+    /* ── Autosave ── */
+    function _geoAutoSave() {
+        var bundle = {};
+        if (typeof datAcometidas  !== 'undefined') bundle.acometidas  = datAcometidas;
+        if (typeof datCruces      !== 'undefined') bundle.cruces      = datCruces;
+        if (typeof datUsuarios    !== 'undefined') bundle.usuarios    = datUsuarios;
+        if (typeof datPolivalvulas!== 'undefined') bundle.polivalvulas= datPolivalvulas;
+        localStorage.setItem(_EDITS_KEY, JSON.stringify(bundle));
+        var el = document.getElementById('geo-edit-autosave');
+        if (el) { el.classList.add('visible'); setTimeout(function(){ el.classList.remove('visible'); }, 1800); }
+    }
+
+    /* ── Toggle modo edición ── */
+    function _geoToggleEdit() {
+        _geoEditMode = !_geoEditMode;
+        var btn = document.getElementById('btn-edit');
+        if (_geoEditMode) {
+            btn.classList.add('activo');
+            btn.textContent = '⏹ DETENER';
+            _geoLoadEdits();
+            _geoRenderEditLayers();
+            map.on('click', _geoOnMapClick);
+        } else {
+            btn.classList.remove('activo');
+            btn.textContent = '✏️ EDITAR';
+            map.off('click', _geoOnMapClick);
+            _geoDestroyEditLayers();
+            _geoCloseEditor();
+        }
+    }
+
+    /* ── Determina qué array corresponde al tipo ── */
+    function _geoGetArr(tipo) {
+        if (tipo==='acometidas'  && typeof datAcometidas  !=='undefined') return datAcometidas;
+        if (tipo==='cruces'      && typeof datCruces      !=='undefined') return datCruces;
+        if (tipo==='usuarios'    && typeof datUsuarios    !=='undefined') return datUsuarios;
+        if (tipo==='polivalvulas'&& typeof datPolivalvulas!=='undefined') return datPolivalvulas;
+        return [];
+    }
+
+    /* ── Obtener lat/lon de un punto según tipo ── */
+    function _geoGetLL(p, tipo) {
+        if (tipo==='usuarios') return { lat: p[0], lon: p[1] };
+        return { lat: p.a, lon: p.o };
+    }
+
+    /* ── Renderizar marcadores editables para todas las capas activas ── */
+    function _geoRenderEditLayers() {
+        _geoDestroyEditLayers();
+        var tipos = ['acometidas','cruces','usuarios','polivalvulas'];
+        tipos.forEach(function(tipo) {
+            if (!capaActiva[tipo]) return;
+            var arr = _geoGetArr(tipo);
+            if (!arr.length) return;
+            var lg = L.layerGroup().addTo(map);
+            arr.forEach(function(p, idx) {
+                var ll = _geoGetLL(p, tipo);
+                var dot = L.divIcon({
+                    className:'', iconSize:[16,16], iconAnchor:[8,8],
+                    html:'<div class="geo-edit-dot" style="background:'+(_editDotColor[tipo]||'#fff')+'"></div>'
+                });
+                var mk = L.marker([ll.lat, ll.lon], { icon:dot, draggable:true, zIndexOffset:500 });
+                mk._editTipo = tipo;
+                mk._editIdx  = idx;
+                mk.on('dragend', function(e) {
+                    var latlng = e.target.getLatLng();
+                    var arr2 = _geoGetArr(tipo);
+                    if (tipo==='usuarios') { arr2[idx][0]=latlng.lat; arr2[idx][1]=latlng.lng; }
+                    else { arr2[idx].a=latlng.lat; arr2[idx].o=latlng.lng; }
+                    _geoAutoSave();
+                    // Rebuild vista layer
+                    if (capaLayers[tipo]) { if(capaActiva[tipo]) map.removeLayer(capaLayers[tipo]); capaLayers[tipo]=null; }
+                    if (capaActiva[tipo]) { _buildCapa(tipo); capaLayers[tipo].addTo(map); }
+                });
+                mk.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    _geoOpenEditor(tipo, idx);
+                });
+                lg.addLayer(mk);
+            });
+            _geoEditLayers[tipo] = lg;
+        });
+    }
+
+    /* ── Destruir capas de edición ── */
+    function _geoDestroyEditLayers() {
+        Object.keys(_geoEditLayers).forEach(function(t) {
+            if (_geoEditLayers[t]) { map.removeLayer(_geoEditLayers[t]); _geoEditLayers[t]=null; }
+        });
+        if (_geoEditMark) { map.removeLayer(_geoEditMark); _geoEditMark=null; }
+    }
+
+    /* ── Click en mapa → nuevo punto ── */
+    function _geoOnMapClick(e) {
+        if (!_geoEditMode) return;
+        // Ignorar clicks sobre marcadores existentes (dejan de propagarse)
+        _geoEditIsNew = true;
+        _geoEditIdx   = -1;
+        // Marcador provisional verde
+        if (_geoEditMark) { map.removeLayer(_geoEditMark); _geoEditMark=null; }
+        var dot = L.divIcon({
+            className:'', iconSize:[16,16], iconAnchor:[8,8],
+            html:'<div class="geo-edit-dot-new"></div>'
+        });
+        _geoEditMark = L.marker(e.latlng, { icon:dot, draggable:true }).addTo(map);
+        _geoOpenEditorNew(e.latlng);
+    }
+
+    /* ── Abrir editor para punto nuevo ── */
+    function _geoOpenEditorNew(latlng) {
+        _geoEditIsNew = true;
+        document.getElementById('gef-estado').value    = '';
+        document.getElementById('gef-barrio').value    = '';
+        document.getElementById('gef-digitador').value = '';
+        document.getElementById('gef-obs').value       = '';
+        document.getElementById('btn-geo-delete').style.display = 'none';
+        _geoPopulateBarrioList();
+        // Preseleccionar tipo según capa activa
+        var tipos = ['acometidas','cruces','usuarios','polivalvulas'];
+        var def = tipos.find(function(t){ return capaActiva[t]; }) || 'acometidas';
+        var r = document.querySelector('input[name="geo-tipo"][value="'+def+'"]');
+        if (r) r.checked = true;
+        document.getElementById('geo-edit-tipo-sel').style.display = '';
+        document.getElementById('geo-edit-panel').classList.add('visible');
+    }
+
+    /* ── Abrir editor para punto existente ── */
+    function _geoOpenEditor(tipo, idx) {
+        _geoEditTipo  = tipo;
+        _geoEditIdx   = idx;
+        _geoEditIsNew = false;
+        var arr = _geoGetArr(tipo);
+        var p   = arr[idx];
+        // Leer campos según tipo
+        var estado='', barrio='', digi='', obs='';
+        if (tipo==='acometidas')  { estado=p.e||''; barrio=p.barrio||''; digi=p.d||''; obs=p.b||''; }
+        else if (tipo==='cruces') { barrio=p.barrio||''; digi=p.d||''; obs=p.b||''; }
+        else if (tipo==='usuarios'){ barrio=p[4]||''; obs=p[3]||''; }
+        else if (tipo==='polivalvulas'){ barrio=p.barrio||''; obs=p.b||''; }
+        document.getElementById('gef-estado').value    = estado;
+        document.getElementById('gef-barrio').value    = barrio;
+        document.getElementById('gef-digitador').value = digi;
+        document.getElementById('gef-obs').value       = obs;
+        document.getElementById('btn-geo-delete').style.display = '';
+        document.getElementById('geo-edit-tipo-sel').style.display = 'none';
+        _geoPopulateBarrioList();
+        document.getElementById('geo-edit-panel').classList.add('visible');
+    }
+
+    /* ── Datalist de barrios ── */
+    function _geoPopulateBarrioList() {
+        var dl = document.getElementById('gef-barrio-list');
+        if (!dl) return;
+        dl.innerHTML = '';
+        if (typeof POLIGONOS !== 'undefined') {
+            Object.keys(POLIGONOS).forEach(function(b) {
+                var opt = document.createElement('option'); opt.value = b; dl.appendChild(opt);
+            });
+        }
+    }
+
+    /* ── Guardar editor ── */
+    function _geoSaveEditor() {
+        var estado = document.getElementById('gef-estado').value.trim();
+        var barrio = document.getElementById('gef-barrio').value.trim();
+        var digi   = document.getElementById('gef-digitador').value.trim();
+        var obs    = document.getElementById('gef-obs').value.trim();
+
+        if (_geoEditIsNew) {
+            // Determinar tipo seleccionado
+            var tipo = (document.querySelector('input[name="geo-tipo"]:checked')||{value:'acometidas'}).value;
+            _geoEditTipo = tipo;
+            if (!_geoEditMark) { _geoCloseEditor(); return; }
+            var ll = _geoEditMark.getLatLng();
+            var nuevoP;
+            if (tipo==='usuarios')
+                nuevoP = [ll.lat, ll.lng, '', obs, barrio];
+            else if (tipo==='cruces')
+                nuevoP = {a:ll.lat, o:ll.lng, barrio:barrio, b:obs, d:digi};
+            else if (tipo==='polivalvulas')
+                nuevoP = {a:ll.lat, o:ll.lng, barrio:barrio, b:obs};
+            else
+                nuevoP = {a:ll.lat, o:ll.lng, e:estado, barrio:barrio, b:obs, d:digi, m:'ACOMETIDA'};
+            _geoGetArr(tipo).push(nuevoP);
+        } else {
+            var arr = _geoGetArr(_geoEditTipo);
+            var p   = arr[_geoEditIdx];
+            if (_geoEditTipo==='acometidas')   { p.e=estado; p.barrio=barrio; p.d=digi; p.b=obs; }
+            else if (_geoEditTipo==='cruces')   { p.barrio=barrio; p.d=digi; p.b=obs; }
+            else if (_geoEditTipo==='usuarios') { p[4]=barrio; p[3]=obs; }
+            else if (_geoEditTipo==='polivalvulas') { p.barrio=barrio; p.b=obs; }
+        }
+        _geoAutoSave();
+        // Rebuild capa visual
+        var t = _geoEditTipo;
+        if (capaLayers[t]) { if(capaActiva[t]) map.removeLayer(capaLayers[t]); capaLayers[t]=null; }
+        if (capaActiva[t]) { _buildCapa(t); capaLayers[t].addTo(map); }
+        _geoRenderEditLayers();
+        _geoCloseEditor();
+    }
+
+    /* ── Eliminar punto ── */
+    function _geoConfirmDelete() {
+        if (_geoEditIsNew || _geoEditIdx < 0) { _geoCloseEditor(); return; }
+        if (!confirm('¿Eliminar este punto?')) return;
+        var arr = _geoGetArr(_geoEditTipo);
+        arr.splice(_geoEditIdx, 1);
+        _geoAutoSave();
+        var t = _geoEditTipo;
+        if (capaLayers[t]) { if(capaActiva[t]) map.removeLayer(capaLayers[t]); capaLayers[t]=null; }
+        if (capaActiva[t]) { _buildCapa(t); capaLayers[t].addTo(map); }
+        _geoRenderEditLayers();
+        _geoCloseEditor();
+    }
+
+    /* ── Cerrar panel editor ── */
+    function _geoCloseEditor() {
+        document.getElementById('geo-edit-panel').classList.remove('visible');
+        if (_geoEditMark) { map.removeLayer(_geoEditMark); _geoEditMark=null; }
+        _geoEditIsNew = false;
+        _geoEditIdx   = -1;
+        _geoEditTipo  = null;
+    }
+
+    /* ── Exportar datos como JSON ── */
+    function _geoExportEdits() {
+        var bundle = {};
+        if (typeof datAcometidas  !=='undefined') bundle.acometidas  = datAcometidas;
+        if (typeof datCruces      !=='undefined') bundle.cruces      = datCruces;
+        if (typeof datUsuarios    !=='undefined') bundle.usuarios    = datUsuarios;
+        if (typeof datPolivalvulas!=='undefined') bundle.polivalvulas= datPolivalvulas;
+        var blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json'});
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'arauca_edits_' + new Date().toISOString().slice(0,10) + '.json';
+        a.click();
+    }
+
+    /* Cargar edits al inicio si hay datos */
+    (function(){
+        try { _geoLoadEdits(); } catch(e) {}
+    })();
+
+    </script>
+
+    <!-- ══ PANEL EDITOR GEOVISOR ══ -->
+    <div id="geo-edit-panel">
+        <h4>✏️ EDITOR DE ELEMENTO <span id="geo-edit-autosave">✔ Guardado</span></h4>
+        <div id="geo-edit-tipo-sel">
+            <b style="font-size:10px;color:#ffa726;display:block;margin-bottom:4px">TIPO DE PUNTO:</b>
+            <label><input type="radio" name="geo-tipo" value="acometidas" checked> Acometida</label>
+            <label><input type="radio" name="geo-tipo" value="cruces"> Cruce</label>
+            <label><input type="radio" name="geo-tipo" value="usuarios"> Usuario</label>
+            <label><input type="radio" name="geo-tipo" value="polivalvulas"> Polivalvula</label>
+        </div>
+        <label>ESTADO / CLASIFICACIÓN</label>
+        <select id="gef-estado">
+            <option value="">— sin clasificar —</option>
+            <option value="SI">SI</option>
+            <option value="NO">NO</option>
+            <option value="SIN RESPUESTA">SIN RESPUESTA</option>
+        </select>
+        <label>BARRIO</label>
+        <input id="gef-barrio" list="gef-barrio-list" placeholder="Barrio">
+        <datalist id="gef-barrio-list"></datalist>
+        <label>DIGITADOR / RESPONSABLE</label>
+        <input id="gef-digitador" placeholder="Nombre">
+        <label>OBSERVACIONES</label>
+        <textarea id="gef-obs" placeholder="Notas adicionales..."></textarea>
+        <div class="geo-edit-actions">
+            <button class="geo-edit-btn guardar"  onclick="_geoSaveEditor()">💾 GUARDAR</button>
+            <button class="geo-edit-btn cancelar" onclick="_geoCloseEditor()">✖ CANCELAR</button>
+            <button class="geo-edit-btn eliminar" id="btn-geo-delete" onclick="_geoConfirmDelete()">🗑 ELIMINAR</button>
+            <button class="geo-edit-btn exportar" onclick="_geoExportEdits()">⬇ EXPORTAR JSON</button>
+        </div>
+    </div>
+
 </body>
 </html>
