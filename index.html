@@ -4976,15 +4976,11 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
         document.getElementById('geo-edit-tipo-sel').style.display = 'none';
         document.getElementById('gef-redes-extra').style.display   = '';
         // Ocultar campos de puntos
-        document.querySelector('label[for="gef-estado"]')           && (document.querySelector('label[for="gef-estado"]').style.display = 'none');
-        document.getElementById('gef-estado').style.display         = 'none';
-        document.getElementById('gef-digitador').parentNode && (document.querySelector('label[for="gef-digitador"]') || {style:{}}).style.display = 'none';
-        document.getElementById('gef-digitador').style.display      = 'none';
-        document.getElementById('gef-obs').style.display            = 'none';
-        document.querySelectorAll('#geo-edit-panel label').forEach(function(l){
-            if (l.textContent.indexOf('DIGITADOR')>-1 || l.textContent.indexOf('OBSERV')>-1 ||
-                l.textContent.indexOf('ESTADO / CLAS')>-1)
-                l.style.display='none';
+        ['gef-estado','gef-digitador','gef-obs'].forEach(function(id){
+            var el = document.getElementById(id); if(el) el.style.display='none';
+        });
+        document.querySelectorAll('#geo-edit-panel > label').forEach(function(l){
+            l.style.display='none';
         });
 
         // Rellenar campos
