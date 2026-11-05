@@ -536,6 +536,20 @@
         }
         body.mobile-mode #logo-araucana { display:none; }
         body.mobile-mode #footer-credito { bottom:3px; font-size:8px; }
+
+        /* ── Visualizador de escala ── */
+        #escala-visor {
+            position:fixed; bottom:28px; right:12px; z-index:500;
+            background:rgba(0,8,20,0.78); border:1px solid rgba(0,200,255,0.35);
+            border-radius:6px; padding:4px 10px 4px 9px;
+            font-family:'Courier New',monospace; font-size:11px; color:#00d4ff;
+            letter-spacing:0.08em; white-space:nowrap; pointer-events:none;
+            backdrop-filter:blur(4px);
+            box-shadow:0 0 10px rgba(0,180,255,0.18);
+            display:flex; align-items:center; gap:6px;
+        }
+        #escala-visor::before { content:'⊕'; font-size:9px; opacity:0.6; }
+        body.mobile-mode #escala-visor { bottom:18px; right:8px; font-size:10px; padding:3px 8px; }
     
         /* ── Barra climatológica ── */
         #barra-clima {
