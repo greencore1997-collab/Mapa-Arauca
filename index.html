@@ -2919,26 +2919,6 @@
         '':      '#90a4ae'   // gris    - sin tipo
     };
 
-    // ── Pesos base por tipo de tubería (px a escala 1:500) ──
-    var _PESO_BASE = { 'TPE1':3.0, 'TPE2':2.5, 'TPE3':2.5, 'TPE3/4':2.0, 'TPE4':3.0 };
-
-    // Metros por píxel a escala 1:500 en pantalla de 96 dpi
-    // 1px = 0.000264583m; a 1:500 → 1px representa 0.132292m
-    var _MPP_REF_500 = 0.132292;
-    var _LAT_RAD = 7.08 * Math.PI / 180; // latitud Arauca
-
-    function _mppZoom(z) {
-        // Metros reales por pixel del mapa a zoom z
-        return 156543.03392 * Math.cos(_LAT_RAD) / Math.pow(2, z);
-    }
-
-    function _weightTuberia(tipo) {
-        var base = _PESO_BASE[tipo] || 1.8;
-        var z    = map.getZoom();
-        var factor = _MPP_REF_500 / _mppZoom(z);
-        return Math.max(0.4, Math.min(base * factor, 25));
-    }
-
     function _estiloTuberia(feature) {
         var tipo   = feature.properties.tipo   || '';
         var estado = feature.properties.estado || '';
@@ -2946,20 +2926,11 @@
         var instalado = (estado === 'INSTALADO');
         return {
             color:     color,
-            weight:    _weightTuberia(tipo),
+            weight:    tipo === 'TPE1' || tipo === 'TPE4' ? 3 : tipo === 'TPE2' || tipo === 'TPE3' ? 2.5 : 1.8,
             opacity:   instalado ? 0.85 : 0.6,
             dashArray: instalado ? null : '6,5'
         };
     }
-
-    // Actualizar grosores al cambiar zoom
-    map.on('zoomend', function() {
-        if (_redGasLayer) {
-            _redGasLayer.eachLayer(function(l) {
-                if (l.feature) l.setStyle(_estiloTuberia(l.feature));
-            });
-        }
-    });
 
     function _popupTuberia(feature, layer) {
         var p = feature.properties;
