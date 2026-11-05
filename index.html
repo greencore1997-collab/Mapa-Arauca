@@ -2924,6 +2924,7 @@
     var _redGasLayer = null;
     var _redGasActiva = false;
     var _redGasData = null;
+    var _redGasCanvas = L.canvas({ padding: 0.5 });
 
     var _COLORES_TUBO = {
         'TPE1':  '#e53935',  // rojo   - 1"
@@ -2991,7 +2992,7 @@
             _redGasLayer = L.geoJSON(_redGasData, {
                 style: _estiloTuberia,
                 onEachFeature: _popupTuberia,
-                renderer: L.canvas({ tolerance: 3 })
+                renderer: _redGasCanvas
             }).addTo(map);
             return;
         }
@@ -3021,7 +3022,7 @@
                 _redGasLayer = L.geoJSON(data, {
                     style: _estiloTuberia,
                     onEachFeature: _popupTuberia,
-                    renderer: L.canvas({ tolerance: 3 })
+                    renderer: _redGasCanvas
                 }).addTo(map);
 
                 // Si el panel de reporte ya está abierto, agregar sección de gas
