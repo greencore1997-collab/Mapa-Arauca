@@ -3718,11 +3718,11 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     clicked = true;
     el.style.transition = 'opacity 0.5s';
     el.style.opacity = '0';
+    // Ocultar s1 de inmediato para evitar el destello
+    var s1 = document.getElementById('intro-s1');
+    if (s1) s1.style.display = 'none';
     setTimeout(function(){
       el.style.display = 'none';
-      // Ocultar s1 (texto+botón), dejar solo shield (logo) y crédito
-      var s1 = document.getElementById('intro-s1');
-      if (s1) s1.style.display = 'none';
       // Asegurar que el escudo (logo Araucana) sea visible como marca de agua
       var shield = document.getElementById('intro-shield');
       if (shield) {
