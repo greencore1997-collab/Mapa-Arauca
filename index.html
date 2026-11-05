@@ -3264,79 +3264,35 @@
         }
 
         window.introEntrar = function() {
-            var s1 = document.getElementById('intro-s1');
-            s1.style.transition = 'opacity 0.28s';
+            // Ocultar pantalla s1 (texto+botón), mostrar solo logo + crédito 3 s
+            var s1   = document.getElementById('intro-s1');
+            var bw   = document.getElementById('intro-bar-wrap');
+            var cred = document.getElementById('intro-credito');
+            s1.style.transition = 'opacity 0.25s';
             s1.style.opacity = '0';
+            if (bw) bw.style.display = 'none';
             setTimeout(function() {
                 s1.style.display = 'none';
-                // Mostrar barra de carga
-                var bw = document.getElementById('intro-bar-wrap');
-                bw.style.display = 'block';
-                var bar = document.getElementById('intro-bar');
-                var t0 = Date.now(), dur = 3500; // 3,5 segundos
-
-                function tick() {
-                    var pct = Math.min((Date.now()-t0)/dur*100, 100);
-                    bar.style.width = pct + '%';
-                    if (pct < 100) { requestAnimationFrame(tick); }
-                    else {
-                        // Barra completa → desvanece barra
-                        setTimeout(function() {
-                            bw.style.transition = 'opacity 0.18s';
-                            bw.style.opacity = '0';
-                            setTimeout(function() {
-                                bw.style.display = 'none';
-                                // ── Mover letrero GREEN CORE al centro ──
-                                var cred = document.getElementById('intro-credito');
-                                cred.style.transition = 'none';
-                                cred.style.animation  = 'none';
-                                cred.style.opacity     = '0.9';
-                                cred.style.letterSpacing = '0.18em';
-                                cred.getBoundingClientRect(); // reflow
-                                cred.style.transition  = 'bottom 0.5s cubic-bezier(0.3,0,0.2,1), font-size 0.5s ease, color 0.4s ease, text-shadow 0.4s ease, opacity 0.35s ease';
-                                cred.style.bottom      = '50px'; // desciende a donde estaba la barra
-                                cred.style.fontSize    = 'clamp(14px,2.4vw,22px)'; // 2× crecimiento durante el desplazamiento
-                                cred.style.color       = '#00c8ff'; // azul característico del diseño
-                                cred.style.textShadow  = '0 0 12px rgba(0,200,255,0.6)';
-                                // ── Tras desplazamiento (650ms) + 2,5 s → "INNOVACION Y GESTION" ──
-                                setTimeout(function() {
-                                    cred.style.opacity = '0';
-                                    setTimeout(function() {
-                                        cred.textContent = 'INNOVACIÓN Y GESTIÓN';
-                                        cred.style.opacity = '0.9';
-                                        // ── Tras 1,5 s → logo Green Core ──
-                                        setTimeout(function() {
-                                            cred.style.opacity = '0';
-                                            setTimeout(function() {
-                                                // Logo original upscaleado 5× (200×110 LANCZOS) → sin pixelación
-                                                cred.innerHTML = _gcSrc
-                                                    ? '<img src="'+_gcSrc+'" style="height:60px;display:block;margin:0 auto;background:transparent;image-rendering:auto;" alt="Green Core Analytics">'
-                                                    : '<span>GREEN CORE ANALYTICS</span>';
-                                                cred.style.opacity = '1';
-                                                // ── Tras 1 s → salida del overlay ──
-                                                setTimeout(function() {
-                                                    var ov = document.getElementById('intro-overlay');
-                                                    ov.classList.add('intro-exit');
-                                                    setTimeout(function(){
-                                                        ov.style.display='none';
-                                                        _avisosSspd();
-                                                    }, 470);
-                                                }, 1000);
-                                            }, 350);
-                                        }, 1500);
-                                    }, 350);
-                                }, 500 + 2500);
-                            }, 200);
-                        }, 200);
-                    }
-                }
-                requestAnimationFrame(tick);
-
-                // Letrero crédito aparece a 1 s
+                // Asegurar que crédito sea visible y en posición original
+                cred.style.transition = 'none';
+                cred.style.animation  = 'none';
+                cred.style.opacity    = '1';
+                cred.style.bottom     = '32px';
+                cred.style.fontSize   = '';
+                cred.style.color      = '';
+                cred.style.textShadow = '';
+                cred.textContent      = 'DESARROLLADO POR GREEN CORE ANALYTICS SAS · 2026';
+                // 3 segundos y sale
                 setTimeout(function() {
-                    document.getElementById('intro-credito').classList.add('iv');
-                }, 1000);
-            }, 290);
+                    var ov = document.getElementById('intro-overlay');
+                    ov.style.transition = 'opacity 0.6s ease';
+                    ov.style.opacity = '0';
+                    setTimeout(function(){
+                        ov.style.display = 'none';
+                        _avisosSspd();
+                    }, 650);
+                }, 3000);
+            }, 280);
         };
     })();
 
@@ -3756,22 +3712,26 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
     ctx.fillStyle=ring; ctx.beginPath(); ctx.arc(CX,CY,R*1.12,0,Math.PI*2); ctx.fill();
   }
 
-  /* Click → desvanece pre-intro → lanza animaciones de intro-s1 */
+  /* Click → desvanece pre-intro → muestra logo + crédito 3s → geovisor */
   el.addEventListener('click', function(){
     if (clicked) return;
     clicked = true;
+    el.style.transition = 'opacity 0.5s';
     el.style.opacity = '0';
     setTimeout(function(){
       el.style.display = 'none';
-      /* Reiniciar animaciones de intro-s1 desde cero */
-      ['intro-geovisor','intro-araucana','intro-entrar','intro-shield'].forEach(function(id){
-        var e = document.getElementById(id);
-        if (!e) return;
-        e.style.animation = 'none';
-        void e.offsetWidth;
-        e.style.animation = '';
-      });
-    }, 800);
+      // Ocultar s1 (texto+botón), dejar solo shield (logo) y crédito
+      var s1 = document.getElementById('intro-s1');
+      if (s1) s1.style.display = 'none';
+      // Asegurar que el escudo (logo Araucana) sea visible como marca de agua
+      var shield = document.getElementById('intro-shield');
+      if (shield) {
+        shield.style.animation = 'none';
+        shield.style.opacity   = '1';
+      }
+      // Disparar la pantalla de crédito 3s → salida
+      introEntrar();
+    }, 550);
   });
 
   function loop(ts){
