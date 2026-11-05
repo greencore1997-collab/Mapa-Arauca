@@ -2990,7 +2990,8 @@
             // Ya cargado — solo agregar al mapa
             _redGasLayer = L.geoJSON(_redGasData, {
                 style: _estiloTuberia,
-                onEachFeature: _popupTuberia
+                onEachFeature: _popupTuberia,
+                renderer: L.canvas({ tolerance: 3 })
             }).addTo(map);
             return;
         }
@@ -3019,7 +3020,8 @@
 
                 _redGasLayer = L.geoJSON(data, {
                     style: _estiloTuberia,
-                    onEachFeature: _popupTuberia
+                    onEachFeature: _popupTuberia,
+                    renderer: L.canvas({ tolerance: 3 })
                 }).addTo(map);
 
                 // Si el panel de reporte ya está abierto, agregar sección de gas
