@@ -772,7 +772,7 @@
             font-weight:900; color:rgba(0,200,255,0.9);
             text-shadow:0 0 40px rgba(0,200,255,0.7), 0 0 80px rgba(0,200,255,0.3);
             pointer-events:none; display:none; line-height:1;
-            animation:none;
+            animation:none; z-index:9999;
         }
         @keyframes countdown-pop {
             0%   { transform:translate(-50%,-50%) scale(1.6); opacity:0; }
@@ -1234,7 +1234,7 @@
     
     <button id="btn-reporte" onclick="toggleReporte()">📊 REPORTE</button>
     <div id="basemap-wrap">
-        <button id="btn-basemap" onclick="_toggleBasemapMenu()" title="Cambiar mapa base">🗺️ OSM ▾</button>
+        <button id="btn-basemap" onclick="_toggleBasemapMenu(event)" title="Cambiar mapa base">🗺️ OSM ▾</button>
         <div id="basemap-menu">
             <div class="bm-item active" data-bm="osm"       onclick="_setBasemap('osm')">🗺️ OSM Estándar</div>
             <div class="bm-item"        data-bm="satellite" onclick="_setBasemap('satellite')">🛰️ Satélite Esri</div>
@@ -3042,15 +3042,17 @@
         hybrid:    { label:'🏙️ Híbrido',    url:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',     opts:{attribution:'© Esri', maxZoom:19} }
     };
 
-    function _toggleBasemapMenu() {
+    window._toggleBasemapMenu = function(e) {
+        if (e) e.stopPropagation();
         document.getElementById('basemap-menu').classList.toggle('open');
-    }
+    };
     document.addEventListener('click', function(e) {
-        if (!document.getElementById('basemap-wrap').contains(e.target))
+        var wrap = document.getElementById('basemap-wrap');
+        if (wrap && !wrap.contains(e.target))
             document.getElementById('basemap-menu').classList.remove('open');
     });
 
-    function _setBasemap(key) {
+    window._setBasemap = function(key) {
         if (!_BASEMAPS[key]) return;
         if (_basemapLayer) map.removeLayer(_basemapLayer);
         // Para híbrido añadir satélite primero como base
@@ -3069,10 +3071,9 @@
             el.classList.toggle('active', el.dataset.bm === key);
         });
         document.getElementById('basemap-menu').classList.remove('open');
-    }
+    };
 
-    // legacy — mantener compatibilidad si algo llama toggleBasemap()
-    function toggleBasemap() { _toggleBasemapMenu(); }
+    window.toggleBasemap = function() { window._toggleBasemapMenu(); };
 
     
     var _mobileMode = false;
