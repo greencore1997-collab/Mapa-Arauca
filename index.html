@@ -578,14 +578,7 @@
             background:#ffb300; cursor:pointer; border:none;
         }
 
-        /* ── Redes gas: grosor fijo sin importar zoom/transform ── */
-        .redes-gas-path {
-            vector-effect: non-scaling-stroke;
-            stroke-width: 2px;
-        }
-        .redes-gas-path.tpe-grande {
-            stroke-width: 3px;
-        }
+        /* grosor controlado por slider – sin CSS override */
     
         /* ── Barra climatológica ── */
         #barra-clima {
@@ -2983,7 +2976,7 @@
         var grande = (tipo === 'TPE1' || tipo === 'TPE4' || tipo === 'TPE2' || tipo === 'TPE3');
         return {
             color:     color,
-            weight:    _grosorRedes || (grande ? 3 : 2),
+            weight:    grande ? 3 : 2,
             opacity:   instalado ? 0.9 : 0.65,
             dashArray: instalado ? null : '6,5',
             className: 'redes-gas-path' + (grande ? ' tpe-grande' : '')
@@ -3097,35 +3090,23 @@
         map.on('zoomend moveend', _actualizarEscala);
         map.whenReady(_actualizarEscala);
     })();
-    /* ── Control de grosor de redes ── */
     var _grosorRedes = 2;
-
-    window._setGrosores = function(val) {
-        _grosorRedes = parseFloat(val);
-        var label = document.getElementById('redes-grosor-val');
-        if (label) label.textContent = _grosorRedes + ' px';
-        _aplicarGrosores();
-    };
 
     function _aplicarGrosores() {
         if (!_redGasLayer) return;
-        // L.GeoJSON.setStyle() ignora el argumento en Leaflet 1.9 (solo llama resetStyle).
-        // Hay que iterar manualmente dos niveles para alcanzar cada Path/Polyline.
-        _redGasLayer.eachLayer(function(layer) {
-            if (layer.setStyle) {
-                layer.setStyle({ weight: _grosorRedes });
-            }
-            if (layer.eachLayer) {
-                layer.eachLayer(function(sub) {
-                    if (sub.setStyle) sub.setStyle({ weight: _grosorRedes });
-                });
-            }
+        var w = _grosorRedes + 'px';
+        _redGasLayer.eachLayer(function(l) {
+            if (l._path) l._path.style.strokeWidth = w;
+            if (l.eachLayer) l.eachLayer(function(s) { if (s._path) s._path.style.strokeWidth = w; });
         });
     }
 
-    map.on('zoomend', function() {
-        if (_redGasActiva) _aplicarGrosores();
-    });
+    window._setGrosores = function(val) {
+        _grosorRedes = parseFloat(val);
+        var el = document.getElementById('redes-grosor-val');
+        if (el) el.textContent = _grosorRedes + ' px';
+        _aplicarGrosores();
+    };
 
     /* ===== FIN RED DE GAS ===== */
 
