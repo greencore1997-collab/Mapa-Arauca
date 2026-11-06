@@ -1415,21 +1415,24 @@
         // LEYENDA CON FILTRO
         var barrioActivo=null;
         function filtrarBarrio(barrio){
+            var crucesOn = typeof capaActiva !== 'undefined' && capaActiva['cruces'];
             if(barrioActivo===barrio){
                 barrioActivo=null;
-                allMarkers.forEach(function(m){m.addTo(map);});
+                if(crucesOn) allMarkers.forEach(function(m){m.addTo(map);});
                 document.querySelectorAll('.legend-item').forEach(function(el){el.classList.remove('active');});
                 document.getElementById('btnTodos').style.display='none';
                 document.getElementById('conteoBarrio').style.display='none';
                 destacarMinimap(null);
                 map.setView([7.08,-70.76],11);
-                statusLog('✅ Mostrando todos los barrios ('+allMarkers.length+' puntos)','ok');
+                statusLog('✅ Mostrando todos los barrios','ok');
             } else {
                 barrioActivo=barrio;
-                allMarkers.forEach(function(m){
-                    if(m._barrio===barrio){m.addTo(map);}
-                    else{map.removeLayer(m);}
-                });
+                if(crucesOn){
+                    allMarkers.forEach(function(m){
+                        if(m._barrio===barrio){m.addTo(map);}
+                        else{map.removeLayer(m);}
+                    });
+                }
                 document.querySelectorAll('.legend-item').forEach(function(el){
                     el.classList.toggle('active',el.dataset.barrio===barrio);
                 });
@@ -1437,7 +1440,7 @@
                 var pts=allMarkers.filter(function(m){return m._barrio===barrio;});
                 document.getElementById('conteoBarrio').style.display='block';
                 document.getElementById('conteoBarrio').textContent='📍 '+pts.length+' puntos en '+barrio;
-                statusLog('✅ Filtro activo: '+barrio+' ('+pts.length+' puntos)','ok');
+                statusLog('✅ Zona: '+barrio+(crucesOn?' ('+pts.length+' cruces)':''),'ok');
                 destacarMinimap(barrio);
                 if(pts.length>0){
                     var lats=pts.map(function(m){return m.getLatLng().lat;});
@@ -4378,6 +4381,12 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             capaLayers[tipo].addTo(map);
             capaActiva[tipo] = true;
             if (btn) btn.classList.add('capa-activa');
+            // Si hay barrio activo y se activa cruces, aplicar filtro de barrio
+            if (tipo === 'cruces' && typeof barrioActivo !== 'undefined' && barrioActivo) {
+                allMarkers.forEach(function(m){
+                    if(m._barrio===barrioActivo){m.addTo(map);} else{map.removeLayer(m);}
+                });
+            }
         }
         // Show/hide acometidas classification panel
         var panelAc = document.getElementById('panel-clasif-acomet');
