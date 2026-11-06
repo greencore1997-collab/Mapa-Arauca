@@ -889,74 +889,104 @@
             animation: pi-blink 2.4s ease-in-out infinite;
         }
         @keyframes pi-blink { 0%,100%{ opacity:0.2; } 50%{ opacity:1; } }
-        /* ════ CAPAS CARTOGRÁFICAS ════ */
-        #capas-section-label {
+        /* ════ PANEL CAPAS ════ */
+        #capas-panel {
             position:absolute; top:292px; right:10px; z-index:404;
-            color:rgba(0,200,255,0.50); font-family:'Orbitron',monospace;
-            font-size:9px; letter-spacing:2px; font-weight:700;
-            width:185px; text-align:center; pointer-events:none;
+            width:210px;
+            background:rgba(0,10,30,0.90);
+            border:1px solid rgba(0,200,255,0.22);
+            border-radius:12px;
+            padding:10px 8px 8px;
+            box-shadow:0 4px 24px rgba(0,0,0,0.5), 0 0 18px rgba(0,180,255,0.07);
+            backdrop-filter:blur(6px);
+            font-family:'Orbitron',monospace;
+        }
+        #capas-panel-header {
+            font-size:8.5px; letter-spacing:2.5px; font-weight:700;
+            color:rgba(0,200,255,0.55); text-align:center;
+            margin-bottom:8px; padding-bottom:6px;
+            border-bottom:1px solid rgba(0,200,255,0.12);
         }
         .btn-capa {
-            position:absolute; right:10px; z-index:404;
-            background:rgba(0,12,35,0.78); color:#80cfff;
-            border:1px solid rgba(0,200,255,0.28); border-radius:8px;
-            padding:5px 11px; font-size:9.5px; font-weight:bold;
-            cursor:pointer; width:185px; text-align:left;
-            font-family:'Orbitron',monospace; letter-spacing:1px;
-            box-shadow:0 0 8px rgba(0,180,255,0.08);
-            transition:all 0.2s; white-space:nowrap; box-sizing:border-box;
+            width:100%; background:transparent; border:none; border-radius:7px;
+            padding:7px 8px; margin-bottom:3px; cursor:pointer;
             display:flex; align-items:center; justify-content:space-between;
+            transition:all 0.18s; box-sizing:border-box;
+            border-left:3px solid transparent;
+            color:#80cfff; font-family:'Orbitron',monospace;
+            font-size:9px; font-weight:700; letter-spacing:0.8px;
         }
-        .btn-capa:hover { background:rgba(0,30,80,0.9); border-color:rgba(0,200,255,0.55); }
-        .btn-capa .capa-badge { font-size:8.5px; opacity:0.55; font-weight:400; letter-spacing:0; }
+        .btn-capa:hover { background:rgba(0,200,255,0.08); }
+        .btn-capa .capa-left { display:flex; align-items:center; gap:7px; }
         .btn-capa .capa-dot {
-            width:7px; height:7px; border-radius:50%; display:inline-block;
-            margin-right:5px; flex-shrink:0;
+            width:8px; height:8px; border-radius:50%; flex-shrink:0;
         }
-        #btn-capa-cruces      { top:308px; }
-        #btn-capa-usuarios    { top:347px; }
-        #btn-capa-acometidas  { top:386px; }
-        #btn-capa-polivalvulas{ top:425px; }
+        .btn-capa .capa-badge {
+            font-size:8px; font-weight:400; letter-spacing:0;
+            background:rgba(255,255,255,0.07); border-radius:10px;
+            padding:1px 6px; color:#7aa8c8; font-family:monospace;
+        }
+        /* activos por capa */
+        #btn-capa-cruces      { border-left-color:rgba(0,229,255,0.25); }
+        #btn-capa-usuarios    { border-left-color:rgba(105,240,174,0.25); }
+        #btn-capa-acometidas  { border-left-color:rgba(255,167,38,0.25); }
+        #btn-capa-polivalvulas{ border-left-color:rgba(234,128,252,0.25); }
+        #btn-capa-cruces.capa-activa {
+            background:rgba(0,140,190,0.22); border-left-color:#00e5ff;
+            color:#00e5ff; box-shadow:inset 0 0 10px rgba(0,229,255,0.08);
+        }
+        #btn-capa-usuarios.capa-activa {
+            background:rgba(0,130,70,0.22); border-left-color:#69f0ae;
+            color:#69f0ae; box-shadow:inset 0 0 10px rgba(105,240,174,0.08);
+        }
+        #btn-capa-acometidas.capa-activa {
+            background:rgba(190,90,0,0.22); border-left-color:#ffa726;
+            color:#ffa726; box-shadow:inset 0 0 10px rgba(255,167,38,0.08);
+        }
+        #btn-capa-polivalvulas.capa-activa {
+            background:rgba(130,0,180,0.22); border-left-color:#ea80fc;
+            color:#ea80fc; box-shadow:inset 0 0 10px rgba(234,128,252,0.08);
+        }
+        /* fila usuarios con botón reporte inline */
+        .capa-row-usuarios { display:flex; align-items:center; gap:3px; margin-bottom:3px; }
+        .capa-row-usuarios #btn-capa-usuarios { flex:1; margin-bottom:0; }
         #btn-rep-usuarios {
-            position:absolute; top:347px; right:199px; z-index:404;
-            width:28px; height:28px;
-            background:rgba(0,12,35,0.78); border:1px solid rgba(105,240,174,0.35);
-            color:#69f0ae; border-radius:6px; cursor:pointer; font-size:12px;
+            width:26px; height:26px; flex-shrink:0;
+            background:rgba(0,12,35,0.6); border:1px solid rgba(105,240,174,0.3);
+            color:#69f0ae; border-radius:6px; cursor:pointer; font-size:11px;
             display:flex; align-items:center; justify-content:center;
             transition:background 0.2s;
         }
-        #btn-rep-usuarios:hover { background:rgba(0,60,40,0.9); border-color:#69f0ae; }
-        body.mobile-mode #btn-rep-usuarios { display:none !important; }
-        #btn-capa-cruces.capa-activa      { background:rgba(0,140,190,0.4);  border-color:#00e5ff; color:#00e5ff; box-shadow:0 0 14px rgba(0,229,255,0.45); }
-        #btn-capa-usuarios.capa-activa    { background:rgba(0,130,70,0.4);   border-color:#69f0ae; color:#69f0ae; box-shadow:0 0 14px rgba(105,240,174,0.45); }
-        #btn-capa-acometidas.capa-activa  { background:rgba(190,90,0,0.4);   border-color:#ffa726; color:#ffa726; box-shadow:0 0 14px rgba(255,167,38,0.45); }
-        #btn-capa-polivalvulas.capa-activa{ background:rgba(130,0,180,0.4);  border-color:#ea80fc; color:#ea80fc; box-shadow:0 0 14px rgba(234,128,252,0.45); }
-        body.mobile-mode #capas-section-label,
-        body.mobile-mode .btn-capa { display:none !important; }
-
-
-        /* ── SELECCIÓN ── */
-        #btn-seleccion {
-            position:absolute; right:10px; z-index:404; top:464px;
-            background:rgba(0,12,35,0.88); color:#fff176;
-            border:1px solid rgba(255,241,118,0.45); border-radius:8px;
-            padding:7px 12px; font-size:11px; font-weight:600; cursor:pointer;
-            letter-spacing:0.5px; width:168px; text-align:left;
-            transition:background 0.2s;
+        #btn-rep-usuarios:hover { background:rgba(0,60,40,0.8); border-color:#69f0ae; }
+        /* separador y selección */
+        .capas-sep {
+            border-top:1px solid rgba(255,241,118,0.15);
+            margin:7px 0 6px;
         }
+        #btn-seleccion {
+            width:100%; background:rgba(255,241,118,0.06);
+            border:1px solid rgba(255,241,118,0.3); border-radius:7px;
+            color:#fff176; padding:7px 10px; font-size:9px; font-weight:700;
+            cursor:pointer; letter-spacing:0.8px; text-align:left;
+            font-family:'Orbitron',monospace; transition:all 0.18s;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        #btn-seleccion:hover { background:rgba(255,241,118,0.12); }
         #btn-seleccion.sel-activo { background:rgba(255,241,118,0.18); border-color:#fff176; }
         #menu-seleccion {
-            position:absolute; right:10px; top:496px; z-index:405;
-            background:rgba(0,12,35,0.96); border:1px solid rgba(255,241,118,0.35);
-            border-radius:8px; padding:6px 0; display:none; width:168px;
+            display:none; margin-top:4px;
+            background:rgba(0,8,22,0.96); border:1px solid rgba(255,241,118,0.2);
+            border-radius:7px; overflow:hidden;
         }
         #menu-seleccion button {
             display:block; width:100%; background:none; border:none;
-            color:#e0e8f0; padding:8px 14px; font-size:11px; text-align:left;
-            cursor:pointer; letter-spacing:0.3px;
+            color:#c8d8e8; padding:8px 12px; font-size:9.5px; text-align:left;
+            cursor:pointer; letter-spacing:0.4px; font-family:'Orbitron',monospace;
+            transition:background 0.15s;
         }
-        #menu-seleccion button:hover { background:rgba(255,241,118,0.12); color:#fff176; }
+        #menu-seleccion button:hover { background:rgba(255,241,118,0.1); color:#fff176; }
         #menu-seleccion button.sel-modo-activo { color:#fff176; background:rgba(255,241,118,0.1); }
+        body.mobile-mode #capas-panel { display:none !important; }
 
         /* ── PANEL ESTADÍSTICAS SELECCIÓN ── */
         #panel-seleccion-stats {
@@ -1094,39 +1124,50 @@
       <div id="restr-lista"></div>
     </div>
     
-    <!-- ════ CAPAS CARTOGRÁFICAS ════ -->
-    <div id="capas-section-label">⬡ CAPAS</div>
-    <button id="btn-capa-cruces" class="btn-capa" onclick="toggleCapa('cruces')">
-        <span><span class="capa-dot" style="background:#00e5ff;box-shadow:0 0 4px #00e5ff"></span>🛣️ CRUCES DE VÍA</span>
-        <span class="capa-badge">670</span>
-    </button>
-    <button id="btn-capa-usuarios" class="btn-capa" onclick="toggleCapa('usuarios')">
-        <span><span class="capa-dot" style="background:#69f0ae;box-shadow:0 0 4px #69f0ae"></span>👤 USUARIOS</span>
-        <span class="capa-badge">15,733</span>
-    </button>
-    <button id="btn-rep-usuarios" onclick="_abrirReporteUsuarios()" title="Reporte de Usuarios">📊</button>
-    <button id="btn-capa-acometidas" class="btn-capa" onclick="toggleCapa('acometidas')">
-        <span><span class="capa-dot" style="background:#ffa726;box-shadow:0 0 4px #ffa726"></span>🔧 ACOMETIDAS</span>
-        <span class="capa-badge">670</span>
-    </button>
-    <div id="panel-clasif-acomet" style="display:none;background:#1e2c3a;border:1px solid #2d4a62;border-radius:6px;margin:4px 6px 6px;padding:8px 10px">
-        <div style="font-size:10px;color:#80afc8;font-weight:700;letter-spacing:.5px;margin-bottom:6px">CLASIFICAR POR</div>
-        <div style="display:flex;gap:6px;margin-bottom:8px">
-            <button class="acomet-modo-btn activo" data-modo="estado" onclick="_setModoAcomet('estado')" style="flex:1;padding:4px 6px;font-size:10.5px;border:1px solid #2d4a62;border-radius:4px;background:#0d1c2a;color:#e0e0e0;cursor:pointer;transition:background .2s">Estado</button>
-            <button class="acomet-modo-btn" data-modo="barrio" onclick="_setModoAcomet('barrio')" style="flex:1;padding:4px 6px;font-size:10.5px;border:1px solid #2d4a62;border-radius:4px;background:#0d1c2a;color:#e0e0e0;cursor:pointer;transition:background .2s">Barrio</button>
-        </div>
-        <div id="leyenda-acomet-body"></div>
-    </div>
-    <button id="btn-capa-polivalvulas" class="btn-capa" onclick="toggleCapa('polivalvulas')">
-        <span><span class="capa-dot" style="background:#ea80fc;box-shadow:0 0 4px #ea80fc"></span>⚙️ POLIVALVULAS</span>
-        <span class="capa-badge">128</span>
-    </button>
+    <!-- ════ PANEL CAPAS ════ -->
+    <div id="capas-panel">
+        <div id="capas-panel-header">⬡ CAPAS</div>
 
-    <!-- ════ SELECCIÓN ════ -->
-    <button id="btn-seleccion" onclick="_toggleMenuSel()">🔲 SELECCIÓN ▾</button>
-    <div id="menu-seleccion">
-        <button id="btn-sel-cuadra" onclick="_activarSeleccion('cuadra')">⬛ Por cuadra</button>
-        <button id="btn-sel-poligono" onclick="_activarSeleccion('poligono')">🔷 Por polígono</button>
+        <button id="btn-capa-cruces" class="btn-capa" onclick="toggleCapa('cruces')">
+            <span class="capa-left"><span class="capa-dot" style="background:#00e5ff;box-shadow:0 0 5px #00e5ff44"></span>🛣️ CRUCES DE VÍA</span>
+            <span class="capa-badge">670</span>
+        </button>
+
+        <div class="capa-row-usuarios">
+            <button id="btn-capa-usuarios" class="btn-capa" onclick="toggleCapa('usuarios')">
+                <span class="capa-left"><span class="capa-dot" style="background:#69f0ae;box-shadow:0 0 5px #69f0ae44"></span>👤 USUARIOS</span>
+                <span class="capa-badge">15,733</span>
+            </button>
+            <button id="btn-rep-usuarios" onclick="_abrirReporteUsuarios()" title="Reporte de Usuarios">📊</button>
+        </div>
+
+        <button id="btn-capa-acometidas" class="btn-capa" onclick="toggleCapa('acometidas')">
+            <span class="capa-left"><span class="capa-dot" style="background:#ffa726;box-shadow:0 0 5px #ffa72644"></span>🔧 ACOMETIDAS</span>
+            <span class="capa-badge">670</span>
+        </button>
+        <div id="panel-clasif-acomet" style="display:none;background:rgba(255,167,38,0.06);border:1px solid rgba(255,167,38,0.2);border-radius:7px;margin:3px 2px 4px;padding:8px 10px">
+            <div style="font-size:9px;color:#ffa726;font-weight:700;letter-spacing:.5px;margin-bottom:6px;font-family:'Orbitron',monospace">CLASIFICAR POR</div>
+            <div style="display:flex;gap:5px;margin-bottom:8px">
+                <button class="acomet-modo-btn activo" data-modo="estado" onclick="_setModoAcomet('estado')" style="flex:1;padding:4px 6px;font-size:9px;background:rgba(255,167,38,0.15);border:1px solid rgba(255,167,38,0.4);border-radius:5px;color:#ffa726;cursor:pointer;font-family:'Orbitron',monospace">Estado</button>
+                <button class="acomet-modo-btn" data-modo="barrio" onclick="_setModoAcomet('barrio')" style="flex:1;padding:4px 6px;font-size:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:5px;color:#aaa;cursor:pointer;font-family:'Orbitron',monospace">Barrio</button>
+            </div>
+            <div id="leyenda-acomet-body"></div>
+        </div>
+
+        <button id="btn-capa-polivalvulas" class="btn-capa" onclick="toggleCapa('polivalvulas')">
+            <span class="capa-left"><span class="capa-dot" style="background:#ea80fc;box-shadow:0 0 5px #ea80fc44"></span>⚙️ POLIVALVULAS</span>
+            <span class="capa-badge">128</span>
+        </button>
+
+        <div class="capas-sep"></div>
+
+        <button id="btn-seleccion" onclick="_toggleMenuSel()">
+            🔲 SELECCIÓN <span style="opacity:0.6;font-size:8px">▾</span>
+        </button>
+        <div id="menu-seleccion">
+            <button id="btn-sel-cuadra" onclick="_activarSeleccion('cuadra')">⬛ Por cuadra</button>
+            <button id="btn-sel-poligono" onclick="_activarSeleccion('poligono')">🔷 Por polígono</button>
+        </div>
     </div>
     <div id="panel-seleccion-stats"></div>
 
@@ -2202,8 +2243,7 @@
             }
         });
         // Ocultar botones de capa y su etiqueta
-        document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='none');
-        document.querySelectorAll('.btn-capa').forEach(function(el){ el.style.display='none'; });
+        var cp=document.getElementById('capas-panel'); if(cp) cp.style.display='none';
         var bru = document.getElementById('btn-rep-usuarios'); if(bru) bru.style.display='none';
         var pp = document.getElementById('panel-puntos-barrio');
         _pblVisiblePreTab = pp && pp.classList.contains('visible');
@@ -2216,8 +2256,7 @@
             if (el) el.style.display = 'block';
         });
         // Restaurar botones de capa y su etiqueta
-        document.getElementById('capas-section-label') && (document.getElementById('capas-section-label').style.display='');
-        document.querySelectorAll('.btn-capa').forEach(function(el){ el.style.display=''; });
+        var cp=document.getElementById('capas-panel'); if(cp) cp.style.display='';
         var bru = document.getElementById('btn-rep-usuarios'); if(bru) bru.style.display='';
         var pp = document.getElementById('panel-puntos-barrio');
         if (pp) { pp.style.visibility = ''; pp.style.pointerEvents = ''; }
