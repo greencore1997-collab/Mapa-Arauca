@@ -551,6 +551,33 @@
         #escala-visor::before { content:'⊕'; font-size:9px; opacity:0.6; }
         body.mobile-mode #escala-visor { bottom:18px; right:8px; font-size:10px; padding:3px 8px; }
 
+        /* ── Control grosor redes ── */
+        #redes-grosor-wrap {
+            margin-top:9px; padding-top:8px;
+            border-top:1px solid rgba(255,160,0,0.2);
+        }
+        #redes-grosor-wrap label {
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:9.5px; color:#ffa726; letter-spacing:.5px; margin-bottom:5px;
+        }
+        #redes-grosor-val {
+            background:rgba(255,160,0,0.15); border-radius:4px;
+            padding:1px 6px; font-family:'Orbitron',monospace; color:#ffcc02;
+        }
+        #redes-grosor {
+            -webkit-appearance:none; width:100%; height:4px;
+            background:rgba(255,160,0,0.25); border-radius:2px; outline:none;
+        }
+        #redes-grosor::-webkit-slider-thumb {
+            -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+            background:#ffb300; cursor:pointer; border:2px solid #fff3;
+            box-shadow:0 0 6px rgba(255,160,0,0.6);
+        }
+        #redes-grosor::-moz-range-thumb {
+            width:14px; height:14px; border-radius:50%;
+            background:#ffb300; cursor:pointer; border:none;
+        }
+
         /* ── Redes gas: grosor fijo sin importar zoom/transform ── */
         .redes-gas-path {
             vector-effect: non-scaling-stroke;
@@ -1151,6 +1178,11 @@
             <div style="border-top:1px solid rgba(255,160,0,0.2);margin:6px 0 4px"></div>
             <div class="rleg-row"><span class="rleg-line" style="background:#aaa"></span>Instalado</div>
             <div class="rleg-row"><span class="rleg-line rleg-dash" style="color:#aaa;height:0;border-top:2px dashed #aaa"></span>Proyectado/Programado</div>
+            <div id="redes-grosor-wrap">
+                <label>GROSOR LÍNEAS <span id="redes-grosor-val">2 px</span></label>
+                <input type="range" id="redes-grosor" min="1" max="10" step="0.5" value="2"
+                       oninput="_setGrosores(this.value)">
+            </div>
             <div id="redes-stats" style="margin-top:7px;font-size:9px;color:#f90;font-family:'Orbitron',monospace;letter-spacing:0.5px"></div>
         </div>
     </div>
@@ -3065,6 +3097,31 @@
         map.on('zoomend moveend', _actualizarEscala);
         map.whenReady(_actualizarEscala);
     })();
+    /* ── Control de grosor de redes ── */
+    var _grosorRedes = 2;
+
+    window._setGrosores = function(val) {
+        _grosorRedes = parseFloat(val);
+        var label = document.getElementById('redes-grosor-val');
+        if (label) label.textContent = _grosorRedes + ' px';
+        _aplicarGrosores();
+    };
+
+    function _aplicarGrosores() {
+        if (!_redGasLayer) return;
+        _redGasLayer.eachLayer(function(l) {
+            if (!l.feature) return;
+            var tipo = l.feature.properties.tipo || '';
+            var grande = (tipo==='TPE1'||tipo==='TPE4'||tipo==='TPE2'||tipo==='TPE3');
+            var w = grande ? _grosorRedes + 1 : _grosorRedes;
+            l.setStyle({ weight: w });
+        });
+    }
+
+    map.on('zoomend', function() {
+        if (_redGasActiva) _aplicarGrosores();
+    });
+
     /* ===== FIN RED DE GAS ===== */
 
 
