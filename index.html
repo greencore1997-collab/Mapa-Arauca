@@ -1239,10 +1239,10 @@
         <div id="basemap-menu">
             <div class="bm-item active" data-bm="osm"       onclick="_setBasemap('osm')">🗺️ OSM Estándar</div>
             <div class="bm-item"        data-bm="satellite" onclick="_setBasemap('satellite')">🛰️ Satélite Esri</div>
-            <div class="bm-item"        data-bm="topo"      onclick="_setBasemap('topo')">⛰️ Topográfico</div>
-            <div class="bm-item"        data-bm="dark"      onclick="_setBasemap('dark')">🌑 Oscuro</div>
-            <div class="bm-item"        data-bm="light"     onclick="_setBasemap('light')">☀️ CartoDB Claro</div>
-            <div class="bm-item"        data-bm="hybrid"    onclick="_setBasemap('hybrid')">🏙️ Híbrido Esri</div>
+            <div class="bm-item"        data-bm="streets"   onclick="_setBasemap('streets')">🛣️ Calles Esri</div>
+            <div class="bm-item"        data-bm="topo"      onclick="_setBasemap('topo')">⛰️ Topográfico Esri</div>
+            <div class="bm-item"        data-bm="gray"      onclick="_setBasemap('gray')">🌫️ Gris Claro Esri</div>
+            <div class="bm-item"        data-bm="dark"      onclick="_setBasemap('dark')">🌑 Gris Oscuro Esri</div>
         </div>
     </div>
     <button id="btn-mobile" onclick="toggleMobile()" title="Modo móvil">📱 Móvil</button>
@@ -3037,10 +3037,10 @@
     var _BASEMAPS = {
         osm:       { label:'🗺️ OSM',        url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',                                                                        opts:{attribution:'© OpenStreetMap', maxZoom:19} },
         satellite: { label:'🛰️ Satélite',   url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',                             opts:{attribution:'© Esri', maxZoom:19} },
-        topo:      { label:'⛰️ Topo',        url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                                                                          opts:{attribution:'© OpenTopoMap', maxZoom:17} },
-        dark:      { label:'🌑 Oscuro',      url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',                                                             opts:{attribution:'© CartoDB', maxZoom:19} },
-        light:     { label:'☀️ Claro',       url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',                                                            opts:{attribution:'© CartoDB', maxZoom:19} },
-        hybrid:    { label:'🏙️ Híbrido',    url:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',     opts:{attribution:'© Esri', maxZoom:19} }
+        streets:   { label:'🛣️ Calles',       url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',                        opts:{attribution:'© Esri', maxZoom:19} },
+        topo:      { label:'⛰️ Topográfico', url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',                           opts:{attribution:'© Esri', maxZoom:19} },
+        gray:      { label:'🌫️ Gris Claro',  url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',             opts:{attribution:'© Esri', maxZoom:16} },
+        dark:      { label:'🌑 Gris Oscuro', url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',              opts:{attribution:'© Esri', maxZoom:16} }
     };
 
     window._toggleBasemapMenu = function(e) {
