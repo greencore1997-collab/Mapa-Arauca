@@ -550,6 +550,15 @@
         }
         #escala-visor::before { content:'⊕'; font-size:9px; opacity:0.6; }
         body.mobile-mode #escala-visor { bottom:18px; right:8px; font-size:10px; padding:3px 8px; }
+
+        /* ── Redes gas: grosor fijo sin importar zoom/transform ── */
+        .redes-gas-path {
+            vector-effect: non-scaling-stroke;
+            stroke-width: 2px;
+        }
+        .redes-gas-path.tpe-grande {
+            stroke-width: 3px;
+        }
     
         /* ── Barra climatológica ── */
         #barra-clima {
@@ -2924,8 +2933,7 @@
     var _redGasLayer = null;
     var _redGasActiva = false;
     var _redGasData = null;
-    var _redGasCanvas = L.canvas({ padding: 0.5 });
-
+   
     var _COLORES_TUBO = {
         'TPE1':  '#e53935',  // rojo   - 1"
         'TPE2':  '#fb8c00',  // naranja - 2"
@@ -2940,11 +2948,13 @@
         var estado = feature.properties.estado || '';
         var color  = _COLORES_TUBO[tipo] || '#90a4ae';
         var instalado = (estado === 'INSTALADO');
+        var grande = (tipo === 'TPE1' || tipo === 'TPE4' || tipo === 'TPE2' || tipo === 'TPE3');
         return {
             color:     color,
-            weight:    tipo === 'TPE1' || tipo === 'TPE4' ? 4 : tipo === 'TPE2' || tipo === 'TPE3' ? 3 : 2,
-            opacity:   instalado ? 0.85 : 0.6,
-            dashArray: instalado ? null : '6,5'
+            weight:    grande ? 3 : 2,
+            opacity:   instalado ? 0.9 : 0.65,
+            dashArray: instalado ? null : '6,5',
+            className: 'redes-gas-path' + (grande ? ' tpe-grande' : '')
         };
     }
 
@@ -2991,8 +3001,7 @@
             // Ya cargado — solo agregar al mapa
             _redGasLayer = L.geoJSON(_redGasData, {
                 style: _estiloTuberia,
-                onEachFeature: _popupTuberia,
-                renderer: _redGasCanvas
+                onEachFeature: _popupTuberia
             }).addTo(map);
             return;
         }
@@ -3021,8 +3030,7 @@
 
                 _redGasLayer = L.geoJSON(data, {
                     style: _estiloTuberia,
-                    onEachFeature: _popupTuberia,
-                    renderer: _redGasCanvas
+                    onEachFeature: _popupTuberia
                 }).addTo(map);
 
                 // Si el panel de reporte ya está abierto, agregar sección de gas
