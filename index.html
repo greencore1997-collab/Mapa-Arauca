@@ -2070,8 +2070,8 @@
                     }
                 }
             }
-            if (hide) { if (map.hasLayer(m))  map.removeLayer(m); }
-            else      { if (!map.hasLayer(m)) m.addTo(map); }
+            if (hide || !(capaActiva && capaActiva['cruces'])) { if (map.hasLayer(m)) map.removeLayer(m); }
+            else { if (!map.hasLayer(m)) m.addTo(map); }
         });
     }
 
@@ -4377,16 +4377,16 @@ body.mobile-mode #panel-puntos-barrio { display:none; }
             map.removeLayer(capaLayers[tipo]);
             capaActiva[tipo] = false;
             if (btn) btn.classList.remove('capa-activa');
+            // quitar también los allMarkers (cruces legacy) del mapa
+            if (tipo === 'cruces') {
+                allMarkers.forEach(function(m){ if (map.hasLayer(m)) map.removeLayer(m); });
+            }
         } else {
             capaLayers[tipo].addTo(map);
             capaActiva[tipo] = true;
             if (btn) btn.classList.add('capa-activa');
-            // Si hay barrio activo y se activa cruces, aplicar filtro de barrio
-            if (tipo === 'cruces' && typeof barrioActivo !== 'undefined' && barrioActivo) {
-                allMarkers.forEach(function(m){
-                    if(m._barrio===barrioActivo){m.addTo(map);} else{map.removeLayer(m);}
-                });
-            }
+            // al activar cruces, respetar filtros de barrio activos
+            if (tipo === 'cruces') aplicarFiltros();
         }
         // Show/hide acometidas classification panel
         var panelAc = document.getElementById('panel-clasif-acomet');
