@@ -203,7 +203,7 @@
     
         /* BASEMAP DROPDOWN */
         #basemap-wrap {
-            position:absolute; top:100px; left:10px; z-index:900;
+            position:absolute; top:100px; left:10px; z-index:1500;
         }
         #btn-basemap {
             background:rgba(0,12,35,0.88); color:#00c8ff;
@@ -219,8 +219,9 @@
         }
         #btn-basemap:hover { background:rgba(0,40,90,0.95); border-color:rgba(0,200,255,0.7); }
         #basemap-menu {
-            display:none; position:absolute; top:calc(100% + 5px); left:0;
+            display:none; position:absolute; bottom:calc(100% + 5px); top:auto; left:0;
             background:rgba(0,10,28,0.96); border:1px solid rgba(0,200,255,0.25);
+            z-index:1500;
             border-radius:10px; overflow:hidden; min-width:170px;
             box-shadow:0 6px 24px rgba(0,0,0,0.6);
         }
