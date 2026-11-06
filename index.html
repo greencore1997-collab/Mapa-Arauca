@@ -2983,7 +2983,7 @@
         var grande = (tipo === 'TPE1' || tipo === 'TPE4' || tipo === 'TPE2' || tipo === 'TPE3');
         return {
             color:     color,
-            weight:    grande ? 3 : 2,
+            weight:    _grosorRedes || (grande ? 3 : 2),
             opacity:   instalado ? 0.9 : 0.65,
             dashArray: instalado ? null : '6,5',
             className: 'redes-gas-path' + (grande ? ' tpe-grande' : '')
@@ -3109,8 +3109,18 @@
 
     function _aplicarGrosores() {
         if (!_redGasLayer) return;
-        // setStyle en L.GeoJSON propaga a TODOS los sublayers automáticamente
-        _redGasLayer.setStyle({ weight: _grosorRedes });
+        // L.GeoJSON.setStyle() ignora el argumento en Leaflet 1.9 (solo llama resetStyle).
+        // Hay que iterar manualmente dos niveles para alcanzar cada Path/Polyline.
+        _redGasLayer.eachLayer(function(layer) {
+            if (layer.setStyle) {
+                layer.setStyle({ weight: _grosorRedes });
+            }
+            if (layer.eachLayer) {
+                layer.eachLayer(function(sub) {
+                    if (sub.setStyle) sub.setStyle({ weight: _grosorRedes });
+                });
+            }
+        });
     }
 
     map.on('zoomend', function() {
