@@ -3109,13 +3109,8 @@
 
     function _aplicarGrosores() {
         if (!_redGasLayer) return;
-        _redGasLayer.eachLayer(function(l) {
-            if (!l.feature) return;
-            var tipo = l.feature.properties.tipo || '';
-            var grande = (tipo==='TPE1'||tipo==='TPE4'||tipo==='TPE2'||tipo==='TPE3');
-            var w = grande ? _grosorRedes + 1 : _grosorRedes;
-            l.setStyle({ weight: w });
-        });
+        // setStyle en L.GeoJSON propaga a TODOS los sublayers automáticamente
+        _redGasLayer.setStyle({ weight: _grosorRedes });
     }
 
     map.on('zoomend', function() {
