@@ -2942,7 +2942,7 @@
         var instalado = (estado === 'INSTALADO');
         return {
             color:     color,
-            weight:    tipo === 'TPE1' || tipo === 'TPE4' ? 3 : tipo === 'TPE2' || tipo === 'TPE3' ? 2.5 : 1.8,
+            weight:    tipo === 'TPE1' || tipo === 'TPE4' ? 4 : tipo === 'TPE2' || tipo === 'TPE3' ? 3 : 2,
             opacity:   instalado ? 0.85 : 0.6,
             dashArray: instalado ? null : '6,5'
         };
