@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puntos de Usuarios - Arauca (Satelital)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  html, body { margin:0; padding:0; height:100%; font-family: Arial, Helvetica, sans-serif; }
+  #map { width:100%; height:100vh; }
+  .leaflet-popup-content { font-size:13px; line-height:1.4; }
+  .leaflet-popup-content b { font-size:14px; color:#1a5276; }
+  #panel {
+    position:absolute; top:10px; right:10px; z-index:1000;
+    background:rgba(255,255,255,0.95); padding:10px 14px; border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3); max-width:240px; font-size:13px;
+  }
+  #panel h3 { margin:0 0 6px 0; font-size:14px; color:#1a5276; }
+  #panel b { color:#c0392b; }
+  #locBtn {
+    display:block; margin-top:8px; width:100%; padding:8px; border:none;
+    border-radius:6px; background:#1a5276; color:#fff; font-size:13px; cursor:pointer;
+  }
+  #locBtn:hover { background:#154360; }
+  #status { margin-top:6px; font-size:11px; color:#555; }
+  .num-badge {
+    background:#c0392b; color:#fff; border-radius:50%; width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center; font-size:10px;
+    font-weight:bold; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,0.5);
+  }
+  .user-dot {
+    background:#2980b9; border:3px solid #fff; border-radius:50%;
+    box-shadow:0 0 0 4px rgba(41,128,185,0.4);
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="panel">
+  <h3>Puntos de usuarios</h3>
+  Total: <b id="totalCount">19</b> ubicaciones<br>
+  Municipio: ARAUCA
+  <button id="locBtn" onclick="ubicarme()">📍 Mostrar mi ubicación actual</button>
+  <div id="status"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const puntos = [
+  {num:1017772, direccion:"CL 1 CR 24 CS 2", barrio:"EL RODEO", lat:7.0802844, lon:-70.7520119},
+  {num:1013663, direccion:"CL 11 # 7 - 08 APT 2", barrio:"CHIRCAL", lat:7.0780556, lon:-70.7460231},
+  {num:1017862, direccion:"CL 12 11 41", barrio:"AMERICAS", lat:7.0788952, lon:-70.7498342},
+  {num:1014407, direccion:"CL 12 # 7 - 135", barrio:"MERIDIANO 70", lat:7.0923591, lon:-70.7614463},
+  {num:1016964, direccion:"CL 13 K 10 ESQ", barrio:"MERIDIANO 70", lat:7.0798923, lon:-70.7482592},
+  {num:1016864, direccion:"CL 16 12 04", barrio:"AMERICAS", lat:7.0826117, lon:-70.7502585},
+  {num:1019351, direccion:"CL 16 12 06", barrio:"MERIDIANO 70", lat:7.0823203, lon:-70.75111},
+  {num:1019352, direccion:"CL 16 12 10 APT 1", barrio:"MERIDIANO 70", lat:7.0824199, lon:-70.7511393},
+  {num:1016897, direccion:"CL 19 13 28", barrio:"AMERICAS", lat:7.0844933, lon:-70.7510715},
+  {num:1012576, direccion:"CL 21 # 7 - 39", barrio:"AMERICAS", lat:7.0866837, lon:-70.7463701},
+  {num:1016837, direccion:"CL 22 11 07", barrio:"LA UNION", lat:7.0870649, lon:-70.7498103},
+  {num:1016838, direccion:"CL 22 11 11", barrio:"LA UNION", lat:7.087084, lon:-70.7497526},
+  {num:1009327, direccion:"CL 7 # 5 - 211", barrio:"SAN CARLOS", lat:7.0668487, lon:-70.7470896},
+  {num:1017093, direccion:"CR 56 15A 104 TORRE 5 APTO 404", barrio:"SENDEROS DE PLAYITAS", lat:7.0663473, lon:-70.7455592},
+  {num:1017184, direccion:"KR 13 18 52", barrio:"FUNDADORES ALTO", lat:7.0842024, lon:-70.7507243},
+  {num:1016876, direccion:"KR 13 19 87", barrio:"AMERICAS", lat:7.0852896, lon:-70.7509259},
+  {num:1015499, direccion:"KR 14 23 57 APT 5 2DO PISO", barrio:"LIBERTADORES", lat:7.0885357, lon:-70.7524366},
+  {num:1017234, direccion:"MZ N CS40", barrio:"BELLO HORIZONTE", lat:7.0898942, lon:-70.750141},
+  {num:1008990, direccion:"KR 7A # 4 - 18 ESQ", barrio:"FLOR AMARILLO", lat:7.0671945, lon:-70.74462}
+];
+
+document.getElementById('totalCount').textContent = puntos.length;
+
+const avgLat = puntos.reduce((s,p)=>s+p.lat,0)/puntos.length;
+const avgLon = puntos.reduce((s,p)=>s+p.lon,0)/puntos.length;
+
+const map = L.map('map').setView([avgLat, avgLon], 15);
+
+// Capa satelital (Esri World Imagery)
+const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
+  maxZoom: 20
+}).addTo(map);
+
+// Capa de etiquetas/calles sobre el satelital (referencia)
+const labelsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 20,
+  opacity: 0.9
+}).addTo(map);
+
+L.control.layers({ "Satelital": satLayer }, { "Etiquetas/Límites": labelsLayer }).addTo(map);
+
+const bounds = [];
+puntos.forEach(p => {
+  const icon = L.divIcon({
+    className: '',
+    html: '<div class="num-badge">'+String(p.num).slice(-4)+'</div>',
+    iconSize: [26,26],
+    iconAnchor: [13,13]
+  });
+  const marker = L.marker([p.lat, p.lon], {icon: icon}).addTo(map);
+  marker.bindPopup(
+    '<b>Usuario: '+p.num+'</b><br>' +
+    'Dirección: '+p.direccion+'<br>' +
+    'Barrio: '+p.barrio+'<br>' +
+    'Lat: '+p.lat+' / Lon: '+p.lon+'<br>' +
+    '<a href="https://www.google.com/maps?q='+p.lat+','+p.lon+'" target="_blank">Abrir en Google Maps</a>'
+  );
+  bounds.push([p.lat, p.lon]);
+});
+
+map.fitBounds(bounds, {padding:[40,40]});
+
+let userMarker = null;
+let userCircle = null;
+
+function ubicarme() {
+  const status = document.getElementById('status');
+  if (!navigator.geolocation) {
+    status.textContent = "Geolocalización no soportada en este navegador.";
+    return;
+  }
+  status.textContent = "Obteniendo ubicación...";
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    const acc = pos.coords.accuracy;
+
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
+
+    const userIcon = L.divIcon({
+      className: '',
+      html: '<div class="user-dot" style="width:16px;height:16px;"></div>',
+      iconSize: [16,16],
+      iconAnchor: [8,8]
+    });
+
+    userMarker = L.marker([lat, lon], {icon: userIcon}).addTo(map);
+    userMarker.bindPopup('<b>Tu ubicación actual</b><br>Precisión: ~'+Math.round(acc)+' m').openPopup();
+    userCircle = L.circle([lat, lon], {radius: acc, color:'#2980b9', fillOpacity:0.1}).addTo(map);
+
+    map.setView([lat, lon], 16);
+    status.textContent = "Ubicación actualizada (precisión ~"+Math.round(acc)+" m).";
+  }, function(err) {
+    status.textContent = "No se pudo obtener la ubicación: " + err.message;
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+}
+</script>
+</body>
+</html>
